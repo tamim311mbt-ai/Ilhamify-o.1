@@ -13,6 +13,7 @@ import { useState } from 'react';
 
 const GITHUB_REPO_URL = 'https://github.com/tamim311mbt-ai/Ilhamify-o.1';
 const APK_DOWNLOAD_URL = '[আপনার-APK-লিংক]';
+const ILHAMIFY_FACEBOOK_PAGE_URL = 'https://www.facebook.com/Ilhamify.com.bd';
 
 interface WelcomeModalProps {
   open: boolean;
@@ -187,7 +188,7 @@ export function WelcomeModal({
                     </span>
                   </div>
 
-                  {/* পেছনে যান ও ব্রাউজারে ব্যবহার করুন */}
+                  {/* পেজ ও ব্রাউজার অ্যাকশন */}
                   <div className="pt-1 flex flex-col sm:flex-row items-stretch gap-2">
                     <motion.button
                       whileTap={{ scale: 0.98 }}
@@ -208,6 +209,27 @@ export function WelcomeModal({
                       <Globe className="w-4 h-4 shrink-0" />
                       <span>ব্রাউজারে ব্যবহার করুন</span>
                     </motion.button>
+                  </div>
+
+                  {/* সেকেন্ডারি অফিশিয়াল ফেসবুক পেজ লিংক */}
+                  <div className="pt-1 text-center">
+                    <a
+                      href={ILHAMIFY_FACEBOOK_PAGE_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-xs font-medium text-teal-700 hover:text-teal-800 underline underline-offset-4 transition-colors"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        className="w-3.5 h-3.5 shrink-0"
+                      >
+                        <path d="M13.5 22v-8h2.7l.4-3h-3.1V9.1c0-.9.3-1.5 1.6-1.5h1.6V4.9c-.3 0-1.3-.1-2.4-.1-2.4 0-4 1.4-4 4.1V11H7.5v3h2.8v8h3.2z" />
+                      </svg>
+                      <span>Ilhamify ফেসবুক পেজ</span>
+                      <ExternalLink className="w-3 h-3 shrink-0" />
+                    </a>
                   </div>
                 </motion.div>
               )}
