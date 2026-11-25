@@ -1,5 +1,5 @@
 import { AnimatePresence, MotionConfig, motion } from 'motion/react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { BrandKitDrawer } from './components/BrandKitDrawer';
 import { CaptionGeneratorView } from './components/CaptionGeneratorView';
 import { CardStudioView } from './components/CardStudioView';
@@ -16,6 +16,16 @@ const VIEW_TRANSITION = {
   ease: [0.16, 1, 0.3, 1] as const,
 };
 
+const DOWNLOAD_COUNT_KEY = 'ilhamify_download_count_v1';
+
+function isStandaloneMode(): boolean {
+  if (typeof window === 'undefined') return false;
+  return (
+    window.matchMedia('(display-mode: standalone)').matches ||
+    (window.navigator as unknown as { standalone?: boolean }).standalone === true
+  );
+}
+
 export default function App() {
   const [activeTab, setActiveTab] = useState<StudioTab>('captions');
   const [activeCaption, setActiveCaption] = useState<string>(CAPTIONS_LIBRARY[0].text);
@@ -23,13 +33,34 @@ export default function App() {
     CAPTIONS_LIBRARY[0].attribution
   );
   const [brandDrawerOpen, setBrandDrawerOpen] = useState<boolean>(false);
-  const [welcomeOpen, setWelcomeOpen] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return true;
-    const isStandalone =
-      window.matchMedia('(display-mode: standalone)').matches ||
-      (window.navigator as unknown as { standalone?: boolean }).standalone === true;
-    return !isStandalone;
-  });
+  const [welcomeOpen, setWelcomeOpen] = useState<boolean>(() => !isStandaloneMode());
+  const [welcomeContext, setWelcomeContext] = useState<'startup' | 'download'>('startup');
+  const downloadCountRef = useRef<number>((() => {
+    try {
+      const raw = localStorage.getItem(DOWNLOAD_COUNT_KEY);
+      const parsed = raw ? parseInt(raw, 10) : 0;
+      return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
+    } catch {
+      return 0;
+    }
+  })());
+
+  const handleDownloadComplete = () => {
+    if (isStandaloneMode() || welcomeOpen) return;
+    const nextCount = downloadCountRef.current + 1;
+    downloadCountRef.current = nextCount;
+    try {
+      localStorage.setItem(DOWNLOAD_COUNT_KEY, String(nextCount));
+    } catch {
+      // স্টোরেজ ত্রুটি উপেক্ষা করুন
+    }
+
+    // প্রথম ডাউনলোডে এবং এরপর প্রতি ৩ বার ডাউনলোডের পর পপআপ দেখান
+    if (nextCount === 1 || nextCount % 3 === 0) {
+      setWelcomeContext('download');
+      setWelcomeOpen(true);
+    }
+  };
 
   const { brandKit, updateBrandKit, resetBrandKit } = useBrandKit();
 
@@ -101,6 +132,7 @@ export default function App() {
                     setActiveTab('reel');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
+                  onDownloadComplete={handleDownloadComplete}
                 />
               </motion.div>
             )}
@@ -121,6 +153,7 @@ export default function App() {
                   brandKit={brandKit}
                   onUpdateBrandKit={updateBrandKit}
                   onOpenBrandKit={() => setBrandDrawerOpen(true)}
+                  onDownloadComplete={handleDownloadComplete}
                 />
               </motion.div>
             )}
@@ -143,7 +176,11 @@ export default function App() {
 
         <OfflineIndicator />
 
-        <WelcomeModal open={welcomeOpen} onClose={() => setWelcomeOpen(false)} />
+        <WelcomeModal
+          open={welcomeOpen}
+          triggerContext={welcomeContext}
+          onClose={() => setWelcomeOpen(false)}
+        />
 
         <BrandKitDrawer
           open={brandDrawerOpen}

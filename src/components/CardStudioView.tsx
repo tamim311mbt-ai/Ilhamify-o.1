@@ -25,6 +25,7 @@ interface CardStudioViewProps {
   onUpdateBrandKit: (patch: Partial<BrandKitState>) => void;
   onOpenBrandKit: () => void;
   onSendToReel: () => void;
+  onDownloadComplete?: () => void;
 }
 
 export function CardStudioView({
@@ -36,6 +37,7 @@ export function CardStudioView({
   onUpdateBrandKit,
   onOpenBrandKit,
   onSendToReel,
+  onDownloadComplete,
 }: CardStudioViewProps) {
   const [settings, setSettings] = useState<CardSettings>({
     aspectRatio: '1:1',
@@ -145,6 +147,7 @@ export function CardStudioView({
       setTimeout(() => URL.revokeObjectURL(url), 1000);
       setDownloaded(true);
       setTimeout(() => setDownloaded(false), 2200);
+      setTimeout(() => onDownloadComplete?.(), 500);
     }, 'image/png');
   };
 

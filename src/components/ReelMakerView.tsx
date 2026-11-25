@@ -37,6 +37,7 @@ interface ReelMakerViewProps {
   brandKit: BrandKitState;
   onUpdateBrandKit: (patch: Partial<BrandKitState>) => void;
   onOpenBrandKit: () => void;
+  onDownloadComplete?: () => void;
 }
 
 const MOTION_STYLES: { id: ReelMotionStyle; label: string; desc: string }[] = [
@@ -73,6 +74,7 @@ export function ReelMakerView({
   brandKit,
   onUpdateBrandKit,
   onOpenBrandKit,
+  onDownloadComplete,
 }: ReelMakerViewProps) {
   const [settings, setSettings] = useState<ReelSettings>({
     themeId: 'emerald-night',
@@ -420,6 +422,7 @@ export function ReelMakerView({
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
+      setTimeout(() => onDownloadComplete?.(), 500);
     };
 
     recorder.onerror = () => {
@@ -508,6 +511,7 @@ export function ReelMakerView({
       a.click();
       document.body.removeChild(a);
       setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setTimeout(() => onDownloadComplete?.(), 500);
     }, 'image/png');
   };
 
