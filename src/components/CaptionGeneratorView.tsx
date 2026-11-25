@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from 'motion/react';
 import { useMemo, useState } from 'react';
 import {
   Check,
@@ -60,6 +61,7 @@ export function CaptionGeneratorView({
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [copiedEditor, setCopiedEditor] = useState<boolean>(false);
+  const [listCycle, setListCycle] = useState<number>(0);
 
   const {
     favoriteIds,
@@ -118,6 +120,7 @@ export function CaptionGeneratorView({
   const handleCategoryChange = (nextCategory: CategoryFilter) => {
     setCategoryFilter(nextCategory);
     setSubTopic('all');
+    setListCycle((c) => c + 1);
     if (nextCategory === 'saved') return;
 
     const nextPool = CAPTIONS_LIBRARY.filter((item) => item.category === nextCategory);
@@ -126,6 +129,7 @@ export function CaptionGeneratorView({
 
   const handleSubTopicChange = (nextSubTopic: CaptionSubTopic) => {
     setSubTopic(nextSubTopic);
+    setListCycle((c) => c + 1);
     if (categoryFilter === 'saved') return;
 
     const nextPool = CAPTIONS_LIBRARY.filter((item) => {
@@ -141,6 +145,7 @@ export function CaptionGeneratorView({
     const exclude = generatedList.map((item) => item.id);
     const picked = shufflePick(filteredPool, count, exclude);
     setGeneratedList(picked);
+    setListCycle((c) => c + 1);
   };
 
   const visibleCaptions =
@@ -373,102 +378,118 @@ export function CaptionGeneratorView({
           </div>
 
           {/* ক্যাপশন তালিকা */}
-          <div className="space-y-3">
-            {visibleCaptions.length === 0 ? (
-              categoryFilter === 'saved' && totalSavedCount === 0 ? (
-                <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-3">
-                  <div className="w-10 h-10 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center mx-auto">
-                    <Star className="w-5 h-5 text-amber-500" />
-                  </div>
-                  <p className="text-sm font-medium text-slate-900">
-                    এখনো কোনো ক্যাপশন সেভ করা হয়নি
-                  </p>
-                  <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                    যেকোনো ইসলামিক বা মোটিভেশনাল ক্যাপশনের তারকা চিহ্নে চাপ দিন অথবা এডিটর থেকে নিজের ক্যাপশন সেভ করুন।
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => handleCategoryChange('islamic')}
-                    className="px-4 py-2 min-h-[40px] text-xs font-medium text-teal-800 bg-teal-50 border border-teal-200 rounded-lg hover:bg-teal-100 transition-colors"
-                  >
-                    ক্যাপশন দেখুন
-                  </button>
-                </div>
-              ) : (
-                <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-3">
-                  <p className="text-sm font-medium text-slate-900">
-                    আপনার খোঁজার সাথে মিলে এমন কোনো ক্যাপশন পাওয়া যায়নি।
-                  </p>
-                  <p className="text-xs text-slate-500">
-                    সার্চ বক্স খালি করে অথবা সবগুলো বিষয় নির্বাচন করে আবার চেষ্টা করুন।
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSearchQuery('');
-                      handleSubTopicChange('all');
-                    }}
-                    className="px-4 py-2 min-h-[40px] text-xs font-medium text-teal-800 bg-teal-50 border border-teal-200 rounded-lg hover:bg-teal-100 transition-colors"
-                  >
-                    ফিল্টার রিসেট করুন
-                  </button>
-                </div>
-              )
-            ) : (
-              visibleCaptions.map((item) => {
-                const isCopied = copiedId === item.id;
-                const isSelected = activeCaption.trim() === item.text.trim();
-                const starred = isFavorite(item.id);
-
-                return (
-                  <article
-                    key={item.id}
-                    className={`bg-white border rounded-2xl p-5 transition-colors ${
-                      isSelected ? 'border-teal-700 ring-1 ring-teal-700/15' : 'border-slate-200'
-                    }`}
-                  >
-                    {/* মেটাডেটা লাইন ও প্রিয় বাটন */}
-                    <div className="flex items-center justify-between gap-4 text-xs text-slate-500 mb-2">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="font-medium text-slate-700">
-                          {item.category === 'islamic' ? 'ইসলামিক' : 'মোটিভেশনাল'}
-                        </span>
-                        <span aria-hidden="true">·</span>
-                        <span>{ALL_SUBTOPIC_LABELS[item.subTopic]}</span>
-                        {item.attribution && (
-                          <>
-                            <span aria-hidden="true">·</span>
-                            <span>{item.attribution}</span>
-                          </>
-                        )}
-                      </div>
-
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className="tabular-nums text-slate-400">
-                          {toBanglaNumber(item.text.length)} অক্ষর
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => toggleFavoriteId(item.id)}
-                          aria-label={starred ? 'সেভ তালিকা থেকে সরান' : 'প্রিয় তালিকায় সেভ করুন'}
-                          aria-pressed={starred}
-                          title={starred ? 'সেভ তালিকা থেকে সরান' : 'সেভ করুন'}
-                          className={`min-w-[38px] min-h-[38px] -mr-1.5 flex items-center justify-center rounded-lg transition-colors ${
-                            starred
-                              ? 'text-amber-500 bg-amber-50 hover:bg-amber-100'
-                              : 'text-slate-400 hover:text-amber-500 hover:bg-slate-50'
-                          }`}
-                        >
-                          <Star
-                            className={`w-4 h-4 ${starred ? 'fill-amber-400 text-amber-500' : ''}`}
-                          />
-                        </button>
-                      </div>
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={`${categoryFilter}-${subTopic}-${listCycle}-${searchQuery.trim() ? 'q' : 'n'}`}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
+              className="space-y-3"
+            >
+              {visibleCaptions.length === 0 ? (
+                categoryFilter === 'saved' && totalSavedCount === 0 ? (
+                  <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-3">
+                    <div className="w-10 h-10 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center mx-auto">
+                      <Star className="w-5 h-5 text-amber-500" />
                     </div>
-
-                    <p className="text-base md:text-[17px] leading-relaxed text-slate-900 font-medium">
-                      {item.text}
+                    <p className="text-sm font-medium text-slate-900">
+                      এখনো কোনো ক্যাপশন সেভ করা হয়নি
                     </p>
+                    <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                      যেকোনো ইসলামিক বা মোটিভেশনাল ক্যাপশনের তারকা চিহ্নে চাপ দিন অথবা এডিটর থেকে নিজের ক্যাপশন সেভ করুন।
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => handleCategoryChange('islamic')}
+                      className="px-4 py-2 min-h-[40px] text-xs font-medium text-teal-800 bg-teal-50 border border-teal-200 rounded-lg hover:bg-teal-100 transition-colors"
+                    >
+                      ক্যাপশন দেখুন
+                    </button>
+                  </div>
+                ) : (
+                  <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-3">
+                    <p className="text-sm font-medium text-slate-900">
+                      আপনার খোঁজার সাথে মিলে এমন কোনো ক্যাপশন পাওয়া যায়নি।
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      সার্চ বক্স খালি করে অথবা সবগুলো বিষয় নির্বাচন করে আবার চেষ্টা করুন।
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSearchQuery('');
+                        handleSubTopicChange('all');
+                      }}
+                      className="px-4 py-2 min-h-[40px] text-xs font-medium text-teal-800 bg-teal-50 border border-teal-200 rounded-lg hover:bg-teal-100 transition-colors"
+                    >
+                      ফিল্টার রিসেট করুন
+                    </button>
+                  </div>
+                )
+              ) : (
+                visibleCaptions.map((item, idx) => {
+                  const isCopied = copiedId === item.id;
+                  const isSelected = activeCaption.trim() === item.text.trim();
+                  const starred = isFavorite(item.id);
+
+                  return (
+                    <motion.article
+                      key={item.id}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        duration: 0.18,
+                        delay: Math.min(idx * 0.025, 0.12),
+                        ease: [0.16, 1, 0.3, 1],
+                      }}
+                      className={`bg-white border rounded-2xl p-5 transition-colors ${
+                        isSelected ? 'border-teal-700 ring-1 ring-teal-700/15' : 'border-slate-200'
+                      }`}
+                    >
+                      {/* মেটাডেটা লাইন ও প্রিয় বাটন */}
+                      <div className="flex items-center justify-between gap-4 text-xs text-slate-500 mb-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-medium text-slate-700">
+                            {item.category === 'islamic' ? 'ইসলামিক' : 'মোটিভেশনাল'}
+                          </span>
+                          <span aria-hidden="true">·</span>
+                          <span>{ALL_SUBTOPIC_LABELS[item.subTopic]}</span>
+                          {item.attribution && (
+                            <>
+                              <span aria-hidden="true">·</span>
+                              <span>{item.attribution}</span>
+                            </>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="tabular-nums text-slate-400">
+                            {toBanglaNumber(item.text.length)} অক্ষর
+                          </span>
+                          <motion.button
+                            whileTap={{ scale: 0.85 }}
+                            type="button"
+                            onClick={() => toggleFavoriteId(item.id)}
+                            aria-label={starred ? 'সেভ তালিকা থেকে সরান' : 'প্রিয় তালিকায় সেভ করুন'}
+                            aria-pressed={starred}
+                            title={starred ? 'সেভ তালিকা থেকে সরান' : 'সেভ করুন'}
+                            className={`min-w-[38px] min-h-[38px] -mr-1.5 flex items-center justify-center rounded-lg transition-colors ${
+                              starred
+                                ? 'text-amber-500 bg-amber-50 hover:bg-amber-100'
+                                : 'text-slate-400 hover:text-amber-500 hover:bg-slate-50'
+                            }`}
+                          >
+                            <Star
+                              className={`w-4 h-4 ${starred ? 'fill-amber-400 text-amber-500' : ''}`}
+                            />
+                          </motion.button>
+                        </div>
+                      </div>
+
+                      <p className="text-base md:text-[17px] leading-relaxed text-slate-900 font-medium">
+                        {item.text}
+                      </p>
 
                     <div className="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
@@ -507,29 +528,32 @@ export function CaptionGeneratorView({
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <button
+                        <motion.button
+                          whileTap={{ scale: 0.96 }}
                           type="button"
                           onClick={() => onSendToCard(item.text, item.attribution)}
                           className="min-h-[40px] px-3 py-2 text-xs font-medium text-teal-800 bg-teal-50 border border-teal-200 rounded-lg hover:bg-teal-100 transition-colors flex items-center gap-1.5 whitespace-nowrap"
                         >
                           <ImageIcon className="w-3.5 h-3.5" />
                           কার্ড তৈরি
-                        </button>
-                        <button
+                        </motion.button>
+                        <motion.button
+                          whileTap={{ scale: 0.96 }}
                           type="button"
                           onClick={() => onSendToReel(item.text, item.attribution)}
                           className="min-h-[40px] px-3 py-2 text-xs font-medium text-slate-900 bg-slate-100 border border-slate-200 rounded-lg hover:bg-slate-200 transition-colors flex items-center gap-1.5 whitespace-nowrap"
                         >
                           <Clapperboard className="w-3.5 h-3.5" />
                           রিল তৈরি
-                        </button>
+                        </motion.button>
                       </div>
                     </div>
-                  </article>
+                  </motion.article>
                 );
               })
             )}
-          </div>
+            </motion.div>
+          </AnimatePresence>
         </div>
 
         {/* ডান কলাম: কাস্টম ক্যাপশন এডিটর */}

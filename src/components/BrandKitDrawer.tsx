@@ -1,5 +1,6 @@
-import React, { useRef, useState } from 'react';
 import { Trash2, Upload, X } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
+import React, { useRef, useState } from 'react';
 import { BrandKitState, WatermarkPosition } from '../types/studio';
 import { toBanglaNumber } from '../utils/banglaDigits';
 
@@ -30,8 +31,6 @@ export function BrandKitDrawer({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
-  if (!open) return null;
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setUploadError(null);
     const file = e.target.files?.[0];
@@ -61,16 +60,28 @@ export function BrandKitDrawer({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-end md:items-center justify-end bg-slate-950/45 backdrop-blur-xs"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="brand-kit-title"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
-      <div className="w-full md:w-[440px] max-h-[90vh] md:h-full md:max-h-none bg-white rounded-t-3xl md:rounded-none border-t md:border-l border-slate-200 flex flex-col overflow-hidden">
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+          className="fixed inset-0 z-50 flex items-end md:items-center justify-end bg-slate-950/45 backdrop-blur-xs"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="brand-kit-title"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) onClose();
+          }}
+        >
+          <motion.div
+            initial={{ opacity: 0, x: 24, y: 16 }}
+            animate={{ opacity: 1, x: 0, y: 0 }}
+            exit={{ opacity: 0, x: 24, y: 16 }}
+            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            className="w-full md:w-[440px] max-h-[90vh] md:h-full md:max-h-none bg-white rounded-t-3xl md:rounded-none border-t md:border-l border-slate-200 flex flex-col overflow-hidden"
+          >
         {/* মোবাইল ড্র্যাগ হ্যান্ডেল */}
         <div className="md:hidden pt-3 pb-1 flex justify-center">
           <div className="w-10 h-1.5 bg-slate-200 rounded-full" />
@@ -356,7 +367,9 @@ export function BrandKitDrawer({
             সম্পন্ন
           </button>
         </div>
-      </div>
-    </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

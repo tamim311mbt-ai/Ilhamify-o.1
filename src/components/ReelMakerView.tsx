@@ -1,3 +1,4 @@
+import { AnimatePresence, motion, useAnimate } from 'motion/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlignCenter,
@@ -93,9 +94,33 @@ export function ReelMakerView({
   const [exportStatusMessage, setExportStatusMessage] = useState<string>('');
 
   const previewCanvasRef = useRef<HTMLCanvasElement>(null);
+  const [stageScope, animateStage] = useAnimate();
+  const isFirstRenderRef = useRef(true);
   const exportCancelRef = useRef<boolean>(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const logoImage = useLoadedImage(brandKit.logoDataUrl);
+
+  // মোশন, থিম বা ফন্ট বদলালে মসৃণ প্রিভিউ ট্রানজিশন
+  useEffect(() => {
+    if (isFirstRenderRef.current) {
+      isFirstRenderRef.current = false;
+      return;
+    }
+    if (!stageScope.current) return;
+    animateStage(
+      stageScope.current,
+      { opacity: [0.78, 1], scale: [0.975, 1] },
+      { duration: 0.18, ease: [0.16, 1, 0.3, 1] }
+    );
+  }, [
+    settings.motionStyle,
+    settings.themeId,
+    settings.typographyId,
+    settings.duration,
+    settings.textAlign,
+    animateStage,
+    stageScope,
+  ]);
 
   const theme = useMemo(
     () => BACKGROUND_THEMES.find((t) => t.id === settings.themeId) ?? BACKGROUND_THEMES[0],
@@ -405,11 +430,13 @@ export function ReelMakerView({
               </span>
             </div>
 
-            <div className="py-4 px-4 bg-slate-100/80 rounded-xl flex justify-center">
-              <canvas
-                ref={previewCanvasRef}
-                className="w-full max-w-[280px] sm:max-w-[300px] aspect-[9/16] rounded-2xl shadow-lg border border-slate-300/70"
-              />
+            <div className="py-4 px-4 bg-slate-100/80 rounded-xl flex justify-center overflow-hidden">
+              <div ref={stageScope} className="w-full flex justify-center">
+                <canvas
+                  ref={previewCanvasRef}
+                  className="w-full max-w-[280px] sm:max-w-[300px] aspect-[9/16] rounded-2xl shadow-lg border border-slate-300/70"
+                />
+              </div>
             </div>
 
             <div className="flex items-center gap-3">
@@ -448,8 +475,16 @@ export function ReelMakerView({
 
             {/* ভিডিও ডাউনলোড ও স্ট্যাটাস */}
             <div className="pt-3 border-t border-slate-100 space-y-3">
-              {exportState === 'recording' ? (
-                <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+              <AnimatePresence mode="wait" initial={false}>
+                {exportState === 'recording' ? (
+                  <motion.div
+                    key="recording"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
+                    className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3"
+                  >
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-medium text-slate-900">{exportStatusMessage}</span>
                     <span className="tabular-nums font-semibold text-teal-700">
@@ -475,9 +510,16 @@ export function ReelMakerView({
                       বাতিল
                     </button>
                   </div>
-                </div>
+                </motion.div>
               ) : (
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                <motion.div
+                  key="idle-or-ready"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
+                  className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3"
+                >
                   <div className="text-xs text-slate-500">
                     {exportState === 'ready' ? (
                       <span className="text-emerald-700 font-medium flex items-center gap-1.5">
@@ -514,17 +556,19 @@ export function ReelMakerView({
                       </button>
                     )}
 
-                    <button
+                    <motion.button
+                      whileTap={{ scale: 0.97 }}
                       type="button"
                       onClick={handleExportVideo}
                       className="min-h-[46px] px-5 py-2.5 text-sm font-semibold text-white bg-teal-700 rounded-xl hover:bg-teal-800 transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
                     >
                       <Film className="w-4 h-4" />
                       ভিডিও ডাউনলোড করুন
-                    </button>
+                    </motion.button>
                   </div>
-                </div>
+                </motion.div>
               )}
+              </AnimatePresence>
             </div>
           </div>
         </div>

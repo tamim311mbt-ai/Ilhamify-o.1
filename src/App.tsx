@@ -1,3 +1,4 @@
+import { AnimatePresence, MotionConfig, motion } from 'motion/react';
 import { useState } from 'react';
 import { BrandKitDrawer } from './components/BrandKitDrawer';
 import { CaptionGeneratorView } from './components/CaptionGeneratorView';
@@ -7,6 +8,11 @@ import { ReelMakerView } from './components/ReelMakerView';
 import { CAPTIONS_LIBRARY } from './data/captions';
 import { useBrandKit } from './hooks/useBrandKit';
 import { StudioTab } from './types/studio';
+
+const VIEW_TRANSITION = {
+  duration: 0.18,
+  ease: [0.16, 1, 0.3, 1] as const,
+};
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<StudioTab>('captions');
@@ -33,72 +39,100 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
-      <Header
-        activeTab={activeTab}
-        onSelectTab={(tab) => {
-          setActiveTab(tab);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
-        onOpenBrandKit={() => setBrandDrawerOpen(true)}
-        brandKit={brandKit}
-      />
+    <MotionConfig reducedMotion="user">
+      <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
+        <Header
+          activeTab={activeTab}
+          onSelectTab={(tab) => {
+            setActiveTab(tab);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          onOpenBrandKit={() => setBrandDrawerOpen(true)}
+          brandKit={brandKit}
+        />
 
-      <main className="flex-1 pb-24 md:pb-12">
-        {activeTab === 'captions' && (
-          <CaptionGeneratorView
-            activeCaption={activeCaption}
-            activeAttribution={activeAttribution}
-            onChangeCaption={setActiveCaption}
-            onChangeAttribution={setActiveAttribution}
-            onSendToCard={handleSendToCard}
-            onSendToReel={handleSendToReel}
-          />
-        )}
+        <main className="flex-1 pb-24 md:pb-12">
+          <AnimatePresence mode="wait" initial={false}>
+            {activeTab === 'captions' && (
+              <motion.div
+                key="captions"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={VIEW_TRANSITION}
+              >
+                <CaptionGeneratorView
+                  activeCaption={activeCaption}
+                  activeAttribution={activeAttribution}
+                  onChangeCaption={setActiveCaption}
+                  onChangeAttribution={setActiveAttribution}
+                  onSendToCard={handleSendToCard}
+                  onSendToReel={handleSendToReel}
+                />
+              </motion.div>
+            )}
 
-        {activeTab === 'card' && (
-          <CardStudioView
-            caption={activeCaption}
-            attribution={activeAttribution}
-            onChangeCaption={setActiveCaption}
-            onChangeAttribution={setActiveAttribution}
-            brandKit={brandKit}
-            onUpdateBrandKit={updateBrandKit}
-            onOpenBrandKit={() => setBrandDrawerOpen(true)}
-            onSendToReel={() => {
-              setActiveTab('reel');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-          />
-        )}
+            {activeTab === 'card' && (
+              <motion.div
+                key="card"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={VIEW_TRANSITION}
+              >
+                <CardStudioView
+                  caption={activeCaption}
+                  attribution={activeAttribution}
+                  onChangeCaption={setActiveCaption}
+                  onChangeAttribution={setActiveAttribution}
+                  brandKit={brandKit}
+                  onUpdateBrandKit={updateBrandKit}
+                  onOpenBrandKit={() => setBrandDrawerOpen(true)}
+                  onSendToReel={() => {
+                    setActiveTab('reel');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                />
+              </motion.div>
+            )}
 
-        {activeTab === 'reel' && (
-          <ReelMakerView
-            caption={activeCaption}
-            attribution={activeAttribution}
-            onChangeCaption={setActiveCaption}
-            onChangeAttribution={setActiveAttribution}
-            brandKit={brandKit}
-            onUpdateBrandKit={updateBrandKit}
-            onOpenBrandKit={() => setBrandDrawerOpen(true)}
-          />
-        )}
-      </main>
+            {activeTab === 'reel' && (
+              <motion.div
+                key="reel"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -6 }}
+                transition={VIEW_TRANSITION}
+              >
+                <ReelMakerView
+                  caption={activeCaption}
+                  attribution={activeAttribution}
+                  onChangeCaption={setActiveCaption}
+                  onChangeAttribution={setActiveAttribution}
+                  brandKit={brandKit}
+                  onUpdateBrandKit={updateBrandKit}
+                  onOpenBrandKit={() => setBrandDrawerOpen(true)}
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </main>
 
-      <footer className="hidden md:block border-t border-slate-200 bg-white py-5">
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between text-xs text-slate-500">
-          <span>ক্যাপশনক্রাফট স্টুডিও</span>
-          <span>৬৫০টি বাংলা ক্যাপশন · কোট কার্ড · ৯:১৬ রিল ভিডিও</span>
-        </div>
-      </footer>
+        <footer className="hidden md:block border-t border-slate-200 bg-white py-5">
+          <div className="max-w-7xl mx-auto px-6 flex items-center justify-between text-xs text-slate-500">
+            <span>ক্যাপশনক্রাফট স্টুডিও</span>
+            <span>৬৫০টি বাংলা ক্যাপশন · কোট কার্ড · ৯:১৬ রিল ভিডিও</span>
+          </div>
+        </footer>
 
-      <BrandKitDrawer
-        open={brandDrawerOpen}
-        onClose={() => setBrandDrawerOpen(false)}
-        brandKit={brandKit}
-        onUpdate={updateBrandKit}
-        onReset={resetBrandKit}
-      />
-    </div>
+        <BrandKitDrawer
+          open={brandDrawerOpen}
+          onClose={() => setBrandDrawerOpen(false)}
+          brandKit={brandKit}
+          onUpdate={updateBrandKit}
+          onReset={resetBrandKit}
+        />
+      </div>
+    </MotionConfig>
   );
 }

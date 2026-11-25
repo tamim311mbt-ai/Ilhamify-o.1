@@ -1,3 +1,4 @@
+import { motion, useAnimate } from 'motion/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlignCenter,
@@ -49,6 +50,8 @@ export function CardStudioView({
 
   const [downloaded, setDownloaded] = useState(false);
   const previewCanvasRef = useRef<HTMLCanvasElement>(null);
+  const [stageScope, animateStage] = useAnimate();
+  const isFirstRenderRef = useRef(true);
   const logoImage = useLoadedImage(brandKit.logoDataUrl);
 
   const aspectSpec = useMemo(
@@ -95,6 +98,20 @@ export function CardStudioView({
       document.fonts.ready.then(draw);
     }
   }, [aspectSpec, caption, attribution, theme, typography, settings, brandKit, logoImage]);
+
+  // অনুপাত, থিম বা ফন্ট বদলালে মসৃণ কম্পোজিটর অ্যানিমেশন
+  useEffect(() => {
+    if (isFirstRenderRef.current) {
+      isFirstRenderRef.current = false;
+      return;
+    }
+    if (!stageScope.current) return;
+    animateStage(
+      stageScope.current,
+      { opacity: [0.76, 1], scale: [0.975, 1] },
+      { duration: 0.18, ease: [0.16, 1, 0.3, 1] }
+    );
+  }, [settings.aspectRatio, settings.themeId, settings.typographyId, settings.textAlign, animateStage, stageScope]);
 
   const handleDownloadPng = () => {
     const offscreen = document.createElement('canvas');
@@ -153,21 +170,24 @@ export function CardStudioView({
               </button>
             </div>
 
-            <div className="py-5 flex items-center justify-center bg-slate-100/80 rounded-xl mt-4 px-4">
-              <canvas
-                ref={previewCanvasRef}
-                className="max-w-full w-auto h-auto max-h-[540px] rounded-xl shadow-md border border-slate-200/80"
-                style={{
-                  aspectRatio: `${aspectSpec.width} / ${aspectSpec.height}`,
-                }}
-              />
+            <div className="py-5 flex items-center justify-center bg-slate-100/80 rounded-xl mt-4 px-4 overflow-hidden">
+              <div ref={stageScope} className="flex items-center justify-center max-w-full">
+                <canvas
+                  ref={previewCanvasRef}
+                  className="max-w-full w-auto h-auto max-h-[540px] rounded-xl shadow-md border border-slate-200/80"
+                  style={{
+                    aspectRatio: `${aspectSpec.width} / ${aspectSpec.height}`,
+                  }}
+                />
+              </div>
             </div>
 
             <div className="mt-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
               <p className="text-xs text-slate-500">
                 ঝকঝকে বাংলা টাইপোগ্রাফি ও স্বচ্ছ পিএনজি লোগোসহ হাই-রেজোলিউশন কার্ড ডাউনলোড হবে।
               </p>
-              <button
+              <motion.button
+                whileTap={{ scale: 0.97 }}
                 type="button"
                 onClick={handleDownloadPng}
                 className="min-h-[46px] px-6 py-2.5 text-sm font-semibold text-white bg-teal-700 rounded-xl hover:bg-teal-800 transition-colors flex items-center justify-center gap-2 shrink-0 whitespace-nowrap"
@@ -183,7 +203,7 @@ export function CardStudioView({
                     কার্ড ডাউনলোড করুন
                   </>
                 )}
-              </button>
+              </motion.button>
             </div>
           </div>
         </div>
