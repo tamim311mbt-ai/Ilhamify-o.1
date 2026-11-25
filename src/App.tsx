@@ -4,6 +4,7 @@ import { BrandKitDrawer } from './components/BrandKitDrawer';
 import { CaptionGeneratorView } from './components/CaptionGeneratorView';
 import { CardStudioView } from './components/CardStudioView';
 import { Header } from './components/Header';
+import { OfflineIndicator } from './components/OfflineIndicator';
 import { ReelMakerView } from './components/ReelMakerView';
 import { CAPTIONS_LIBRARY } from './data/captions';
 import { useBrandKit } from './hooks/useBrandKit';
@@ -120,10 +121,19 @@ export default function App() {
 
         <footer className="hidden md:block border-t border-slate-200 bg-white py-5">
           <div className="max-w-7xl mx-auto px-6 flex items-center justify-between text-xs text-slate-500">
-            <span>ক্যাপশনক্রাফট স্টুডিও</span>
+            <div className="flex items-center gap-2.5">
+              <img
+                src={`${import.meta.env.BASE_URL}logo.png`}
+                alt="Ilhamify ইলহামিফাই"
+                className="h-6 w-auto object-contain"
+              />
+              <span className="font-medium text-slate-700">Ilhamify ইলহামিফাই</span>
+            </div>
             <span>৬৫০টি বাংলা ক্যাপশন · কোট কার্ড · ৯:১৬ রিল ভিডিও</span>
           </div>
         </footer>
+
+        <OfflineIndicator />
 
         <BrandKitDrawer
           open={brandDrawerOpen}

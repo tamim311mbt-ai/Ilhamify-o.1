@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'motion/react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Check,
   Clapperboard,
@@ -62,6 +62,17 @@ export function CaptionGeneratorView({
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [copiedEditor, setCopiedEditor] = useState<boolean>(false);
   const [listCycle, setListCycle] = useState<number>(0);
+  const [highlightedIds, setHighlightedIds] = useState<string[]>([]);
+  const captionListTopRef = useRef<HTMLDivElement>(null);
+  const highlightTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (highlightTimerRef.current !== null) {
+        window.clearTimeout(highlightTimerRef.current);
+      }
+    };
+  }, []);
 
   const {
     favoriteIds,
@@ -142,10 +153,35 @@ export function CaptionGeneratorView({
 
   const handleGenerate = (count: number) => {
     if (categoryFilter === 'saved') return;
+    const pool = searchQuery.trim()
+      ? CAPTIONS_LIBRARY.filter((item) => {
+          if (item.category !== categoryFilter) return false;
+          if (subTopic !== 'all' && item.subTopic !== subTopic) return false;
+          return true;
+        })
+      : filteredPool;
+
+    if (searchQuery.trim()) {
+      setSearchQuery('');
+    }
+
     const exclude = generatedList.map((item) => item.id);
-    const picked = shufflePick(filteredPool, count, exclude);
+    const picked = shufflePick(pool, count, exclude);
     setGeneratedList(picked);
     setListCycle((c) => c + 1);
+
+    const newIds = picked.map((item) => item.id);
+    setHighlightedIds(newIds);
+    if (highlightTimerRef.current !== null) {
+      window.clearTimeout(highlightTimerRef.current);
+    }
+    highlightTimerRef.current = window.setTimeout(() => {
+      setHighlightedIds([]);
+    }, 1500);
+
+    requestAnimationFrame(() => {
+      captionListTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   };
 
   const visibleCaptions =
@@ -321,9 +357,9 @@ export function CaptionGeneratorView({
               </div>
             </div>
 
-            {/* সার্চ ও র‍্যান্ডম জেনারেট */}
+            {/* সার্চ বক্স */}
             <div className="pt-2 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-              <div className="relative flex-1">
+              <div className="relative flex-1 min-w-0">
                 <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   type="text"
@@ -334,50 +370,17 @@ export function CaptionGeneratorView({
                 />
               </div>
 
-              {categoryFilter === 'saved' ? (
+              {categoryFilter === 'saved' && (
                 <div className="text-xs font-medium text-slate-600 px-1 shrink-0 tabular-nums">
                   মোট {toBanglaNumber(filteredPool.length)}টি সেভ করা ক্যাপশন
-                </div>
-              ) : (
-                <div className="flex items-center gap-2 shrink-0">
-                  <button
-                    type="button"
-                    onClick={() => handleGenerate(1)}
-                    className="min-h-[44px] px-3.5 py-2 text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors whitespace-nowrap"
-                  >
-                    একটি নতুন ক্যাপশন
-                  </button>
-
-                  <div className="inline-flex items-center border border-slate-200 rounded-xl overflow-hidden bg-white">
-                    <select
-                      aria-label="কতগুলো ক্যাপশন তৈরি হবে"
-                      value={batchSize}
-                      onChange={(e) => {
-                        const next = parseInt(e.target.value, 10);
-                        setBatchSize(next);
-                        handleGenerate(next);
-                      }}
-                      className="h-[42px] pl-3 pr-1.5 text-xs font-medium text-slate-700 bg-transparent focus:outline-none cursor-pointer tabular-nums"
-                    >
-                      <option value={3}>৩টি</option>
-                      <option value={5}>৫টি</option>
-                      <option value={8}>৮টি</option>
-                    </select>
-                    <button
-                      type="button"
-                      onClick={() => handleGenerate(batchSize)}
-                      className="min-h-[42px] px-4 py-2 text-xs font-semibold text-white bg-teal-700 hover:bg-teal-800 transition-colors flex items-center gap-1.5 whitespace-nowrap"
-                    >
-                      <RefreshCw className="w-3.5 h-3.5" />
-                      নতুন {toBanglaNumber(batchSize)}টি দেখুন
-                    </button>
-                  </div>
                 </div>
               )}
             </div>
           </div>
 
-          {/* ক্যাপশন তালিকা */}
+          {/* স্ক্রল ও ক্যাপশন তালিকা */}
+          <div ref={captionListTopRef} className="scroll-mt-4" />
+
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={`${categoryFilter}-${subTopic}-${listCycle}-${searchQuery.trim() ? 'q' : 'n'}`}
@@ -431,6 +434,7 @@ export function CaptionGeneratorView({
                 visibleCaptions.map((item, idx) => {
                   const isCopied = copiedId === item.id;
                   const isSelected = activeCaption.trim() === item.text.trim();
+                  const isNewlyGenerated = highlightedIds.includes(item.id);
                   const starred = isFavorite(item.id);
 
                   return (
@@ -443,8 +447,12 @@ export function CaptionGeneratorView({
                         delay: Math.min(idx * 0.025, 0.12),
                         ease: [0.16, 1, 0.3, 1],
                       }}
-                      className={`bg-white border rounded-2xl p-5 transition-colors ${
-                        isSelected ? 'border-teal-700 ring-1 ring-teal-700/15' : 'border-slate-200'
+                      className={`border rounded-2xl p-5 transition-all duration-300 ${
+                        isNewlyGenerated
+                          ? 'bg-teal-100/75 border-teal-700 ring-2 ring-teal-700/20'
+                          : isSelected
+                          ? 'bg-white border-teal-700 ring-1 ring-teal-700/20'
+                          : 'bg-white border-slate-200'
                       }`}
                     >
                       {/* মেটাডেটা লাইন ও প্রিয় বাটন */}
@@ -554,6 +562,46 @@ export function CaptionGeneratorView({
             )}
             </motion.div>
           </AnimatePresence>
+
+          {/* ক্যাপশন তালিকার নিচে র‍্যান্ডম জেনারেট কন্ট্রোল */}
+          {categoryFilter !== 'saved' && (
+            <div className="bg-white border border-slate-200 rounded-2xl p-3.5 sm:p-4 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-2.5">
+              <motion.button
+                whileTap={{ scale: 0.98 }}
+                type="button"
+                onClick={() => handleGenerate(1)}
+                className="w-full sm:w-auto min-h-[44px] px-4 py-2 text-xs sm:text-sm font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100 transition-colors flex items-center justify-center whitespace-nowrap"
+              >
+                একটি নতুন ক্যাপশন
+              </motion.button>
+
+              <div className="w-full sm:w-auto flex items-stretch border border-slate-200 rounded-xl overflow-hidden bg-white">
+                <select
+                  aria-label="কতগুলো ক্যাপশন তৈরি হবে"
+                  value={batchSize}
+                  onChange={(e) => {
+                    const next = parseInt(e.target.value, 10);
+                    setBatchSize(next);
+                    handleGenerate(next);
+                  }}
+                  className="h-[44px] pl-3 pr-2 text-xs sm:text-sm font-medium text-slate-700 bg-slate-50 border-r border-slate-200 focus:outline-none cursor-pointer tabular-nums shrink-0"
+                >
+                  <option value={3}>৩টি</option>
+                  <option value={5}>৫টি</option>
+                  <option value={8}>৮টি</option>
+                </select>
+                <motion.button
+                  whileTap={{ scale: 0.98 }}
+                  type="button"
+                  onClick={() => handleGenerate(batchSize)}
+                  className="flex-1 sm:flex-initial min-h-[44px] px-4 py-2 text-xs sm:text-sm font-semibold text-white bg-teal-700 hover:bg-teal-800 transition-colors flex items-center justify-center gap-1.5 whitespace-nowrap"
+                >
+                  <RefreshCw className="w-3.5 h-3.5 shrink-0" />
+                  <span>নতুন {toBanglaNumber(batchSize)}টি দেখুন</span>
+                </motion.button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* ডান কলাম: কাস্টম ক্যাপশন এডিটর */}

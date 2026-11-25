@@ -138,7 +138,7 @@ export function CardStudioView({
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `captioncraft-card-${aspectSpec.id.replace(':', 'x')}-${Date.now()}.png`;
+      a.download = `ilhamify-card-${aspectSpec.id.replace(':', 'x')}-${Date.now()}.png`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

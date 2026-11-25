@@ -1,6 +1,7 @@
 import { Clapperboard, Image as ImageIcon, Sparkles } from 'lucide-react';
 import { motion } from 'motion/react';
 import { BrandKitState, StudioTab } from '../types/studio';
+import { PWAInstallButton } from './PWAInstallButton';
 
 interface HeaderProps {
   activeTab: StudioTab;
@@ -30,13 +31,19 @@ export function Header({
       {/* ডেস্কটপ টপ বার */}
       <header className="hidden md:block bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-8">
-          {/* ব্র্যান্ড নাম */}
+          {/* ব্র্যান্ড নাম ও লোগো */}
           <button
             type="button"
             onClick={() => onSelectTab('captions')}
-            className="text-lg font-bold tracking-tight text-slate-900 whitespace-nowrap shrink-0 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-700"
+            aria-label="Ilhamify ইলহামিফাই"
+            className="flex items-center gap-2.5 shrink-0 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-teal-700"
           >
-            ক্যাপশনক্রাফট স্টুডিও
+            <img
+              src={`${import.meta.env.BASE_URL}logo.png`}
+              alt="Ilhamify ইলহামিফাই"
+              className="h-9 w-auto object-contain"
+            />
+            <span className="sr-only">Ilhamify ইলহামিফাই</span>
           </button>
 
           {/* নেভিগেশন ট্যাব */}
@@ -65,8 +72,9 @@ export function Header({
             })}
           </nav>
 
-          {/* কাস্টম নাম ও লোগো অ্যাকশন */}
-          <div className="flex items-center shrink-0">
+          {/* কাস্টম নাম, লোগো ও অ্যাপ ইনস্টল অ্যাকশন */}
+          <div className="flex items-center gap-2.5 shrink-0">
+            <PWAInstallButton />
             <motion.button
               whileTap={{ scale: 0.97 }}
               type="button"
@@ -80,18 +88,31 @@ export function Header({
       </header>
 
       {/* মোবাইল হেডার */}
-      <header className="md:hidden bg-white border-b border-slate-200 px-4 h-14 flex items-center justify-between gap-4">
-        <span className="text-base font-bold tracking-tight text-slate-900 whitespace-nowrap shrink-0">
-          ক্যাপশনক্রাফট স্টুডিও
-        </span>
-        <motion.button
-          whileTap={{ scale: 0.96 }}
+      <header className="md:hidden bg-white border-b border-slate-200 px-4 h-14 flex items-center justify-between gap-3">
+        <button
           type="button"
-          onClick={onOpenBrandKit}
-          className="px-3.5 py-2 min-h-[40px] text-xs font-semibold text-teal-800 bg-teal-50 border border-teal-200 rounded-lg whitespace-nowrap shrink-0"
+          onClick={() => onSelectTab('captions')}
+          aria-label="Ilhamify ইলহামিফাই"
+          className="flex items-center shrink-0"
         >
-          কাস্টম নাম ও লোগো
-        </motion.button>
+          <img
+            src={`${import.meta.env.BASE_URL}logo.png`}
+            alt="Ilhamify ইলহামিফাই"
+            className="h-8 w-auto object-contain"
+          />
+          <span className="sr-only">Ilhamify ইলহামিফাই</span>
+        </button>
+        <div className="flex items-center gap-2 shrink-0">
+          <PWAInstallButton compact />
+          <motion.button
+            whileTap={{ scale: 0.96 }}
+            type="button"
+            onClick={onOpenBrandKit}
+            className="px-3.5 py-2 min-h-[40px] text-xs font-semibold text-teal-800 bg-teal-50 border border-teal-200 rounded-lg whitespace-nowrap shrink-0"
+          >
+            কাস্টম নাম ও লোগো
+          </motion.button>
+        </div>
       </header>
 
       {/* মোবাইল বটম নেভিগেশন বার */}

@@ -146,7 +146,7 @@ export function BrandKitDrawer({
                 type="text"
                 value={brandKit.handleText}
                 onChange={(e) => onUpdate({ handleText: e.target.value })}
-                placeholder="@আপনার_নাম অথবা পেজের নাম"
+                placeholder="@Ilhamify অথবা পেজের নাম"
                 maxLength={48}
                 className="w-full h-11 px-3.5 text-sm text-slate-900 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-teal-700 focus:ring-2 focus:ring-teal-700/15"
               />

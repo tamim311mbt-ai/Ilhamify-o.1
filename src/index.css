@@ -1,5 +1,31 @@
 @import "tailwindcss";
 
+@theme {
+  --color-teal-50: #F4F8F8;
+  --color-teal-100: #EAF1F1;
+  --color-teal-200: #C8DADA;
+  --color-teal-300: #A0BEBE;
+  --color-teal-400: #769D9D;
+  --color-teal-500: #5B8383;
+  --color-teal-600: #4E7272;
+  --color-teal-700: #4E7272;
+  --color-teal-800: #385454;
+  --color-teal-900: #283D3D;
+  --color-teal-950: #182626;
+
+  --color-slate-50: #FAFBFB;
+  --color-slate-100: #F4F8F8;
+  --color-slate-200: #DCE6E6;
+  --color-slate-300: #C2D2D2;
+  --color-slate-400: #738B8B;
+  --color-slate-500: #5C7373;
+  --color-slate-600: #455A5A;
+  --color-slate-700: #314343;
+  --color-slate-800: #263535;
+  --color-slate-900: #1E2B2B;
+  --color-slate-950: #121B1B;
+}
+
 @layer base {
   :root {
     --font-sans: "Hind Siliguri", "Noto Sans Bengali", system-ui, -apple-system, sans-serif;
@@ -9,6 +35,8 @@
 
   html {
     font-family: var(--font-sans);
+    background-color: #FAFBFB;
+    color: #1E2B2B;
     -webkit-tap-highlight-color: transparent;
   }
 }

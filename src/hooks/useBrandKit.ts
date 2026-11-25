@@ -4,7 +4,7 @@ import { BrandKitState } from '../types/studio';
 const STORAGE_KEY = 'captioncraft_brand_kit_bn_v1';
 
 const DEFAULT_BRAND_KIT: BrandKitState = {
-  handleText: '@ক্যাপশনক্রাফট',
+  handleText: '@Ilhamify',
   showHandle: true,
   handlePosition: 'bottom-center',
   handleOpacity: 0.85,
@@ -20,7 +20,11 @@ export function useBrandKit() {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
-        return { ...DEFAULT_BRAND_KIT, ...JSON.parse(saved) };
+        const parsed = JSON.parse(saved) as Partial<BrandKitState>;
+        if (parsed.handleText === '@ক্যাপশনক্রাফট') {
+          parsed.handleText = '@Ilhamify';
+        }
+        return { ...DEFAULT_BRAND_KIT, ...parsed };
       }
     } catch {
       // স্টোরেজ ত্রুটি উপেক্ষা করুন

@@ -314,7 +314,7 @@ export function ReelMakerView({
 
       const a = document.createElement('a');
       a.href = url;
-      a.download = `captioncraft-reel-${settings.duration}s-${Date.now()}.${supported.ext}`;
+      a.download = `ilhamify-reel-${settings.duration}s-${Date.now()}.${supported.ext}`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -401,7 +401,7 @@ export function ReelMakerView({
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `captioncraft-reel-frame-${Date.now()}.png`;
+      a.download = `ilhamify-reel-frame-${Date.now()}.png`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -537,7 +537,7 @@ export function ReelMakerView({
                     {exportState === 'ready' && exportedVideoUrl && (
                       <a
                         href={exportedVideoUrl}
-                        download={`captioncraft-reel-${settings.duration}s.${exportedExt}`}
+                        download={`ilhamify-reel-${settings.duration}s.${exportedExt}`}
                         className="min-h-[46px] px-4 py-2.5 text-sm font-semibold text-teal-800 bg-teal-50 border border-teal-200 rounded-xl hover:bg-teal-100 transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
                       >
                         <Download className="w-4 h-4" />

@@ -1,0 +1,32 @@
+{
+  "id": "/Ilhamify-o.1/",
+  "name": "Ilhamify ইলহামিফাই",
+  "short_name": "Ilhamify",
+  "description": "৬৫০+ ইসলামিক ও মোটিভেশনাল বাংলা ক্যাপশন জেনারেটর, কোট কার্ড মেকার এবং ৯:১৬ রিল ভিডিও মেকার।",
+  "theme_color": "#4E7272",
+  "background_color": "#FAFBFB",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "start_url": "/Ilhamify-o.1/",
+  "scope": "/Ilhamify-o.1/",
+  "icons": [
+    {
+      "src": "pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "pwa-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
