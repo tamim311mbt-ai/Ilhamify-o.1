@@ -6,6 +6,7 @@ import { CardStudioView } from './components/CardStudioView';
 import { Header } from './components/Header';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { ReelMakerView } from './components/ReelMakerView';
+import { SiteFooter } from './components/SiteFooter';
 import { WelcomeModal } from './components/WelcomeModal';
 import { CAPTIONS_LIBRARY } from './data/captions';
 import { useBrandKit } from './hooks/useBrandKit';
@@ -18,22 +19,75 @@ const VIEW_TRANSITION = {
 
 const DOWNLOAD_COUNT_KEY = 'ilhamify_download_count_v1';
 
-function isStandaloneMode(): boolean {
+function isRunningInInstalledAppOrWebView(): boolean {
   if (typeof window === 'undefined') return false;
-  return (
+
+  // PWA / Standalone / TWA ডিসপ্লে মোড যাচাই
+  const isStandaloneDisplay =
     window.matchMedia('(display-mode: standalone)').matches ||
-    (window.navigator as unknown as { standalone?: boolean }).standalone === true
-  );
+    window.matchMedia('(display-mode: fullscreen)').matches ||
+    window.matchMedia('(display-mode: minimal-ui)').matches ||
+    (window.navigator as unknown as { standalone?: boolean }).standalone === true;
+
+  if (isStandaloneDisplay) return true;
+
+  // Android TWA / অ্যাপ রেফারার যাচাই
+  if (typeof document !== 'undefined' && document.referrer.startsWith('android-app://')) {
+    return true;
+  }
+
+  // Android WebView ও APK র‍্যাপার User-Agent যাচাই
+  const ua = window.navigator.userAgent || '';
+  const isWebViewUA =
+    /; wv\)/i.test(ua) ||
+    /\bwv\b/i.test(ua) ||
+    /WebIntoApp/i.test(ua) ||
+    /WebViewGold|Appilix|AppsGeyser|AppMySite|Median|GoNative|Capacitor|Cordova|Crosswalk/i.test(
+      ua
+    ) ||
+    (/Android/i.test(ua) && /Version\/[\d.]+.*Chrome\//i.test(ua));
+
+  if (isWebViewUA) return true;
+
+  // নেটিভ WebView ব্রিজ গ্লোবাল যাচাই
+  const win = window as unknown as Record<string, unknown>;
+  if (
+    Boolean(win.ReactNativeWebView) ||
+    Boolean(win.Capacitor) ||
+    Boolean(win.cordova) ||
+    Boolean(win.AndroidInterface) ||
+    Boolean(win.WebIntoApp)
+  ) {
+    return true;
+  }
+
+  // ঐচ্ছিক URL প্যারামিটার (যেমন ?app=1 বা ?webview=1)
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if (
+      params.get('app') === '1' ||
+      params.get('apk') === '1' ||
+      params.get('webview') === '1' ||
+      params.get('standalone') === '1'
+    ) {
+      return true;
+    }
+  } catch {
+    // URL পার্সিং ত্রুটি উপেক্ষা করুন
+  }
+
+  return false;
 }
 
 export default function App() {
+  const isInApp = isRunningInInstalledAppOrWebView();
   const [activeTab, setActiveTab] = useState<StudioTab>('captions');
   const [activeCaption, setActiveCaption] = useState<string>(CAPTIONS_LIBRARY[0].text);
   const [activeAttribution, setActiveAttribution] = useState<string>(
     CAPTIONS_LIBRARY[0].attribution
   );
   const [brandDrawerOpen, setBrandDrawerOpen] = useState<boolean>(false);
-  const [welcomeOpen, setWelcomeOpen] = useState<boolean>(() => !isStandaloneMode());
+  const [welcomeOpen, setWelcomeOpen] = useState<boolean>(() => !isInApp);
   const [welcomeContext, setWelcomeContext] = useState<'startup' | 'download'>('startup');
   const downloadCountRef = useRef<number>((() => {
     try {
@@ -46,7 +100,7 @@ export default function App() {
   })());
 
   const handleDownloadComplete = () => {
-    if (isStandaloneMode() || welcomeOpen) return;
+    if (isInApp || isRunningInInstalledAppOrWebView() || welcomeOpen) return;
     const nextCount = downloadCountRef.current + 1;
     downloadCountRef.current = nextCount;
     try {
@@ -91,7 +145,7 @@ export default function App() {
           brandKit={brandKit}
         />
 
-        <main className="flex-1 pb-24 md:pb-12">
+        <main className="flex-1 pb-4 md:pb-8">
           <AnimatePresence mode="wait" initial={false}>
             {activeTab === 'captions' && (
               <motion.div
@@ -160,27 +214,17 @@ export default function App() {
           </AnimatePresence>
         </main>
 
-        <footer className="hidden md:block border-t border-slate-200 bg-white py-5">
-          <div className="max-w-7xl mx-auto px-6 flex items-center justify-between text-xs text-slate-500">
-            <div className="flex items-center gap-2.5">
-              <img
-                src={`${import.meta.env.BASE_URL}logo.png`}
-                alt="Ilhamify ইলহামিফাই"
-                className="h-6 w-auto object-contain"
-              />
-              <span className="font-medium text-slate-700">Ilhamify ইলহামিফাই</span>
-            </div>
-            <span>৬৫০টি বাংলা ক্যাপশন · কোট কার্ড · ৯:১৬ রিল ভিডিও</span>
-          </div>
-        </footer>
+        <SiteFooter />
 
         <OfflineIndicator />
 
-        <WelcomeModal
-          open={welcomeOpen}
-          triggerContext={welcomeContext}
-          onClose={() => setWelcomeOpen(false)}
-        />
+        {!isInApp && (
+          <WelcomeModal
+            open={welcomeOpen}
+            triggerContext={welcomeContext}
+            onClose={() => setWelcomeOpen(false)}
+          />
+        )}
 
         <BrandKitDrawer
           open={brandDrawerOpen}
