@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { BrandKitState } from '../types/studio';
 
-const STORAGE_KEY = 'captioncraft_brand_kit_v1';
+const STORAGE_KEY = 'captioncraft_brand_kit_bn_v1';
 
 const DEFAULT_BRAND_KIT: BrandKitState = {
-  handleText: '@captioncraft',
+  handleText: '@ক্যাপশনক্রাফট',
   showHandle: true,
   handlePosition: 'bottom-center',
   handleOpacity: 0.85,
@@ -23,7 +23,7 @@ export function useBrandKit() {
         return { ...DEFAULT_BRAND_KIT, ...JSON.parse(saved) };
       }
     } catch {
-      // Ignore storage errors in restricted environments
+      // স্টোরেজ ত্রুটি উপেক্ষা করুন
     }
     return DEFAULT_BRAND_KIT;
   });
@@ -32,7 +32,7 @@ export function useBrandKit() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(brandKit));
     } catch {
-      // Ignore storage quota errors
+      // স্টোরেজ কোটা ত্রুটি উপেক্ষা করুন
     }
   }, [brandKit]);
 

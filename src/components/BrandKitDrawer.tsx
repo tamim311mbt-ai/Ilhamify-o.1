@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Trash2, Upload, X } from 'lucide-react';
 import { BrandKitState, WatermarkPosition } from '../types/studio';
+import { toBanglaNumber } from '../utils/banglaDigits';
 
 interface BrandKitDrawerProps {
   open: boolean;
@@ -11,12 +12,12 @@ interface BrandKitDrawerProps {
 }
 
 const POSITION_OPTIONS: { id: WatermarkPosition; label: string }[] = [
-  { id: 'top-left', label: 'Top Left' },
-  { id: 'top-center', label: 'Top Center' },
-  { id: 'top-right', label: 'Top Right' },
-  { id: 'bottom-left', label: 'Bottom Left' },
-  { id: 'bottom-center', label: 'Bottom Center' },
-  { id: 'bottom-right', label: 'Bottom Right' },
+  { id: 'top-left', label: 'উপরে বামে' },
+  { id: 'top-center', label: 'উপরে মাঝে' },
+  { id: 'top-right', label: 'উপরে ডানে' },
+  { id: 'bottom-left', label: 'নিচে বামে' },
+  { id: 'bottom-center', label: 'নিচে মাঝে' },
+  { id: 'bottom-right', label: 'নিচে ডানে' },
 ];
 
 export function BrandKitDrawer({
@@ -37,12 +38,12 @@ export function BrandKitDrawer({
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      setUploadError('Please select a valid PNG, WebP, or SVG image file.');
+      setUploadError('অনুগ্রহ করে সঠিক পিএনজি, ওয়েবপি বা এসভিজি ছবি নির্বাচন করুন।');
       return;
     }
 
     if (file.size > 4 * 1024 * 1024) {
-      setUploadError('Logo file is too large. Please choose an image under 4 MB.');
+      setUploadError('লোগো ফাইলটি অনেক বড়। ৪ মেগাবাইটের কম আকারের ছবি দিন।');
       return;
     }
 
@@ -53,7 +54,7 @@ export function BrandKitDrawer({
       }
     };
     reader.onerror = () => {
-      setUploadError('Could not read the selected image file.');
+      setUploadError('নির্বাচিত ছবিটি পড়া সম্ভব হয়নি।');
     };
     reader.readAsDataURL(file);
     e.target.value = '';
@@ -70,44 +71,45 @@ export function BrandKitDrawer({
       }}
     >
       <div className="w-full md:w-[440px] max-h-[90vh] md:h-full md:max-h-none bg-white rounded-t-3xl md:rounded-none border-t md:border-l border-slate-200 flex flex-col overflow-hidden">
-        {/* Mobile grab handle */}
+        {/* মোবাইল ড্র্যাগ হ্যান্ডেল */}
         <div className="md:hidden pt-3 pb-1 flex justify-center">
           <div className="w-10 h-1.5 bg-slate-200 rounded-full" />
         </div>
 
-        {/* Drawer Header */}
+        {/* ড্রয়ার হেডার */}
         <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between gap-4">
           <div>
             <h2 id="brand-kit-title" className="text-lg font-semibold text-slate-900">
-              Name & PNG Logo Watermark
+              কাস্টম নাম ও লোগো ওয়াটারমার্ক
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              Synced automatically across Card Studio and Reel Maker
+              কার্ড মেকার ও রিল মেকারে স্বয়ংক্রিয়ভাবে যুক্ত হবে
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close watermark settings"
+            aria-label="সেটিংস বন্ধ করুন"
             className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Scrollable Content */}
+        {/* স্ক্রলযোগ্য কন্টেন্ট */}
         <div className="flex-1 overflow-y-auto p-6 space-y-8">
-          {/* Custom Name / Handle Section */}
+          {/* কাস্টম নাম / হ্যান্ডেল */}
           <section className="space-y-4">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <h3 className="text-sm font-semibold text-slate-900">Custom Name or Handle</h3>
-                <p className="text-xs text-slate-500">Shown cleanly on cards and reels</p>
+                <h3 className="text-sm font-semibold text-slate-900">কাস্টম নাম বা হ্যান্ডেল</h3>
+                <p className="text-xs text-slate-500">কার্ড ও রিলে পরিচ্ছন্নভাবে দেখাবে</p>
               </div>
               <button
                 type="button"
                 role="switch"
                 aria-checked={brandKit.showHandle}
+                aria-label="কাস্টম নাম চালু বা বন্ধ করুন"
                 onClick={() => onUpdate({ showHandle: !brandKit.showHandle })}
                 className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors ${
                   brandKit.showHandle ? 'bg-teal-700' : 'bg-slate-300'
@@ -126,14 +128,14 @@ export function BrandKitDrawer({
                 htmlFor="brand-handle-input"
                 className="block text-xs font-medium text-slate-700 mb-1.5"
               >
-                Display Text
+                প্রদর্শনের নাম
               </label>
               <input
                 id="brand-handle-input"
                 type="text"
                 value={brandKit.handleText}
                 onChange={(e) => onUpdate({ handleText: e.target.value })}
-                placeholder="@yourname or Your Brand"
+                placeholder="@আপনার_নাম অথবা পেজের নাম"
                 maxLength={48}
                 className="w-full h-11 px-3.5 text-sm text-slate-900 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-teal-700 focus:ring-2 focus:ring-teal-700/15"
               />
@@ -141,7 +143,7 @@ export function BrandKitDrawer({
 
             <div>
               <label className="block text-xs font-medium text-slate-700 mb-1.5">
-                Position
+                অবস্থান
               </label>
               <div className="grid grid-cols-3 gap-2">
                 {POSITION_OPTIONS.map((pos) => (
@@ -163,9 +165,9 @@ export function BrandKitDrawer({
 
             <div>
               <div className="flex items-center justify-between text-xs mb-1.5">
-                <span className="font-medium text-slate-700">Text Opacity</span>
-                <span className="font-mono-tabular text-slate-500">
-                  {Math.round(brandKit.handleOpacity * 100)}%
+                <span className="font-medium text-slate-700">লেখার স্বচ্ছতা</span>
+                <span className="tabular-nums text-slate-500">
+                  {toBanglaNumber(Math.round(brandKit.handleOpacity * 100))}%
                 </span>
               </div>
               <input
@@ -182,17 +184,18 @@ export function BrandKitDrawer({
 
           <hr className="border-slate-200" />
 
-          {/* PNG Logo Watermark Section */}
+          {/* পিএনজি লোগো ওয়াটারমার্ক */}
           <section className="space-y-4">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <h3 className="text-sm font-semibold text-slate-900">PNG Logo Watermark</h3>
-                <p className="text-xs text-slate-500">Supports transparent PNG backgrounds</p>
+                <h3 className="text-sm font-semibold text-slate-900">পিএনজি লোগো ওয়াটারমার্ক</h3>
+                <p className="text-xs text-slate-500">স্বচ্ছ ব্যাকগ্রাউন্ডযুক্ত পিএনজি সমর্থিত</p>
               </div>
               <button
                 type="button"
                 role="switch"
                 aria-checked={brandKit.showLogo}
+                aria-label="লোগো চালু বা বন্ধ করুন"
                 onClick={() => onUpdate({ showLogo: !brandKit.showLogo })}
                 className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors ${
                   brandKit.showLogo ? 'bg-teal-700' : 'bg-slate-300'
@@ -229,13 +232,13 @@ export function BrandKitDrawer({
                   >
                     <img
                       src={brandKit.logoDataUrl}
-                      alt="Uploaded brand logo preview"
+                      alt="আপলোড করা লোগোর প্রিভিউ"
                       className="max-w-full max-h-full object-contain"
                     />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-slate-900 truncate">Logo ready</p>
-                    <p className="text-xs text-slate-500">Transparent PNG supported</p>
+                    <p className="text-sm font-medium text-slate-900 truncate">লোগো প্রস্তুত</p>
+                    <p className="text-xs text-slate-500">স্বচ্ছ পিএনজি সমর্থিত</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
@@ -244,12 +247,12 @@ export function BrandKitDrawer({
                     onClick={() => fileInputRef.current?.click()}
                     className="px-3 py-2 min-h-[40px] text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
                   >
-                    Replace
+                    পরিবর্তন
                   </button>
                   <button
                     type="button"
                     onClick={() => onUpdate({ logoDataUrl: null })}
-                    aria-label="Remove logo"
+                    aria-label="লোগো মুছুন"
                     className="min-w-[40px] min-h-[40px] flex items-center justify-center text-rose-600 bg-white border border-slate-200 rounded-lg hover:bg-rose-50 transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -263,9 +266,9 @@ export function BrandKitDrawer({
                 className="w-full py-6 px-4 border border-dashed border-slate-300 rounded-xl bg-slate-50/70 hover:bg-slate-100/70 hover:border-teal-600 transition-colors flex flex-col items-center justify-center gap-2 text-center"
               >
                 <Upload className="w-5 h-5 text-teal-700" />
-                <span className="text-sm font-medium text-slate-900">Upload PNG Logo</span>
+                <span className="text-sm font-medium text-slate-900">পিএনজি লোগো আপলোড করুন</span>
                 <span className="text-xs text-slate-500">
-                  Transparent PNG recommended · Max 4 MB
+                  স্বচ্ছ ব্যাকগ্রাউন্ডযুক্ত পিএনজি ভালো দেখায় · সর্বোচ্চ ৪ মেগাবাইট
                 </span>
               </button>
             )}
@@ -276,7 +279,7 @@ export function BrandKitDrawer({
 
             <div>
               <label className="block text-xs font-medium text-slate-700 mb-1.5">
-                Logo Position
+                লোগোর অবস্থান
               </label>
               <div className="grid grid-cols-3 gap-2">
                 {POSITION_OPTIONS.map((pos) => (
@@ -299,8 +302,10 @@ export function BrandKitDrawer({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <div className="flex items-center justify-between text-xs mb-1.5">
-                  <span className="font-medium text-slate-700">Logo Size</span>
-                  <span className="font-mono-tabular text-slate-500">{brandKit.logoSize}px</span>
+                  <span className="font-medium text-slate-700">লোগোর আকার</span>
+                  <span className="tabular-nums text-slate-500">
+                    {toBanglaNumber(brandKit.logoSize)} পিক্সেল
+                  </span>
                 </div>
                 <input
                   type="range"
@@ -315,9 +320,9 @@ export function BrandKitDrawer({
 
               <div>
                 <div className="flex items-center justify-between text-xs mb-1.5">
-                  <span className="font-medium text-slate-700">Opacity</span>
-                  <span className="font-mono-tabular text-slate-500">
-                    {Math.round(brandKit.logoOpacity * 100)}%
+                  <span className="font-medium text-slate-700">স্বচ্ছতা</span>
+                  <span className="tabular-nums text-slate-500">
+                    {toBanglaNumber(Math.round(brandKit.logoOpacity * 100))}%
                   </span>
                 </div>
                 <input
@@ -334,21 +339,21 @@ export function BrandKitDrawer({
           </section>
         </div>
 
-        {/* Footer Actions */}
+        {/* ফুটার অ্যাকশন */}
         <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between gap-3">
           <button
             type="button"
             onClick={onReset}
             className="px-3.5 py-2 min-h-[44px] text-xs font-medium text-slate-600 hover:text-slate-900 transition-colors"
           >
-            Reset Defaults
+            পূর্বের অবস্থায় ফিরুন
           </button>
           <button
             type="button"
             onClick={onClose}
             className="px-5 py-2.5 min-h-[44px] text-sm font-medium text-white bg-teal-700 rounded-lg hover:bg-teal-800 transition-colors"
           >
-            Done
+            সম্পন্ন
           </button>
         </div>
       </div>

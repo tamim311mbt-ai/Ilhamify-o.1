@@ -31,7 +31,7 @@ export interface RenderReelFrameInput {
   settings: ReelSettings;
   brandKit: BrandKitState;
   logoImage: HTMLImageElement | null;
-  progress: number; // 0 to 1
+  progress: number;
 }
 
 function drawBackground(
@@ -62,7 +62,6 @@ function drawBackground(
     ctx.fillRect(0, 0, width, height);
   }
 
-  // Subtle radial vignette for depth
   const vignette = ctx.createRadialGradient(
     width * 0.5,
     height * 0.45,
@@ -75,6 +74,20 @@ function drawBackground(
   vignette.addColorStop(1, theme.isDark ? 'rgba(0, 0, 0, 0.28)' : 'rgba(15, 23, 42, 0.04)');
   ctx.fillStyle = vignette;
   ctx.fillRect(0, 0, width, height);
+}
+
+// বাংলা যুক্তবর্ণ ও মাত্রা ঠিক রাখতে Grapheme-সচেতন লাইন র‍্যাপিং
+function splitGraphemes(text: string): string[] {
+  if (typeof Intl !== 'undefined' && 'Segmenter' in Intl) {
+    const SegmenterCtor = (Intl as unknown as {
+      Segmenter: new (locale: string, opts: { granularity: string }) => {
+        segment: (s: string) => Iterable<{ segment: string }>;
+      };
+    }).Segmenter;
+    const segmenter = new SegmenterCtor('bn', { granularity: 'grapheme' });
+    return Array.from(segmenter.segment(text), (s) => s.segment);
+  }
+  return Array.from(text);
 }
 
 function wrapLines(
@@ -103,14 +116,13 @@ function wrapLines(
           lines.push(current);
           current = word;
         } else {
-          // Word longer than maxWidth: break cleanly by character
           let chunk = '';
-          for (const ch of Array.from(word)) {
-            if (ctx.measureText(chunk + ch).width <= maxWidth) {
-              chunk += ch;
+          for (const g of splitGraphemes(word)) {
+            if (ctx.measureText(chunk + g).width <= maxWidth) {
+              chunk += g;
             } else {
               if (chunk) lines.push(chunk);
-              chunk = ch;
+              chunk = g;
             }
           }
           current = chunk;
@@ -139,7 +151,6 @@ function drawWatermarks(
   const marginY = 68 * scale;
   const activeColor = textColorOverride || theme.textColor;
 
-  // Compute logo rectangle if rendered
   let logoRect: { x: number; y: number; w: number; h: number; pos: WatermarkPosition } | null =
     null;
 
@@ -175,12 +186,11 @@ function drawWatermarks(
     logoRect = { x, y, w: drawW, h: drawH, pos: brandKit.logoPosition };
   }
 
-  // Draw custom name/handle
   const cleanHandle = brandKit.handleText.trim();
   if (brandKit.showHandle && cleanHandle) {
     ctx.save();
     const handleFontSize = Math.round(28 * scale);
-    ctx.font = `500 ${handleFontSize}px "Plus Jakarta Sans", "Hind Siliguri", sans-serif`;
+    ctx.font = `500 ${handleFontSize}px "Hind Siliguri", "Noto Sans Bengali", sans-serif`;
     ctx.fillStyle = activeColor;
     ctx.globalAlpha = Math.max(0.15, Math.min(1, brandKit.handleOpacity));
 
@@ -205,7 +215,6 @@ function drawWatermarks(
       y = marginY;
     }
 
-    // Prevent overlap if logo and handle share the exact same slot
     if (logoRect && logoRect.pos === brandKit.handlePosition) {
       const gap = 16 * scale;
       if (brandKit.handlePosition.startsWith('bottom')) {
@@ -242,9 +251,8 @@ export function renderQuoteCard({
   const primaryTextColor = settings.customTextColor || theme.textColor;
 
   const displayCaption =
-    caption.trim() || 'Write or select a caption to preview your quote card.';
+    caption.trim() || 'আপনার কোট কার্ড দেখতে এখানে একটি বাংলা ক্যাপশন লিখুন বা নির্বাচন করুন।';
 
-  // Fit font size dynamically if caption is long
   let fontSize = settings.fontSize * scale;
   let lines: string[] = [];
   let lineHeight = fontSize * typography.lineHeightRatio;
@@ -264,16 +272,19 @@ export function renderQuoteCard({
   const hasAttribution = attribution.trim().length > 0;
   const attrFontSize = Math.max(22 * scale, fontSize * 0.54);
   const dividerGap = settings.showDivider ? 36 * scale : 0;
-  const attrHeight = hasAttribution ? attrFontSize * 1.6 + dividerGap : settings.showDivider ? 32 * scale : 0;
+  const attrHeight = hasAttribution
+    ? attrFontSize * 1.6 + dividerGap
+    : settings.showDivider
+      ? 32 * scale
+      : 0;
 
   const totalVerticalSpan = blockHeight + attrHeight;
-  let startY = (height - totalVerticalSpan) / 2;
+  const startY = (height - totalVerticalSpan) / 2;
 
-  // Subtle decorative quote mark above text
   if (settings.showQuoteMark) {
     ctx.save();
     const qSize = Math.round(92 * scale);
-    ctx.font = `600 ${qSize}px "Cormorant Garamond", Georgia, serif`;
+    ctx.font = `600 ${qSize}px "Noto Serif Bengali", Georgia, serif`;
     ctx.fillStyle = theme.accentColor;
     ctx.globalAlpha = 0.42;
     ctx.textBaseline = 'alphabetic';
@@ -287,7 +298,6 @@ export function renderQuoteCard({
     ctx.restore();
   }
 
-  // Render caption lines
   ctx.save();
   ctx.font = `${typography.fontWeight} ${fontSize}px ${typography.fontFamily}`;
   ctx.fillStyle = primaryTextColor;
@@ -302,7 +312,6 @@ export function renderQuoteCard({
 
   let cursorY = startY + blockHeight;
 
-  // Optional subtle hairline accent divider
   if (settings.showDivider) {
     cursorY += 28 * scale;
     const lineW = 84 * scale;
@@ -317,10 +326,9 @@ export function renderQuoteCard({
     cursorY += 26 * scale;
   }
 
-  // Attribution / subtitle
   if (hasAttribution) {
     ctx.save();
-    ctx.font = `500 ${attrFontSize}px "Plus Jakarta Sans", "Hind Siliguri", sans-serif`;
+    ctx.font = `500 ${attrFontSize}px "Hind Siliguri", "Noto Sans Bengali", sans-serif`;
     ctx.fillStyle = settings.customTextColor ? primaryTextColor : theme.mutedColor;
     ctx.globalAlpha = 0.9;
     ctx.textBaseline = 'top';
@@ -329,7 +337,6 @@ export function renderQuoteCard({
     ctx.restore();
   }
 
-  // Render custom name/handle and PNG logo watermark
   drawWatermarks(
     ctx,
     width,
@@ -341,7 +348,6 @@ export function renderQuoteCard({
   );
 }
 
-// Deterministic particle seed for consistent smooth reel loops
 const PARTICLE_SEEDS = Array.from({ length: 18 }, (_, i) => ({
   x: ((i * 73 + 19) % 100) / 100,
   y: ((i * 41 + 37) % 100) / 100,
@@ -371,7 +377,6 @@ export function renderReelFrame({
   const wave = Math.sin(clampedP * Math.PI * 2);
   const cosWave = Math.cos(clampedP * Math.PI * 2);
 
-  // Motion Layer 1: Atmospheric animated glow based on motionStyle
   ctx.save();
   if (settings.motionStyle === 'drift') {
     const gx = width * (0.5 + 0.24 * wave);
@@ -405,7 +410,6 @@ export function renderReelFrame({
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, width, height);
   } else {
-    // kinetic subtle top & bottom ambient glow
     const grad = ctx.createRadialGradient(
       width * 0.5,
       height * 0.38,
@@ -421,7 +425,6 @@ export function renderReelFrame({
   }
   ctx.restore();
 
-  // Motion Layer 2: Soft floating particles
   if (settings.showParticles) {
     ctx.save();
     ctx.fillStyle = theme.accentColor;
@@ -436,12 +439,11 @@ export function renderReelFrame({
     ctx.restore();
   }
 
-  // Caption layout & animation
   const paddingX = 110 * scale;
   const maxTextWidth = width - paddingX * 2;
   const maxContentHeight = height * 0.54;
   const displayCaption =
-    caption.trim() || 'Write or select a caption to preview your vertical reel.';
+    caption.trim() || 'আপনার রিল প্রিভিউ দেখতে এখানে একটি বাংলা ক্যাপশন লিখুন বা নির্বাচন করুন।';
 
   let fontSize = settings.fontSize * scale;
   let lines: string[] = [];
@@ -460,9 +462,9 @@ export function renderReelFrame({
   const blockHeight = lines.length * lineHeight;
   const hasAttribution = attribution.trim().length > 0;
   const attrFontSize = Math.max(24 * scale, fontSize * 0.52);
-  const totalVerticalSpan = blockHeight + (hasAttribution ? attrFontSize * 2.2 + 34 * scale : 24 * scale);
+  const totalVerticalSpan =
+    blockHeight + (hasAttribution ? attrFontSize * 2.2 + 34 * scale : 24 * scale);
 
-  // Subtle camera breath scale for 'breathing' style
   const textScale =
     settings.motionStyle === 'breathing'
       ? 1 + 0.018 * Math.sin(clampedP * Math.PI)
@@ -493,7 +495,6 @@ export function renderReelFrame({
       lineAlpha = eased;
       offsetY = (1 - eased) * 26 * scale;
     } else {
-      // Gentle intro fade over first 8% of reel
       const intro = Math.min(1, clampedP / 0.08);
       lineAlpha = intro;
       offsetY = (1 - intro) * 14 * scale;
@@ -505,7 +506,6 @@ export function renderReelFrame({
     ctx.restore();
   });
 
-  // Subtle divider + attribution
   const attrAlpha =
     settings.motionStyle === 'kinetic'
       ? Math.max(0, Math.min(1, (clampedP - lines.length * 0.05) / 0.2))
@@ -522,7 +522,7 @@ export function renderReelFrame({
     ctx.fillRect(divX, divY, divW, Math.max(2, 3 * scale));
 
     ctx.globalAlpha = attrAlpha * 0.9;
-    ctx.font = `500 ${attrFontSize}px "Plus Jakarta Sans", "Hind Siliguri", sans-serif`;
+    ctx.font = `500 ${attrFontSize}px "Hind Siliguri", "Noto Sans Bengali", sans-serif`;
     ctx.fillStyle = theme.mutedColor;
     ctx.textBaseline = 'top';
     ctx.textAlign = settings.textAlign === 'center' ? 'center' : 'left';
@@ -532,7 +532,5 @@ export function renderReelFrame({
 
   ctx.restore();
 
-  // Bottom progress hair-line indicator inside reel? No, keep exported reel clean!
-  // Render Brand Watermarks
   drawWatermarks(ctx, width, height, theme, brandKit, logoImage);
 }

@@ -10,9 +10,9 @@ import { StudioTab } from './types/studio';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<StudioTab>('captions');
-  const [activeCaption, setActiveCaption] = useState<string>(CAPTIONS_LIBRARY[0].en);
+  const [activeCaption, setActiveCaption] = useState<string>(CAPTIONS_LIBRARY[0].text);
   const [activeAttribution, setActiveAttribution] = useState<string>(
-    CAPTIONS_LIBRARY[0].attributionEn ?? ''
+    CAPTIONS_LIBRARY[0].attribution
   );
   const [brandDrawerOpen, setBrandDrawerOpen] = useState<boolean>(false);
 
@@ -87,8 +87,8 @@ export default function App() {
 
       <footer className="hidden md:block border-t border-slate-200 bg-white py-5">
         <div className="max-w-7xl mx-auto px-6 flex items-center justify-between text-xs text-slate-500">
-          <span>CaptionCraft Studio</span>
-          <span>Bilingual Captions · Quote Cards · 9:16 Reels</span>
+          <span>ক্যাপশনক্রাফট স্টুডিও</span>
+          <span>৬৫০টি বাংলা ক্যাপশন · কোট কার্ড · ৯:১৬ রিল ভিডিও</span>
         </div>
       </footer>
 

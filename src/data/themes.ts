@@ -1,50 +1,52 @@
-import { AspectRatioSpec, BackgroundTheme, TypographyPreset } from '../types/studio';
+import {
+  AspectRatioSpec,
+  BackgroundTheme,
+  IslamicSubTopic,
+  MotivationalSubTopic,
+  TypographyPreset,
+} from '../types/studio';
 
 export const ASPECT_RATIOS: AspectRatioSpec[] = [
-  { id: '1:1', label: '1:1 Square', sublabel: '1080 × 1080', width: 1080, height: 1080 },
-  { id: '4:5', label: '4:5 Portrait', sublabel: '1080 × 1350', width: 1080, height: 1350 },
-  { id: '9:16', label: '9:16 Story', sublabel: '1080 × 1920', width: 1080, height: 1920 },
+  { id: '1:1', label: '১:১ স্কয়ার', sublabel: '১০৮০ × ১০৮০', width: 1080, height: 1080 },
+  { id: '4:5', label: '৪:৫ পোর্ট্রেট', sublabel: '১০৮০ × ১৩৫০', width: 1080, height: 1350 },
+  { id: '9:16', label: '৯:১৬ স্টোরি', sublabel: '১০৮০ × ১৯২০', width: 1080, height: 1920 },
 ];
 
 export const TYPOGRAPHY_PRESETS: TypographyPreset[] = [
   {
-    id: 'editorial',
-    name: 'Editorial Serif',
-    fontFamily: '"Cormorant Garamond", "Noto Serif Bengali", Georgia, serif',
+    id: 'serif',
+    name: 'সাহিত্যিক সেরিফ',
+    fontFamily: '"Noto Serif Bengali", "Tiro Bangla", serif',
     fontWeight: 600,
-    letterSpacing: -0.01,
-    lineHeightRatio: 1.32,
+    lineHeightRatio: 1.48,
   },
   {
-    id: 'modern',
-    name: 'Modern Sans',
-    fontFamily: '"Plus Jakarta Sans", "Hind Siliguri", sans-serif',
+    id: 'hind',
+    name: 'আধুনিক হিন্ড স্যান্স',
+    fontFamily: '"Hind Siliguri", "Noto Sans Bengali", sans-serif',
     fontWeight: 600,
-    letterSpacing: -0.02,
-    lineHeightRatio: 1.38,
-  },
-  {
-    id: 'bold',
-    name: 'Display Bold',
-    fontFamily: '"Outfit", "Hind Siliguri", sans-serif',
-    fontWeight: 700,
-    letterSpacing: -0.025,
-    lineHeightRatio: 1.28,
-  },
-  {
-    id: 'minimal',
-    name: 'Clean Light',
-    fontFamily: '"DM Sans", "Hind Siliguri", sans-serif',
-    fontWeight: 400,
-    letterSpacing: 0,
     lineHeightRatio: 1.45,
+  },
+  {
+    id: 'baloo',
+    name: 'বোল্ড ডিসপ্লে',
+    fontFamily: '"Baloo Da 2", "Hind Siliguri", sans-serif',
+    fontWeight: 600,
+    lineHeightRatio: 1.42,
+  },
+  {
+    id: 'anek',
+    name: 'মসৃণ মিনিমাল',
+    fontFamily: '"Anek Bangla", "Noto Sans Bengali", sans-serif',
+    fontWeight: 500,
+    lineHeightRatio: 1.48,
   },
 ];
 
 export const BACKGROUND_THEMES: BackgroundTheme[] = [
   {
     id: 'emerald-night',
-    name: 'Midnight Emerald',
+    name: 'গভীর পান্না রাত',
     kind: 'gradient',
     colors: ['#042f2e', '#0f3d3e', '#021717'],
     angle: 145,
@@ -56,7 +58,7 @@ export const BACKGROUND_THEMES: BackgroundTheme[] = [
   },
   {
     id: 'ivory-parchment',
-    name: 'Warm Ivory',
+    name: 'স্নিগ্ধ আইভরি',
     kind: 'solid',
     colors: ['#f8f6f1'],
     textColor: '#1c1917',
@@ -67,7 +69,7 @@ export const BACKGROUND_THEMES: BackgroundTheme[] = [
   },
   {
     id: 'obsidian-gold',
-    name: 'Obsidian Gold',
+    name: 'কালো ও সোনালি',
     kind: 'gradient',
     colors: ['#09090b', '#18181b', '#272014'],
     angle: 160,
@@ -79,7 +81,7 @@ export const BACKGROUND_THEMES: BackgroundTheme[] = [
   },
   {
     id: 'slate-mist',
-    name: 'Nordic Slate',
+    name: 'নীলচে স্লেট',
     kind: 'gradient',
     colors: ['#0f172a', '#1e293b', '#0f172a'],
     angle: 135,
@@ -91,7 +93,7 @@ export const BACKGROUND_THEMES: BackgroundTheme[] = [
   },
   {
     id: 'crisp-paper',
-    name: 'Studio White',
+    name: 'শুভ্র কাগজ',
     kind: 'solid',
     colors: ['#ffffff'],
     textColor: '#0f172a',
@@ -102,7 +104,7 @@ export const BACKGROUND_THEMES: BackgroundTheme[] = [
   },
   {
     id: 'desert-dusk',
-    name: 'Desert Dusk',
+    name: 'মরু গোধূলি',
     kind: 'gradient',
     colors: ['#2c1810', '#542d1b', '#1f110b'],
     angle: 150,
@@ -114,7 +116,7 @@ export const BACKGROUND_THEMES: BackgroundTheme[] = [
   },
   {
     id: 'sage-linen',
-    name: 'Sage Linen',
+    name: 'সবুজ লিনেন',
     kind: 'gradient',
     colors: ['#ecfdf5', '#d1fae5', '#f0fdf4'],
     angle: 135,
@@ -126,7 +128,7 @@ export const BACKGROUND_THEMES: BackgroundTheme[] = [
   },
   {
     id: 'deep-ocean',
-    name: 'Deep Ocean',
+    name: 'গভীর সমুদ্র',
     kind: 'gradient',
     colors: ['#082f49', '#0c4a6e', '#041a2b'],
     angle: 165,
@@ -138,7 +140,7 @@ export const BACKGROUND_THEMES: BackgroundTheme[] = [
   },
   {
     id: 'soft-rose',
-    name: 'Muted Clay',
+    name: 'কোমল গোলাপি',
     kind: 'gradient',
     colors: ['#fdf2f2', '#fce7f3', '#fff1f2'],
     angle: 140,
@@ -150,7 +152,7 @@ export const BACKGROUND_THEMES: BackgroundTheme[] = [
   },
   {
     id: 'charcoal-mono',
-    name: 'Charcoal Ink',
+    name: 'চারকোল কালো',
     kind: 'solid',
     colors: ['#141416'],
     textColor: '#f4f4f5',
@@ -161,15 +163,39 @@ export const BACKGROUND_THEMES: BackgroundTheme[] = [
   },
 ];
 
-export const MOOD_LABELS: Record<
-  'all' | 'patience' | 'gratitude' | 'faith' | 'discipline' | 'success' | 'resilience',
-  { en: string; bn: string }
+export const ISLAMIC_SUBTOPICS: { id: IslamicSubTopic; label: string }[] = [
+  { id: 'sabr', label: 'সবর ও ধৈর্য' },
+  { id: 'shukr', label: 'শোকর ও কৃতজ্ঞতা' },
+  { id: 'tawakkul', label: 'আল্লাহর ওপর ভরসা' },
+  { id: 'tawbah', label: 'ক্ষমা ও তওবা' },
+  { id: 'quran_salah', label: 'কুরআন ও নামাজ' },
+  { id: 'life_akhirah', label: 'জীবন ও আখিরাত' },
+];
+
+export const MOTIVATIONAL_SUBTOPICS: { id: MotivationalSubTopic; label: string }[] = [
+  { id: 'confidence', label: 'আত্মবিশ্বাস' },
+  { id: 'hardwork', label: 'পরিশ্রম ও ধৈর্য' },
+  { id: 'resilience', label: 'ব্যর্থতা থেকে ঘুরে দাঁড়ানো' },
+  { id: 'goals', label: 'লক্ষ্য ও স্বপ্ন' },
+  { id: 'discipline', label: 'সময় ও শৃঙ্খলা' },
+  { id: 'positivity', label: 'ইতিবাচক মানসিকতা' },
+];
+
+export const ALL_SUBTOPIC_LABELS: Record<
+  'all' | IslamicSubTopic | MotivationalSubTopic,
+  string
 > = {
-  all: { en: 'All Moods', bn: 'সবগুলো' },
-  patience: { en: 'Patience', bn: 'সবর ও ধৈর্য' },
-  gratitude: { en: 'Gratitude', bn: 'শুকরিয়া' },
-  faith: { en: 'Faith', bn: 'ঈমান ও তাওয়াক্কুল' },
-  discipline: { en: 'Discipline', bn: 'শৃঙ্খলা' },
-  success: { en: 'Success', bn: 'সাফল্য' },
-  resilience: { en: 'Resilience', bn: 'দৃঢ়তা' },
+  all: 'সবগুলো বিষয়',
+  sabr: 'সবর ও ধৈর্য',
+  shukr: 'শোকর ও কৃতজ্ঞতা',
+  tawakkul: 'আল্লাহর ওপর ভরসা',
+  tawbah: 'ক্ষমা ও তওবা',
+  quran_salah: 'কুরআন ও নামাজ',
+  life_akhirah: 'জীবন ও আখিরাত',
+  confidence: 'আত্মবিশ্বাস',
+  hardwork: 'পরিশ্রম ও ধৈর্য',
+  resilience: 'ব্যর্থতা থেকে ঘুরে দাঁড়ানো',
+  goals: 'লক্ষ্য ও স্বপ্ন',
+  discipline: 'সময় ও শৃঙ্খলা',
+  positivity: 'ইতিবাচক মানসিকতা',
 };

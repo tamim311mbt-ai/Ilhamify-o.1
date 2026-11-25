@@ -22,6 +22,7 @@ import {
   ReelMotionStyle,
   ReelSettings,
 } from '../types/studio';
+import { formatBanglaSeconds, toBanglaNumber } from '../utils/banglaDigits';
 import { renderReelFrame } from '../utils/canvasRenderer';
 
 interface ReelMakerViewProps {
@@ -35,10 +36,10 @@ interface ReelMakerViewProps {
 }
 
 const MOTION_STYLES: { id: ReelMotionStyle; label: string; desc: string }[] = [
-  { id: 'drift', label: 'Gentle Drift', desc: 'Slow ambient glow movement' },
-  { id: 'breathing', label: 'Breathing Zoom', desc: 'Subtle rhythmic pulse' },
-  { id: 'kinetic', label: 'Kinetic Fade', desc: 'Staggered line reveal' },
-  { id: 'horizon', label: 'Calm Horizon', desc: 'Soft light sweep' },
+  { id: 'drift', label: 'মৃদু প্রবাহ', desc: 'ধীর গতির আলোর প্রবাহ' },
+  { id: 'breathing', label: 'স্পন্দন জুম', desc: 'হালকা ছন্দময় বিস্তার' },
+  { id: 'kinetic', label: 'কাইনেটিক ফেড', desc: 'লাইনের পর লাইন প্রকাশ' },
+  { id: 'horizon', label: 'শান্ত দিগন্ত', desc: 'কোমল আলোর ঝলক' },
 ];
 
 const DURATIONS: ReelDuration[] = [5, 10, 15];
@@ -60,13 +61,6 @@ function pickSupportedVideoMime(): { mimeType: string; ext: 'mp4' | 'webm' } | n
   return null;
 }
 
-function formatSeconds(sec: number): string {
-  const whole = Math.max(0, Math.floor(sec));
-  const m = Math.floor(whole / 60);
-  const s = whole % 60;
-  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-}
-
 export function ReelMakerView({
   caption,
   attribution,
@@ -78,10 +72,10 @@ export function ReelMakerView({
 }: ReelMakerViewProps) {
   const [settings, setSettings] = useState<ReelSettings>({
     themeId: 'emerald-night',
-    typographyId: 'editorial',
+    typographyId: 'serif',
     motionStyle: 'kinetic',
     duration: 10,
-    fontSize: 56,
+    fontSize: 54,
     textAlign: 'center',
     showParticles: true,
     resolution: '720p',
@@ -90,7 +84,6 @@ export function ReelMakerView({
   const [isPlaying, setIsPlaying] = useState<boolean>(true);
   const [progress, setProgress] = useState<number>(0);
 
-  // Export state
   const [exportState, setExportState] = useState<
     'idle' | 'recording' | 'ready' | 'unsupported' | 'error'
   >('idle');
@@ -114,7 +107,6 @@ export function ReelMakerView({
     [settings.typographyId]
   );
 
-  // Clean up object URL on unmount or re-export
   useEffect(() => {
     return () => {
       if (exportedVideoUrl) {
@@ -123,7 +115,6 @@ export function ReelMakerView({
     };
   }, [exportedVideoUrl]);
 
-  // Playback loop for preview canvas
   useEffect(() => {
     let rafId = 0;
     let lastTimestamp = performance.now();
@@ -171,11 +162,9 @@ export function ReelMakerView({
 
     rafId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafId);
-    // Intentionally keeping progress out of dependency array while playing to avoid restarting rAF every frame
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isPlaying, settings, caption, attribution, theme, typography, brandKit, logoImage]);
 
-  // Redraw immediately when paused and user scrubs or changes controls
   useEffect(() => {
     if (isPlaying) return;
     const canvas = previewCanvasRef.current;
@@ -212,7 +201,7 @@ export function ReelMakerView({
     if (!supported || typeof testCanvas.captureStream !== 'function') {
       setExportState('unsupported');
       setExportStatusMessage(
-        'In-browser video recording is not supported in this browser. You can save a high-resolution 9:16 PNG frame instead.'
+        'আপনার বর্তমান ব্রাউজারে সরাসরি ভিডিও রেকর্ডিং সমর্থিত নয়। চাইলে ৯:১৬ ছবি হিসেবে ডাউনলোড করতে পারেন।'
       );
       return;
     }
@@ -226,7 +215,9 @@ export function ReelMakerView({
     setExportState('recording');
     setExportProgress(0);
     setExportExt(supported.ext);
-    setExportStatusMessage(`Rendering ${settings.duration}s vertical reel (${supported.ext.toUpperCase()})...`);
+    setExportStatusMessage(
+      `${toBanglaNumber(settings.duration)} সেকেন্ডের রিল ভিডিও তৈরি হচ্ছে...`
+    );
 
     const width = settings.resolution === '1080p' ? 1080 : 720;
     const height = settings.resolution === '1080p' ? 1920 : 1280;
@@ -237,11 +228,10 @@ export function ReelMakerView({
     const ctx = recordCanvas.getContext('2d');
     if (!ctx) {
       setExportState('error');
-      setExportStatusMessage('Could not initialize video canvas.');
+      setExportStatusMessage('ভিডিও ক্যানভাস চালু করা যায়নি।');
       return;
     }
 
-    // Draw initial frame before starting captureStream
     renderReelFrame({
       ctx,
       width,
@@ -267,7 +257,7 @@ export function ReelMakerView({
       });
     } catch {
       setExportState('error');
-      setExportStatusMessage('Could not start MediaRecorder with this video format.');
+      setExportStatusMessage('এই ফরম্যাটে ভিডিও রেকর্ডিং শুরু করা যায়নি।');
       return;
     }
 
@@ -293,9 +283,10 @@ export function ReelMakerView({
       setExportedVideoUrl(url);
       setExportState('ready');
       setExportProgress(100);
-      setExportStatusMessage(`Ready to save (${supported.ext.toUpperCase()} · ${settings.resolution})`);
+      setExportStatusMessage(
+        `ভিডিও প্রস্তুত (${settings.resolution === '1080p' ? '১০৮০পি ফুল এইচডি' : '৭২০পি এইচডি'})`
+      );
 
-      // Trigger automatic download
       const a = document.createElement('a');
       a.href = url;
       a.download = `captioncraft-reel-${settings.duration}s-${Date.now()}.${supported.ext}`;
@@ -307,7 +298,7 @@ export function ReelMakerView({
     recorder.onerror = () => {
       stream.getTracks().forEach((t) => t.stop());
       setExportState('error');
-      setExportStatusMessage('Video recording encountered an unexpected error.');
+      setExportStatusMessage('ভিডিও রেকর্ডিংয়ের সময় একটি ত্রুটি ঘটেছে।');
     };
 
     recorder.start(250);
@@ -396,23 +387,24 @@ export function ReelMakerView({
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Right/Top Stage: 9:16 Vertical Reel Preview & Export */}
+        {/* ডান/উপর স্টেজ: ৯:১৬ রিল প্রিভিউ ও ভিডিও ডাউনলোড */}
         <div className="lg:col-span-6 lg:order-2 lg:sticky lg:top-6 space-y-4">
           <div className="bg-white border border-slate-200 rounded-2xl p-4 md:p-6 space-y-4">
             <div className="flex items-center justify-between gap-4 pb-3 border-b border-slate-100">
               <div className="text-xs text-slate-500 flex items-center gap-2">
-                <span className="font-semibold text-slate-900">9:16 Reel Preview</span>
+                <span className="font-semibold text-slate-900">৯:১৬ রিল প্রিভিউ</span>
                 <span aria-hidden="true">·</span>
-                <span className="font-mono-tabular">
-                  {settings.duration}s · {settings.resolution}
+                <span className="tabular-nums">
+                  {toBanglaNumber(settings.duration)} সেকেন্ড ·{' '}
+                  {settings.resolution === '1080p' ? '১০৮০পি' : '৭২০পি'}
                 </span>
               </div>
-              <span className="text-xs font-mono-tabular text-slate-500">
-                {formatSeconds(progress * settings.duration)} / {formatSeconds(settings.duration)}
+              <span className="text-xs tabular-nums text-slate-500">
+                {formatBanglaSeconds(progress * settings.duration)} /{' '}
+                {formatBanglaSeconds(settings.duration)}
               </span>
             </div>
 
-            {/* Vertical 9:16 Canvas Frame */}
             <div className="py-4 px-4 bg-slate-100/80 rounded-xl flex justify-center">
               <canvas
                 ref={previewCanvasRef}
@@ -420,12 +412,11 @@ export function ReelMakerView({
               />
             </div>
 
-            {/* Playback Transport Bar */}
             <div className="flex items-center gap-3">
               <button
                 type="button"
                 onClick={() => setIsPlaying((p) => !p)}
-                aria-label={isPlaying ? 'Pause reel preview' : 'Play reel preview'}
+                aria-label={isPlaying ? 'প্রিভিউ থামান' : 'প্রিভিউ চালান'}
                 className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-slate-900 text-white hover:bg-slate-800 transition-colors shrink-0"
               >
                 {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
@@ -434,7 +425,7 @@ export function ReelMakerView({
               <button
                 type="button"
                 onClick={handleRestart}
-                aria-label="Restart reel preview"
+                aria-label="শুরু থেকে চালান"
                 className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors shrink-0"
               >
                 <RotateCcw className="w-4 h-4" />
@@ -442,7 +433,7 @@ export function ReelMakerView({
 
               <input
                 type="range"
-                aria-label="Seek reel timeline"
+                aria-label="রিল টাইমলাইন"
                 min={0}
                 max={0.999}
                 step={0.005}
@@ -455,14 +446,14 @@ export function ReelMakerView({
               />
             </div>
 
-            {/* Export Controls & Status */}
+            {/* ভিডিও ডাউনলোড ও স্ট্যাটাস */}
             <div className="pt-3 border-t border-slate-100 space-y-3">
               {exportState === 'recording' ? (
                 <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-medium text-slate-900">{exportStatusMessage}</span>
-                    <span className="font-mono-tabular font-semibold text-teal-700">
-                      {exportProgress}%
+                    <span className="tabular-nums font-semibold text-teal-700">
+                      {toBanglaNumber(exportProgress)}%
                     </span>
                   </div>
                   <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
@@ -473,7 +464,7 @@ export function ReelMakerView({
                   </div>
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-[11px] text-slate-500">
-                      Keep this tab active while frames encode in real time
+                      ভিডিও তৈরি শেষ না হওয়া পর্যন্ত এই ট্যাবটি খোলা রাখুন
                     </span>
                     <button
                       type="button"
@@ -481,7 +472,7 @@ export function ReelMakerView({
                       className="min-h-[36px] px-3 py-1 text-xs font-medium text-rose-700 bg-white border border-rose-200 rounded-lg hover:bg-rose-50 flex items-center gap-1"
                     >
                       <X className="w-3.5 h-3.5" />
-                      Cancel
+                      বাতিল
                     </button>
                   </div>
                 </div>
@@ -496,9 +487,7 @@ export function ReelMakerView({
                     ) : exportState === 'unsupported' || exportState === 'error' ? (
                       <span className="text-amber-700 font-medium">{exportStatusMessage}</span>
                     ) : (
-                      <span>
-                        Exports directly in your browser using HTML5 Canvas video recording.
-                      </span>
+                      <span>সরাসরি ব্রাউজার থেকেই ৯:১৬ রিল ভিডিও রেন্ডার ও ডাউনলোড হবে।</span>
                     )}
                   </div>
 
@@ -510,7 +499,7 @@ export function ReelMakerView({
                         className="min-h-[46px] px-4 py-2.5 text-sm font-semibold text-teal-800 bg-teal-50 border border-teal-200 rounded-xl hover:bg-teal-100 transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
                       >
                         <Download className="w-4 h-4" />
-                        Save .{exportedExt.toUpperCase()}
+                        ফাইল সেভ করুন
                       </a>
                     )}
 
@@ -521,7 +510,7 @@ export function ReelMakerView({
                         className="min-h-[46px] px-4 py-2.5 text-sm font-semibold text-slate-900 bg-slate-100 border border-slate-200 rounded-xl hover:bg-slate-200 transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
                       >
                         <Download className="w-4 h-4" />
-                        Save 9:16 PNG
+                        ছবি ডাউনলোড করুন
                       </button>
                     )}
 
@@ -531,7 +520,7 @@ export function ReelMakerView({
                       className="min-h-[46px] px-5 py-2.5 text-sm font-semibold text-white bg-teal-700 rounded-xl hover:bg-teal-800 transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
                     >
                       <Film className="w-4 h-4" />
-                      Export Video
+                      ভিডিও ডাউনলোড করুন
                     </button>
                   </div>
                 </div>
@@ -540,39 +529,39 @@ export function ReelMakerView({
           </div>
         </div>
 
-        {/* Left Controls Column */}
+        {/* বাম কন্ট্রোল কলাম */}
         <div className="lg:col-span-6 lg:order-1 space-y-5">
           <div className="space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">Reel Maker</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">রিল মেকার</h1>
             <p className="text-sm text-slate-600">
-              Build vertical 9:16 animated caption reels with subtle motion, custom handle, and PNG logo.
+              হালকা মোশন, বাংলা ক্যাপশন এবং কাস্টম নাম ও লোগো দিয়ে ৯:১৬ শর্ট ভিডিও তৈরি করুন।
             </p>
           </div>
 
-          {/* Caption Content */}
+          {/* রিলের লেখা */}
           <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3.5">
-            <h2 className="text-sm font-semibold text-slate-900">Reel Caption</h2>
+            <h2 className="text-sm font-semibold text-slate-900">রিলের ক্যাপশন</h2>
             <textarea
               rows={3}
               value={caption}
               onChange={(e) => onChangeCaption(e.target.value)}
-              placeholder="Enter caption for your vertical reel..."
+              placeholder="রিল ভিডিওর জন্য বাংলা ক্যাপশন লিখুন..."
               className="w-full p-3 text-sm leading-relaxed text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:border-teal-700 resize-y"
             />
             <input
               type="text"
               value={attribution}
               onChange={(e) => onChangeAttribution(e.target.value)}
-              placeholder="Optional subtitle or source"
+              placeholder="ঐচ্ছিক ছোট শিরোনাম বা সূত্র"
               className="w-full h-10 px-3 text-sm text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:border-teal-700"
             />
           </section>
 
-          {/* Motion Style & Duration */}
+          {/* মোশন ও সময়কাল */}
           <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4">
             <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-slate-500" />
-              Motion & Duration
+              মোশন ও সময়কাল
             </h2>
 
             <div className="grid grid-cols-2 gap-2.5">
@@ -608,7 +597,7 @@ export function ReelMakerView({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
               <div>
                 <span className="block text-xs font-medium text-slate-700 mb-1.5">
-                  Reel Duration
+                  ভিডিওর দৈর্ঘ্য
                 </span>
                 <div className="grid grid-cols-3 gap-1.5">
                   {DURATIONS.map((dur) => (
@@ -619,13 +608,13 @@ export function ReelMakerView({
                         setSettings((s) => ({ ...s, duration: dur }));
                         setProgress(0);
                       }}
-                      className={`min-h-[40px] rounded-lg border text-xs font-semibold font-mono-tabular transition-colors ${
+                      className={`min-h-[40px] rounded-lg border text-xs font-semibold tabular-nums transition-colors ${
                         settings.duration === dur
                           ? 'bg-slate-900 text-white border-slate-900'
                           : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
                       }`}
                     >
-                      {dur}s
+                      {toBanglaNumber(dur)} সেকেন্ড
                     </button>
                   ))}
                 </div>
@@ -633,30 +622,30 @@ export function ReelMakerView({
 
               <div>
                 <span className="block text-xs font-medium text-slate-700 mb-1.5">
-                  Export Resolution
+                  ভিডিওর মান
                 </span>
                 <div className="grid grid-cols-2 gap-1.5">
                   <button
                     type="button"
                     onClick={() => setSettings((s) => ({ ...s, resolution: '720p' }))}
-                    className={`min-h-[40px] rounded-lg border text-xs font-semibold font-mono-tabular transition-colors ${
+                    className={`min-h-[40px] rounded-lg border text-xs font-semibold tabular-nums transition-colors ${
                       settings.resolution === '720p'
                         ? 'bg-slate-900 text-white border-slate-900'
                         : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
                     }`}
                   >
-                    720p HD
+                    ৭২০পি এইচডি
                   </button>
                   <button
                     type="button"
                     onClick={() => setSettings((s) => ({ ...s, resolution: '1080p' }))}
-                    className={`min-h-[40px] rounded-lg border text-xs font-semibold font-mono-tabular transition-colors ${
+                    className={`min-h-[40px] rounded-lg border text-xs font-semibold tabular-nums transition-colors ${
                       settings.resolution === '1080p'
                         ? 'bg-slate-900 text-white border-slate-900'
                         : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
                     }`}
                   >
-                    1080p FHD
+                    ১০৮০পি ফুল এইচডি
                   </button>
                 </div>
               </div>
@@ -664,12 +653,13 @@ export function ReelMakerView({
 
             <div className="flex items-center justify-between pt-1">
               <span className="text-xs font-medium text-slate-700">
-                Subtle floating light particles
+                ভাসমান আলোর কণা দেখান
               </span>
               <button
                 type="button"
                 role="switch"
                 aria-checked={settings.showParticles}
+                aria-label="ভাসমান আলোর কণা চালু বা বন্ধ করুন"
                 onClick={() =>
                   setSettings((s) => ({ ...s, showParticles: !s.showParticles }))
                 }
@@ -686,12 +676,12 @@ export function ReelMakerView({
             </div>
           </section>
 
-          {/* Background Palette */}
+          {/* ব্যাকগ্রাউন্ড থিম */}
           <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                 <Palette className="w-4 h-4 text-slate-500" />
-                Background Theme
+                ব্যাকগ্রাউন্ড থিম
               </h2>
               <span className="text-xs text-slate-500">{theme.name}</span>
             </div>
@@ -728,11 +718,11 @@ export function ReelMakerView({
             </div>
           </section>
 
-          {/* Typography & Watermark */}
+          {/* বাংলা ফন্ট ও আকার */}
           <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4">
             <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
               <Type className="w-4 h-4 text-slate-500" />
-              Typography
+              বাংলা ফন্ট
             </h2>
 
             <div className="grid grid-cols-2 gap-2">
@@ -758,13 +748,15 @@ export function ReelMakerView({
             <div className="grid grid-cols-2 gap-4 items-center">
               <div>
                 <div className="flex items-center justify-between text-xs mb-1.5">
-                  <span className="font-medium text-slate-700">Text Size</span>
-                  <span className="font-mono-tabular text-slate-500">{settings.fontSize}px</span>
+                  <span className="font-medium text-slate-700">ফন্টের আকার</span>
+                  <span className="tabular-nums text-slate-500">
+                    {toBanglaNumber(settings.fontSize)}
+                  </span>
                 </div>
                 <input
                   type="range"
-                  min={38}
-                  max={78}
+                  min={36}
+                  max={74}
                   step={2}
                   value={settings.fontSize}
                   onChange={(e) =>
@@ -775,7 +767,7 @@ export function ReelMakerView({
               </div>
 
               <div>
-                <span className="block text-xs font-medium text-slate-700 mb-1.5">Alignment</span>
+                <span className="block text-xs font-medium text-slate-700 mb-1.5">সাজানো</span>
                 <div className="grid grid-cols-2 gap-1.5">
                   <button
                     type="button"
@@ -787,7 +779,7 @@ export function ReelMakerView({
                     }`}
                   >
                     <AlignCenter className="w-3.5 h-3.5" />
-                    Center
+                    মাঝে
                   </button>
                   <button
                     type="button"
@@ -799,26 +791,26 @@ export function ReelMakerView({
                     }`}
                   >
                     <AlignLeft className="w-3.5 h-3.5" />
-                    Left
+                    বামে
                   </button>
                 </div>
               </div>
             </div>
           </section>
 
-          {/* Brand Watermark Summary */}
+          {/* কাস্টম নাম ও লোগো */}
           <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3">
             <div className="flex items-center justify-between gap-4">
               <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                 <Stamp className="w-4 h-4 text-slate-500" />
-                Name & PNG Logo Watermark
+                কাস্টম নাম ও লোগো
               </h2>
               <button
                 type="button"
                 onClick={onOpenBrandKit}
                 className="text-xs font-semibold text-teal-700 hover:text-teal-800 transition-colors whitespace-nowrap"
               >
-                Configure
+                পরিবর্তন করুন
               </button>
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -831,7 +823,7 @@ export function ReelMakerView({
                     : 'bg-white text-slate-600 border-slate-200'
                 }`}
               >
-                {brandKit.showHandle ? 'Handle: On' : 'Handle: Off'}
+                {brandKit.showHandle ? 'নাম: চালু' : 'নাম: বন্ধ'}
               </button>
 
               <button
@@ -845,9 +837,9 @@ export function ReelMakerView({
               >
                 {brandKit.logoDataUrl
                   ? brandKit.showLogo
-                    ? 'PNG Logo: On'
-                    : 'PNG Logo: Off'
-                  : 'No PNG Logo'}
+                    ? 'পিএনজি লোগো: চালু'
+                    : 'পিএনজি লোগো: বন্ধ'
+                  : 'কোনো লোগো নেই'}
               </button>
             </div>
           </section>

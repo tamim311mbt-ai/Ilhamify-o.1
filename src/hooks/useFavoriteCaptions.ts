@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { CaptionItem } from '../types/studio';
+import { CaptionCategory, CaptionItem } from '../types/studio';
 
-const FAVORITE_IDS_KEY = 'captioncraft_favorite_ids_v1';
-const CUSTOM_SAVED_KEY = 'captioncraft_custom_saved_v1';
+const FAVORITE_IDS_KEY = 'captioncraft_favorite_ids_bn_v1';
+const CUSTOM_SAVED_KEY = 'captioncraft_custom_saved_bn_v1';
 
 export function useFavoriteCaptions() {
   const [favoriteIds, setFavoriteIds] = useState<string[]>(() => {
@@ -13,7 +13,7 @@ export function useFavoriteCaptions() {
         if (Array.isArray(parsed)) return parsed;
       }
     } catch {
-      // Ignore storage errors
+      // স্টোরেজ ত্রুটি উপেক্ষা করুন
     }
     return [];
   });
@@ -26,7 +26,7 @@ export function useFavoriteCaptions() {
         if (Array.isArray(parsed)) return parsed;
       }
     } catch {
-      // Ignore storage errors
+      // স্টোরেজ ত্রুটি উপেক্ষা করুন
     }
     return [];
   });
@@ -35,7 +35,7 @@ export function useFavoriteCaptions() {
     try {
       localStorage.setItem(FAVORITE_IDS_KEY, JSON.stringify(favoriteIds));
     } catch {
-      // Ignore storage errors
+      // স্টোরেজ ত্রুটি উপেক্ষা করুন
     }
   }, [favoriteIds]);
 
@@ -43,12 +43,11 @@ export function useFavoriteCaptions() {
     try {
       localStorage.setItem(CUSTOM_SAVED_KEY, JSON.stringify(customSaved));
     } catch {
-      // Ignore storage errors
+      // স্টোরেজ ত্রুটি উপেক্ষা করুন
     }
   }, [customSaved]);
 
   const toggleFavoriteId = (id: string) => {
-    // If it's a custom saved item being unstarred, remove it from customSaved as well
     if (id.startsWith('custom-')) {
       setCustomSaved((prev) => prev.filter((item) => item.id !== id));
       return;
@@ -68,24 +67,20 @@ export function useFavoriteCaptions() {
   const saveCustomCaption = (
     text: string,
     attribution: string,
-    category: 'islamic' | 'motivational'
+    category: CaptionCategory
   ) => {
     const clean = text.trim();
     if (!clean) return null;
 
-    const existing = customSaved.find(
-      (c) => c.en.trim() === clean || c.bn.trim() === clean
-    );
+    const existing = customSaved.find((c) => c.text.trim() === clean);
     if (existing) return existing.id;
 
     const newItem: CaptionItem = {
       id: `custom-${Date.now()}`,
       category,
-      mood: 'faith',
-      en: clean,
-      bn: clean,
-      attributionEn: attribution.trim() || 'Custom Caption',
-      attributionBn: attribution.trim() || 'নিজস্ব ক্যাপশন',
+      subTopic: category === 'islamic' ? 'sabr' : 'confidence',
+      text: clean,
+      attribution: attribution.trim() || 'নিজস্ব ক্যাপশন',
     };
     setCustomSaved((prev) => [newItem, ...prev]);
     return newItem.id;

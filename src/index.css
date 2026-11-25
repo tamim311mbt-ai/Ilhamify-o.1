@@ -2,10 +2,9 @@
 
 @layer base {
   :root {
-    --font-sans: "Plus Jakarta Sans", "Hind Siliguri", system-ui, -apple-system, sans-serif;
-    --font-serif: "Cormorant Garamond", "Noto Serif Bengali", Georgia, serif;
-    --font-display: "Outfit", "Hind Siliguri", sans-serif;
-    --font-mono: "JetBrains Mono", ui-monospace, monospace;
+    --font-sans: "Hind Siliguri", "Noto Sans Bengali", system-ui, -apple-system, sans-serif;
+    --font-serif: "Noto Serif Bengali", "Tiro Bangla", Georgia, serif;
+    --font-display: "Baloo Da 2", "Hind Siliguri", sans-serif;
   }
 
   html {
@@ -26,16 +25,11 @@
   font-family: var(--font-display);
 }
 
-.font-mono-tabular {
-  font-family: var(--font-mono);
-  font-variant-numeric: tabular-nums;
-}
-
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }
 
-/* Safe area bottom padding for mobile app wrapping */
+/* মোবাইল অ্যাপের সেফ এরিয়া প্যাডিং */
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }

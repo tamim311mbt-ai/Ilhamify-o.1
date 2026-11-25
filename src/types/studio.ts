@@ -2,25 +2,30 @@ export type StudioTab = 'captions' | 'card' | 'reel';
 
 export type CaptionCategory = 'islamic' | 'motivational';
 
-export type CaptionMood =
-  | 'all'
-  | 'patience'
-  | 'gratitude'
-  | 'faith'
-  | 'discipline'
-  | 'success'
-  | 'resilience';
+export type IslamicSubTopic =
+  | 'sabr'
+  | 'shukr'
+  | 'tawakkul'
+  | 'tawbah'
+  | 'quran_salah'
+  | 'life_akhirah';
 
-export type CaptionLanguage = 'en' | 'bn';
+export type MotivationalSubTopic =
+  | 'confidence'
+  | 'hardwork'
+  | 'resilience'
+  | 'goals'
+  | 'discipline'
+  | 'positivity';
+
+export type CaptionSubTopic = 'all' | IslamicSubTopic | MotivationalSubTopic;
 
 export interface CaptionItem {
   id: string;
   category: CaptionCategory;
-  mood: Exclude<CaptionMood, 'all'>;
-  en: string;
-  bn: string;
-  attributionEn?: string;
-  attributionBn?: string;
+  subTopic: IslamicSubTopic | MotivationalSubTopic;
+  text: string;
+  attribution: string;
 }
 
 export type AspectRatioId = '1:1' | '4:5' | '9:16';
@@ -33,16 +38,14 @@ export interface AspectRatioSpec {
   height: number;
 }
 
-export type TypographyPresetId = 'editorial' | 'modern' | 'bold' | 'minimal';
+export type TypographyPresetId = 'hind' | 'serif' | 'baloo' | 'anek';
 
 export interface TypographyPreset {
   id: TypographyPresetId;
   name: string;
   fontFamily: string;
   fontWeight: number;
-  letterSpacing: number;
   lineHeightRatio: number;
-  italic?: boolean;
 }
 
 export interface BackgroundTheme {

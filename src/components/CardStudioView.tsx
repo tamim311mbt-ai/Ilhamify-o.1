@@ -12,6 +12,7 @@ import {
 import { ASPECT_RATIOS, BACKGROUND_THEMES, TYPOGRAPHY_PRESETS } from '../data/themes';
 import { useLoadedImage } from '../hooks/useLoadedImage';
 import { BrandKitState, CardSettings } from '../types/studio';
+import { toBanglaNumber } from '../utils/banglaDigits';
 import { renderQuoteCard } from '../utils/canvasRenderer';
 
 interface CardStudioViewProps {
@@ -38,8 +39,8 @@ export function CardStudioView({
   const [settings, setSettings] = useState<CardSettings>({
     aspectRatio: '1:1',
     themeId: 'emerald-night',
-    typographyId: 'editorial',
-    fontSize: 54,
+    typographyId: 'serif',
+    fontSize: 52,
     textAlign: 'center',
     showQuoteMark: true,
     showDivider: true,
@@ -65,14 +66,12 @@ export function CardStudioView({
     [settings.typographyId]
   );
 
-  // Render crisp preview onto the live Canvas
   useEffect(() => {
     const canvas = previewCanvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Render at full export resolution so font wrapping matches downloaded PNG 1:1
     canvas.width = aspectSpec.width;
     canvas.height = aspectSpec.height;
 
@@ -135,14 +134,14 @@ export function CardStudioView({
   return (
     <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Preview Stage (First on mobile for instant visual feedback, right on desktop) */}
+        {/* কার্ড প্রিভিউ স্টেজ */}
         <div className="lg:col-span-7 lg:order-2 lg:sticky lg:top-6 space-y-4">
           <div className="bg-white border border-slate-200 rounded-2xl p-4 md:p-6">
             <div className="flex items-center justify-between gap-4 pb-4 border-b border-slate-100">
               <div className="text-xs text-slate-500 flex items-center gap-2">
-                <span className="font-semibold text-slate-900">Card Preview</span>
+                <span className="font-semibold text-slate-900">কার্ড প্রিভিউ</span>
                 <span aria-hidden="true">·</span>
-                <span className="font-mono-tabular">{aspectSpec.sublabel} px</span>
+                <span className="tabular-nums">{aspectSpec.sublabel} পিক্সেল</span>
               </div>
               <button
                 type="button"
@@ -150,11 +149,10 @@ export function CardStudioView({
                 className="min-h-[38px] px-3 py-1.5 text-xs font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 transition-colors flex items-center gap-1.5 whitespace-nowrap"
               >
                 <Clapperboard className="w-3.5 h-3.5" />
-                Animate as Reel
+                রিল ভিডিও বানান
               </button>
             </div>
 
-            {/* Canvas Stage */}
             <div className="py-5 flex items-center justify-center bg-slate-100/80 rounded-xl mt-4 px-4">
               <canvas
                 ref={previewCanvasRef}
@@ -165,10 +163,9 @@ export function CardStudioView({
               />
             </div>
 
-            {/* Primary Download CTA */}
             <div className="mt-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
               <p className="text-xs text-slate-500">
-                Exports as a high-resolution PNG with crisp typography and transparent logo watermark.
+                ঝকঝকে বাংলা টাইপোগ্রাফি ও স্বচ্ছ পিএনজি লোগোসহ হাই-রেজোলিউশন কার্ড ডাউনলোড হবে।
               </p>
               <button
                 type="button"
@@ -178,12 +175,12 @@ export function CardStudioView({
                 {downloaded ? (
                   <>
                     <Check className="w-4 h-4" />
-                    PNG Saved
+                    কার্ড ডাউনলোড হয়েছে
                   </>
                 ) : (
                   <>
                     <Download className="w-4 h-4" />
-                    Download PNG
+                    কার্ড ডাউনলোড করুন
                   </>
                 )}
               </button>
@@ -191,37 +188,37 @@ export function CardStudioView({
           </div>
         </div>
 
-        {/* Left Controls Column */}
+        {/* কন্ট্রোল কলাম */}
         <div className="lg:col-span-5 lg:order-1 space-y-5">
           <div className="space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">Card Studio</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">কার্ড মেকার</h1>
             <p className="text-sm text-slate-600">
-              Customize aspect ratio, color gradient, typography, and your personal watermark.
+              কার্ডের অনুপাত, রঙের গ্রেডিয়েন্ট, বাংলা ফন্ট ও আপনার কাস্টম লোগো সাজিয়ে নিন।
             </p>
           </div>
 
-          {/* Text Content */}
+          {/* ক্যাপশন লেখা */}
           <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3.5">
-            <h2 className="text-sm font-semibold text-slate-900">Caption Text</h2>
+            <h2 className="text-sm font-semibold text-slate-900">কার্ডের লেখা</h2>
             <textarea
               rows={3}
               value={caption}
               onChange={(e) => onChangeCaption(e.target.value)}
-              placeholder="Enter caption text..."
+              placeholder="এখানে বাংলা ক্যাপশন লিখুন..."
               className="w-full p-3 text-sm leading-relaxed text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:border-teal-700 resize-y"
             />
             <input
               type="text"
               value={attribution}
               onChange={(e) => onChangeAttribution(e.target.value)}
-              placeholder="Optional subtitle or reference"
+              placeholder="ঐচ্ছিক ছোট শিরোনাম বা সূত্র"
               className="w-full h-10 px-3 text-sm text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:border-teal-700"
             />
           </section>
 
-          {/* Aspect Ratio */}
+          {/* অনুপাত নির্বাচন */}
           <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3">
-            <h2 className="text-sm font-semibold text-slate-900">Aspect Ratio</h2>
+            <h2 className="text-sm font-semibold text-slate-900">কার্ডের মাপ (অনুপাত)</h2>
             <div className="grid grid-cols-3 gap-2">
               {ASPECT_RATIOS.map((ratio) => {
                 const active = settings.aspectRatio === ratio.id;
@@ -238,7 +235,7 @@ export function CardStudioView({
                   >
                     <div className="text-xs font-semibold whitespace-nowrap">{ratio.label}</div>
                     <div
-                      className={`text-[11px] font-mono-tabular mt-0.5 ${
+                      className={`text-[11px] tabular-nums mt-0.5 ${
                         active ? 'text-teal-100' : 'text-slate-500'
                       }`}
                     >
@@ -250,12 +247,12 @@ export function CardStudioView({
             </div>
           </section>
 
-          {/* Background Palette */}
+          {/* ব্যাকগ্রাউন্ড প্যালেট */}
           <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                 <Palette className="w-4 h-4 text-slate-500" />
-                Background & Gradient
+                ব্যাকগ্রাউন্ড ও গ্রেডিয়েন্ট
               </h2>
               <span className="text-xs text-slate-500">{theme.name}</span>
             </div>
@@ -294,11 +291,11 @@ export function CardStudioView({
             </div>
           </section>
 
-          {/* Typography & Layout */}
+          {/* বাংলা টাইপোগ্রাফি */}
           <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4">
             <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
               <Type className="w-4 h-4 text-slate-500" />
-              Typography & Style
+              বাংলা ফন্ট ও বিন্যাস
             </h2>
 
             <div className="grid grid-cols-2 gap-2">
@@ -324,13 +321,15 @@ export function CardStudioView({
             <div className="grid grid-cols-2 gap-4 items-center">
               <div>
                 <div className="flex items-center justify-between text-xs mb-1.5">
-                  <span className="font-medium text-slate-700">Text Size</span>
-                  <span className="font-mono-tabular text-slate-500">{settings.fontSize}px</span>
+                  <span className="font-medium text-slate-700">ফন্টের আকার</span>
+                  <span className="tabular-nums text-slate-500">
+                    {toBanglaNumber(settings.fontSize)}
+                  </span>
                 </div>
                 <input
                   type="range"
-                  min={36}
-                  max={78}
+                  min={34}
+                  max={74}
                   step={2}
                   value={settings.fontSize}
                   onChange={(e) =>
@@ -341,7 +340,7 @@ export function CardStudioView({
               </div>
 
               <div>
-                <span className="block text-xs font-medium text-slate-700 mb-1.5">Alignment</span>
+                <span className="block text-xs font-medium text-slate-700 mb-1.5">সাজানো</span>
                 <div className="grid grid-cols-2 gap-1.5">
                   <button
                     type="button"
@@ -353,7 +352,7 @@ export function CardStudioView({
                     }`}
                   >
                     <AlignCenter className="w-3.5 h-3.5" />
-                    Center
+                    মাঝে
                   </button>
                   <button
                     type="button"
@@ -365,7 +364,7 @@ export function CardStudioView({
                     }`}
                   >
                     <AlignLeft className="w-3.5 h-3.5" />
-                    Left
+                    বামে
                   </button>
                 </div>
               </div>
@@ -381,7 +380,7 @@ export function CardStudioView({
                     : 'bg-white text-slate-600 border-slate-200'
                 }`}
               >
-                Quote Mark
+                উদ্ধৃতি চিহ্ন
               </button>
               <button
                 type="button"
@@ -392,24 +391,24 @@ export function CardStudioView({
                     : 'bg-white text-slate-600 border-slate-200'
                 }`}
               >
-                Accent Line
+                বিভাজক রেখা
               </button>
             </div>
           </section>
 
-          {/* Watermark & PNG Logo Quick Summary */}
+          {/* কাস্টম নাম ও লোগো */}
           <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3">
             <div className="flex items-center justify-between gap-4">
               <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                 <Stamp className="w-4 h-4 text-slate-500" />
-                Name & PNG Logo Watermark
+                কাস্টম নাম ও লোগো
               </h2>
               <button
                 type="button"
                 onClick={onOpenBrandKit}
                 className="text-xs font-semibold text-teal-700 hover:text-teal-800 transition-colors whitespace-nowrap"
               >
-                Configure
+                পরিবর্তন করুন
               </button>
             </div>
 
@@ -423,7 +422,7 @@ export function CardStudioView({
                     : 'bg-white text-slate-600 border-slate-200'
                 }`}
               >
-                {brandKit.showHandle ? 'Handle: On' : 'Handle: Off'}
+                {brandKit.showHandle ? 'নাম: চালু' : 'নাম: বন্ধ'}
               </button>
 
               <button
@@ -437,9 +436,9 @@ export function CardStudioView({
               >
                 {brandKit.logoDataUrl
                   ? brandKit.showLogo
-                    ? 'PNG Logo: On'
-                    : 'PNG Logo: Off'
-                  : 'No PNG Logo'}
+                    ? 'পিএনজি লোগো: চালু'
+                    : 'পিএনজি লোগো: বন্ধ'
+                  : 'কোনো লোগো নেই'}
               </button>
             </div>
           </section>
