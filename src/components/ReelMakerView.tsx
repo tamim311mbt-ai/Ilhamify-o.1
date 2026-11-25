@@ -1,18 +1,21 @@
 import { AnimatePresence, motion, useAnimate } from 'motion/react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { ChangeEvent, useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlignCenter,
   AlignLeft,
   Check,
   Download,
   Film,
+  Music,
   Palette,
   Pause,
   Play,
   RotateCcw,
   Sparkles,
   Stamp,
+  Trash2,
   Type,
+  Upload,
   X,
 } from 'lucide-react';
 import { BACKGROUND_THEMES, TYPOGRAPHY_PRESETS } from '../data/themes';
@@ -93,7 +96,17 @@ export function ReelMakerView({
   const [exportedExt, setExportExt] = useState<'mp4' | 'webm'>('webm');
   const [exportStatusMessage, setExportStatusMessage] = useState<string>('');
 
+  const [audioFileUrl, setAudioFileUrl] = useState<string | null>(null);
+  const [audioFileName, setAudioFileName] = useState<string>('');
+  const [audioFileSize, setAudioFileSize] = useState<number>(0);
+  const [audioDuration, setAudioDuration] = useState<number>(0);
+  const [audioCurrentTime, setAudioCurrentTime] = useState<number>(0);
+  const [isAudioPlaying, setIsAudioPlaying] = useState<boolean>(false);
+  const [audioError, setAudioError] = useState<string | null>(null);
+
   const previewCanvasRef = useRef<HTMLCanvasElement>(null);
+  const audioInputRef = useRef<HTMLInputElement>(null);
+  const audioElementRef = useRef<HTMLAudioElement>(null);
   const [stageScope, animateStage] = useAnimate();
   const isFirstRenderRef = useRef(true);
   const exportCancelRef = useRef<boolean>(false);
@@ -139,6 +152,95 @@ export function ReelMakerView({
       }
     };
   }, [exportedVideoUrl]);
+
+  useEffect(() => {
+    return () => {
+      if (audioFileUrl) {
+        URL.revokeObjectURL(audioFileUrl);
+      }
+    };
+  }, [audioFileUrl]);
+
+  const MAX_AUDIO_SIZE_BYTES = 15 * 1024 * 1024;
+
+  const formatAudioTime = (seconds: number) => {
+    const safe = Number.isFinite(seconds) && seconds > 0 ? Math.floor(seconds) : 0;
+    const mins = Math.floor(safe / 60);
+    const secs = safe % 60;
+    return `${toBanglaNumber(String(mins).padStart(2, '0'))}:${toBanglaNumber(String(secs).padStart(2, '0'))}`;
+  };
+
+  const formatFileSizeMb = (bytes: number) => {
+    const mb = (bytes / (1024 * 1024)).toFixed(1).replace('.', '.');
+    return `${toBanglaNumber(mb)} মেগাবাইট`;
+  };
+
+  const handleAudioFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setAudioError(null);
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+
+    const hasAudioMime = file.type.startsWith('audio/');
+    const hasAudioExt = /\.(mp3|wav|m4a|ogg|aac|flac|opus|webm)$/i.test(file.name);
+    if (!hasAudioMime && !hasAudioExt) {
+      setAudioError('অসমর্থিত ফাইল ফরম্যাট। অনুগ্রহ করে MP3, WAV, M4A বা OGG অডিও ফাইল নির্বাচন করুন।');
+      return;
+    }
+
+    if (file.size > MAX_AUDIO_SIZE_BYTES) {
+      setAudioError('অডিও ফাইলটি ১৫ মেগাবাইটের বেশি বড়। অনুগ্রহ করে ছোট আকারের অডিও দিন।');
+      return;
+    }
+
+    if (audioElementRef.current) {
+      audioElementRef.current.pause();
+    }
+    if (audioFileUrl) {
+      URL.revokeObjectURL(audioFileUrl);
+    }
+
+    const nextUrl = URL.createObjectURL(file);
+    setAudioFileUrl(nextUrl);
+    setAudioFileName(file.name);
+    setAudioFileSize(file.size);
+    setAudioDuration(0);
+    setAudioCurrentTime(0);
+    setIsAudioPlaying(false);
+  };
+
+  const handleToggleAudioPlay = async () => {
+    const el = audioElementRef.current;
+    if (!el) return;
+    if (isAudioPlaying) {
+      el.pause();
+      setIsAudioPlaying(false);
+    } else {
+      try {
+        await el.play();
+        setIsAudioPlaying(true);
+      } catch {
+        setAudioError('এই অডিও ফাইলটি ব্রাউজারে চালানো সম্ভব হচ্ছে না। অন্য ফাইল দিয়ে চেষ্টা করুন।');
+        setIsAudioPlaying(false);
+      }
+    }
+  };
+
+  const handleRemoveAudio = () => {
+    if (audioElementRef.current) {
+      audioElementRef.current.pause();
+    }
+    if (audioFileUrl) {
+      URL.revokeObjectURL(audioFileUrl);
+    }
+    setAudioFileUrl(null);
+    setAudioFileName('');
+    setAudioFileSize(0);
+    setAudioDuration(0);
+    setAudioCurrentTime(0);
+    setIsAudioPlaying(false);
+    setAudioError(null);
+  };
 
   useEffect(() => {
     let rafId = 0;
@@ -718,6 +820,144 @@ export function ReelMakerView({
                 />
               </button>
             </div>
+          </section>
+
+          {/* অডিও আপলোড ও প্রিভিউ */}
+          <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3.5">
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+                <Music className="w-4 h-4 text-teal-700" />
+                রিলের অডিও (ঐচ্ছিক)
+              </h2>
+              <span className="text-[11px] text-slate-500">MP3, WAV, M4A, OGG · সর্বোচ্চ ১৫ মেগাবাইট</span>
+            </div>
+
+            <input
+              ref={audioInputRef}
+              type="file"
+              accept="audio/*"
+              onChange={handleAudioFileChange}
+              className="hidden"
+            />
+
+            {audioFileUrl ? (
+              <div className="p-3.5 bg-teal-50 border border-teal-200 rounded-xl space-y-3">
+                <audio
+                  ref={audioElementRef}
+                  src={audioFileUrl}
+                  preload="metadata"
+                  onLoadedMetadata={(e) => {
+                    const dur = e.currentTarget.duration;
+                    if (Number.isFinite(dur)) setAudioDuration(dur);
+                  }}
+                  onTimeUpdate={(e) => setAudioCurrentTime(e.currentTarget.currentTime)}
+                  onEnded={() => {
+                    setIsAudioPlaying(false);
+                    setAudioCurrentTime(0);
+                  }}
+                  onError={() => {
+                    setIsAudioPlaying(false);
+                    setAudioError('নির্বাচিত অডিও ফাইলটি পড়া বা চালানো সম্ভব হয়নি।');
+                  }}
+                  className="hidden"
+                />
+
+                <div className="flex items-center gap-3 min-w-0">
+                  <motion.button
+                    whileTap={{ scale: 0.94 }}
+                    type="button"
+                    onClick={handleToggleAudioPlay}
+                    aria-label={isAudioPlaying ? 'অডিও থামান' : 'অডিও চালান'}
+                    className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-teal-700 text-white hover:bg-teal-800 transition-colors shrink-0"
+                  >
+                    {isAudioPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                  </motion.button>
+
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-xs sm:text-sm font-semibold text-slate-900 truncate">
+                        {audioFileName}
+                      </p>
+                      <span className="text-[11px] tabular-nums text-slate-500 shrink-0">
+                        {formatFileSizeMb(audioFileSize)}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="range"
+                        aria-label="অডিও টাইমলাইন"
+                        min={0}
+                        max={audioDuration > 0 ? audioDuration : 1}
+                        step={0.1}
+                        value={Math.min(audioCurrentTime, audioDuration || 1)}
+                        onChange={(e) => {
+                          const nextTime = parseFloat(e.target.value);
+                          setAudioCurrentTime(nextTime);
+                          if (audioElementRef.current) {
+                            audioElementRef.current.currentTime = nextTime;
+                          }
+                        }}
+                        className="flex-1 min-w-0 accent-teal-700 cursor-pointer"
+                      />
+                      <span className="text-[11px] tabular-nums text-slate-600 shrink-0">
+                        {formatAudioTime(audioCurrentTime)} / {formatAudioTime(audioDuration)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-teal-200/70">
+                  <span className="text-[11px] text-slate-600">
+                    আপলোড করা অডিও কেবল এই ব্রাউজার সেশনে লোকালি প্রিভিউ হবে।
+                  </span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => audioInputRef.current?.click()}
+                      className="min-h-[36px] px-3 py-1.5 text-xs font-medium text-teal-800 bg-white border border-teal-200 rounded-lg hover:bg-teal-100 transition-colors whitespace-nowrap"
+                    >
+                      পরিবর্তন করুন
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleRemoveAudio}
+                      aria-label="অডিও মুছুন"
+                      className="min-h-[36px] px-3 py-1.5 text-xs font-medium text-rose-700 bg-white border border-rose-200 rounded-lg hover:bg-rose-50 transition-colors flex items-center gap-1 whitespace-nowrap"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      মুছুন
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                <motion.button
+                  whileTap={{ scale: 0.99 }}
+                  type="button"
+                  onClick={() => audioInputRef.current?.click()}
+                  className="w-full py-4 px-4 border border-dashed border-teal-300 rounded-xl bg-teal-50/70 hover:bg-teal-100/70 hover:border-teal-700 transition-colors flex flex-col sm:flex-row items-center justify-center gap-3 text-center sm:text-left"
+                >
+                  <span className="min-h-[40px] px-4 py-2 text-xs sm:text-sm font-semibold text-white bg-teal-700 rounded-lg inline-flex items-center gap-2 shrink-0">
+                    <Upload className="w-4 h-4" />
+                    ডিভাইস থেকে অডিও যুক্ত করুন
+                  </span>
+                  <span className="text-xs text-slate-600">
+                    MP3, WAV, M4A বা OGG ফাইল নির্বাচন করে রিলের সাথে শুনুন
+                  </span>
+                </motion.button>
+                <p className="text-[11px] text-slate-500">
+                  নোট: আপলোড করা অডিও কেবল আপনার ব্রাউজারেই লোকাল প্রিভিউর জন্য ব্যবহৃত হয় এবং সার্ভারে সংরক্ষণ করা হয় না।
+                </p>
+              </div>
+            )}
+
+            {audioError && (
+              <p role="alert" className="text-xs font-medium text-rose-600">
+                {audioError}
+              </p>
+            )}
           </section>
 
           {/* ব্যাকগ্রাউন্ড থিম */}
