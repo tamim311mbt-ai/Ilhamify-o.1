@@ -6,6 +6,7 @@ import { CardStudioView } from './components/CardStudioView';
 import { Header } from './components/Header';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { ReelMakerView } from './components/ReelMakerView';
+import { WelcomeModal } from './components/WelcomeModal';
 import { CAPTIONS_LIBRARY } from './data/captions';
 import { useBrandKit } from './hooks/useBrandKit';
 import { StudioTab } from './types/studio';
@@ -22,6 +23,13 @@ export default function App() {
     CAPTIONS_LIBRARY[0].attribution
   );
   const [brandDrawerOpen, setBrandDrawerOpen] = useState<boolean>(false);
+  const [welcomeOpen, setWelcomeOpen] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return true;
+    const isStandalone =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as unknown as { standalone?: boolean }).standalone === true;
+    return !isStandalone;
+  });
 
   const { brandKit, updateBrandKit, resetBrandKit } = useBrandKit();
 
@@ -134,6 +142,8 @@ export default function App() {
         </footer>
 
         <OfflineIndicator />
+
+        <WelcomeModal open={welcomeOpen} onClose={() => setWelcomeOpen(false)} />
 
         <BrandKitDrawer
           open={brandDrawerOpen}
