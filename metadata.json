@@ -1,0 +1,6 @@
+{
+  "name": "CaptionCraft Studio",
+  "description": "Create Islamic and motivational captions, custom quote cards, and vertical 9:16 reels with your own name and PNG logo watermark.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
