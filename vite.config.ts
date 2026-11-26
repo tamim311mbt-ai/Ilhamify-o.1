@@ -7,7 +7,7 @@ import {VitePWA} from 'vite-plugin-pwa';
 
 export default defineConfig(() => {
   return {
-    base: '/',
+    base: '/Ilhamify-o.1/',
     plugins: [
       react(),
       tailwindcss(),
