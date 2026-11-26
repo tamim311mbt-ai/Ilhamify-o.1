@@ -10,6 +10,7 @@ import { SiteFooter } from './components/SiteFooter';
 import { WelcomeModal } from './components/WelcomeModal';
 import { CAPTIONS_LIBRARY } from './data/captions';
 import { useBrandKit } from './hooks/useBrandKit';
+import { usePWAInstall } from './hooks/usePWAInstall';
 import { StudioTab } from './types/studio';
 import { isRunningInInstalledAppOrWebView } from './utils/appEnvironment';
 
@@ -21,7 +22,8 @@ const VIEW_TRANSITION = {
 const DOWNLOAD_COUNT_KEY = 'ilhamify_download_count_v1';
 
 export default function App() {
-  const isInApp = isRunningInInstalledAppOrWebView();
+  const { isInstalled } = usePWAInstall();
+  const isInApp = isInstalled || isRunningInInstalledAppOrWebView();
   const [activeTab, setActiveTab] = useState<StudioTab>('captions');
   const [activeCaption, setActiveCaption] = useState<string>(CAPTIONS_LIBRARY[0].text);
   const [activeAttribution, setActiveAttribution] = useState<string>(

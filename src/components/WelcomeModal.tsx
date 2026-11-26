@@ -1,18 +1,21 @@
 import {
   ArrowLeft,
   CheckCircle2,
+  Chrome,
+  Compass,
   Download,
   ExternalLink,
   Globe,
-  Info,
+  MoreVertical,
+  Share,
+  Shield,
   ShieldCheck,
-  Smartphone,
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useState } from 'react';
+import { usePWAInstall } from '../hooks/usePWAInstall';
 
 const GITHUB_REPO_URL = 'https://github.com/tamim311mbt-ai/Ilhamify-o.1';
-const APK_DOWNLOAD_URL = '[আপনার-APK-লিংক]';
 const ILHAMIFY_FACEBOOK_PAGE_URL = 'https://www.facebook.com/Ilhamify.com.bd';
 
 interface WelcomeModalProps {
@@ -26,7 +29,28 @@ export function WelcomeModal({
   triggerContext = 'startup',
   onClose,
 }: WelcomeModalProps) {
-  const [view, setView] = useState<'initial' | 'apk'>('initial');
+  const [view, setView] = useState<'initial' | 'guide'>('initial');
+  const { isInstallable, isInstalled, isIOS, browserKind, install } = usePWAInstall();
+
+  if (isInstalled) {
+    return null;
+  }
+
+  const handleInstallClick = async () => {
+    if (isInstallable) {
+      const result = await install();
+      if (result === 'accepted') {
+        onClose();
+        return;
+      }
+      if (result === 'unavailable') {
+        setView('guide');
+      }
+      return;
+    }
+
+    setView('guide');
+  };
 
   return (
     <AnimatePresence
@@ -93,8 +117,8 @@ export function WelcomeModal({
                     </h2>
                     <p className="text-sm leading-relaxed text-slate-600">
                       {triggerContext === 'download'
-                        ? 'মোবাইলে আরও দ্রুত ও সহজ অভিজ্ঞতার জন্য আমাদের Android APK ডাউনলোড করতে পারেন অথবা ব্রাউজারেই কাজ চালিয়ে যেতে পারেন।'
-                        : '৬৫০+ ইসলামিক ও মোটিভেশনাল বাংলা ক্যাপশন, কোট কার্ড এবং ৯:১৬ রিল ভিডিও তৈরি করুন সহজেই—অ্যান্ড্রয়েড অ্যাপ হিসেবে অথবা সরাসরি ব্রাউজারে।'}
+                        ? 'ফোনের হোম স্ক্রিন থেকে আরও দ্রুত ব্যবহার ও অফলাইন সুবিধার জন্য Ilhamify অ্যাপটি ইনস্টল করতে পারেন অথবা ব্রাউজারেই চালিয়ে যেতে পারেন।'
+                        : '৬৫০+ ইসলামিক ও মোটিভেশনাল বাংলা ক্যাপশন, কোট কার্ড এবং ৯:১৬ রিল ভিডিও তৈরি করুন সহজেই—অ্যাপ হিসেবে ইনস্টল করে অথবা সরাসরি ব্রাউজারে।'}
                     </p>
                   </div>
 
@@ -102,11 +126,11 @@ export function WelcomeModal({
                     <motion.button
                       whileTap={{ scale: 0.98 }}
                       type="button"
-                      onClick={() => setView('apk')}
+                      onClick={handleInstallClick}
                       className="w-full min-h-[48px] px-4 py-3 text-sm font-semibold text-white bg-teal-700 hover:bg-teal-800 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-xs"
                     >
-                      <Smartphone className="w-4 h-4 shrink-0" />
-                      <span>APK ডাউনলোড করুন</span>
+                      <Download className="w-4 h-4 shrink-0" />
+                      <span>অ্যাপ ইনস্টল করুন</span>
                     </motion.button>
 
                     <motion.button
@@ -122,7 +146,7 @@ export function WelcomeModal({
                 </motion.div>
               ) : (
                 <motion.div
-                  key="apk"
+                  key="guide"
                   initial={{ opacity: 0, x: 10 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 10 }}
@@ -132,63 +156,94 @@ export function WelcomeModal({
                   <div className="space-y-2">
                     <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-teal-100 text-teal-800 text-xs font-semibold">
                       <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
-                      <span>ওপেন সোর্স সফটওয়্যার</span>
+                      <span>ওপেন সোর্স ওয়েব অ্যাপ (PWA)</span>
                     </div>
 
                     <h2
                       id="welcome-modal-title"
                       className="text-lg font-bold tracking-tight text-slate-900"
                     >
-                      Ilhamify Android APK ডাউনলোড
+                      হোম স্ক্রিনে Ilhamify যুক্ত করুন
                     </h2>
 
-                    <p className="text-sm leading-relaxed text-slate-600">
-                      এটি একটি সম্পূর্ণ <strong className="font-semibold text-slate-900">ওপেন সোর্স সফটওয়্যার</strong>। আপনি চাইলে এর সোর্স কোড যাচাই করতে পারেন অথবা সরাসরি APK ফাইল ডাউনলোড করে ফোনে ইনস্টল করতে পারেন।
+                    <p className="text-xs sm:text-sm leading-relaxed text-slate-600">
+                      {isIOS
+                        ? 'iPhone বা iPad-এ Safari ব্রাউজার থেকে সরাসরি হোম স্ক্রিনে অ্যাপটি যুক্ত করতে নিচের ধাপ দুটি অনুসরণ করুন:'
+                        : 'আপনার বর্তমান ব্রাউজারটি স্বয়ংক্রিয় ইনস্টল প্রম্পট দেখায়নি। অনুগ্রহ করে ব্রাউজারের মেনু থেকে সহজেই অ্যাপটি যুক্ত করুন:'}
                     </p>
                   </div>
 
-                  {/* GitHub রিপোজিটরি লিংক */}
-                  <a
-                    href={GITHUB_REPO_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-between gap-3 p-3.5 rounded-xl bg-slate-50 border border-slate-200 hover:border-teal-700 hover:bg-teal-50/70 transition-colors group"
-                  >
-                    <div className="min-w-0">
-                      <div className="text-xs font-semibold text-slate-900">
-                        GitHub রিপোজিটরি (সোর্স কোড)
+                  {isIOS ? (
+                    <ol className="space-y-2.5 text-xs sm:text-sm text-slate-700 bg-slate-50 border border-slate-200 rounded-xl p-3.5">
+                      <li className="flex items-start gap-2">
+                        <span className="font-semibold text-teal-800">১.</span>
+                        <span>
+                          Safari ব্রাউজারের নিচে বা উপরে থাকা{' '}
+                          <strong className="inline-flex items-center gap-1 text-slate-900">
+                            <Share className="w-3.5 h-3.5" /> Share
+                          </strong>{' '}
+                          বাটনে ট্যাপ করুন।
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="font-semibold text-teal-800">২.</span>
+                        <span>
+                          নিচে স্ক্রল করে <strong className="text-slate-900">Add to Home Screen</strong> নির্বাচন করুন।
+                        </span>
+                      </li>
+                    </ol>
+                  ) : (
+                    <div className="space-y-2.5">
+                      <div
+                        className={`p-3 rounded-xl border space-y-1 ${
+                          browserKind === 'brave'
+                            ? 'bg-teal-50/80 border-teal-300'
+                            : 'bg-slate-50 border-slate-200'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 text-xs font-semibold text-slate-900">
+                          <Shield className="w-4 h-4 text-teal-700 shrink-0" />
+                          <span>Brave ব্রাউজারের জন্য:</span>
+                        </div>
+                        <p className="text-xs leading-relaxed text-slate-600">
+                          Brave-এর <strong className="text-slate-900">Shields</strong> আইকন অথবা তিন-ডট মেনু (
+                          <strong className="inline-flex items-center text-slate-900">
+                            <MoreVertical className="w-3 h-3" />
+                          </strong>
+                          ) থেকে <strong className="text-slate-900">Install app</strong> বা{' '}
+                          <strong className="text-slate-900">Add to Home screen</strong> নির্বাচন করুন।
+                        </p>
                       </div>
-                      <div className="text-xs text-slate-500 truncate mt-0.5">
-                        {GITHUB_REPO_URL}
+
+                      <div
+                        className={`p-3 rounded-xl border space-y-1 ${
+                          browserKind === 'firefox'
+                            ? 'bg-teal-50/80 border-teal-300'
+                            : 'bg-slate-50 border-slate-200'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 text-xs font-semibold text-slate-900">
+                          <Compass className="w-4 h-4 text-teal-700 shrink-0" />
+                          <span>Firefox ব্রাউজারের জন্য:</span>
+                        </div>
+                        <p className="text-xs leading-relaxed text-slate-600">
+                          Firefox-এর মেনু (<strong className="text-slate-900">⋮</strong>) খুলে{' '}
+                          <strong className="text-slate-900">Install</strong> অথবা{' '}
+                          <strong className="text-slate-900">Add to Home screen</strong> বাটনে ট্যাপ করুন।
+                        </p>
+                      </div>
+
+                      <div className="p-3 rounded-xl bg-teal-50 border border-teal-200 flex items-start gap-2.5">
+                        <Chrome className="w-4 h-4 text-teal-700 shrink-0 mt-0.5" />
+                        <p className="text-xs leading-relaxed text-teal-900">
+                          <strong className="font-semibold">সবচেয়ে সহজ উপায়:</strong> এক-ট্যাপে অ্যাপ ইনস্টল করতে সাইটটি{' '}
+                          <strong className="font-semibold">Google Chrome</strong> ব্রাউজারে খুলুন।
+                        </p>
                       </div>
                     </div>
-                    <ExternalLink className="w-4 h-4 text-teal-700 shrink-0 group-hover:translate-x-0.5 transition-transform" />
-                  </a>
+                  )}
 
-                  {/* ডাউনলোড বাটন */}
-                  <motion.a
-                    whileTap={{ scale: 0.98 }}
-                    href={APK_DOWNLOAD_URL}
-                    download
-                    className="w-full min-h-[48px] px-4 py-3 text-sm font-semibold text-white bg-teal-700 hover:bg-teal-800 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-xs"
-                  >
-                    <Download className="w-4 h-4 shrink-0" />
-                    <span>APK ফাইল ডাউনলোড করুন</span>
-                  </motion.a>
-
-                  {/* Install unknown apps নোট */}
-                  <div className="p-3 rounded-xl bg-teal-50 border border-teal-200 flex items-start gap-2.5 text-xs leading-relaxed text-slate-700">
-                    <Info className="w-4 h-4 text-teal-700 shrink-0 mt-0.5" />
-                    <span>
-                      নোট: ব্রাউজার থেকে সরাসরি APK ইনস্টল করার সময় প্রয়োজনে ফোনের Settings থেকে{' '}
-                      <strong className="font-semibold text-slate-900">
-                        &ldquo;Install unknown apps&rdquo;
-                      </strong>{' '}
-                      অনুমতি চালু করে নিন।
-                    </span>
-                  </div>
-
-                  {/* পেজ ও ব্রাউজার অ্যাকশন */}
+                  {/* পেছনে যান ও ব্রাউজারে ব্যবহার করুন */}
                   <div className="pt-1 flex flex-col sm:flex-row items-stretch gap-2">
                     <motion.button
                       whileTap={{ scale: 0.98 }}
@@ -204,29 +259,30 @@ export function WelcomeModal({
                       whileTap={{ scale: 0.98 }}
                       type="button"
                       onClick={onClose}
-                      className="flex-1 min-h-[44px] px-4 py-2.5 text-xs sm:text-sm font-semibold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-200 rounded-xl transition-colors flex items-center justify-center gap-1.5 whitespace-nowrap"
+                      className="flex-1 min-h-[44px] px-4 py-2.5 text-xs sm:text-sm font-semibold text-white bg-teal-700 hover:bg-teal-800 rounded-xl transition-colors flex items-center justify-center gap-1.5 whitespace-nowrap"
                     >
                       <Globe className="w-4 h-4 shrink-0" />
                       <span>ব্রাউজারে ব্যবহার করুন</span>
                     </motion.button>
                   </div>
 
-                  {/* সেকেন্ডারি অফিশিয়াল ফেসবুক পেজ লিংক */}
-                  <div className="pt-1 text-center">
+                  {/* সেকেন্ডারি ওপেন-সোর্স GitHub ও ফেসবুক পেজ লিংক */}
+                  <div className="pt-1 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs">
+                    <a
+                      href={GITHUB_REPO_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 font-medium text-teal-700 hover:text-teal-800 underline underline-offset-4 transition-colors"
+                    >
+                      <span>GitHub ওপেন সোর্স</span>
+                      <ExternalLink className="w-3 h-3 shrink-0" />
+                    </a>
                     <a
                       href={ILHAMIFY_FACEBOOK_PAGE_URL}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-xs font-medium text-teal-700 hover:text-teal-800 underline underline-offset-4 transition-colors"
+                      className="inline-flex items-center gap-1 font-medium text-teal-700 hover:text-teal-800 underline underline-offset-4 transition-colors"
                     >
-                      <svg
-                        aria-hidden="true"
-                        viewBox="0 0 24 24"
-                        fill="currentColor"
-                        className="w-3.5 h-3.5 shrink-0"
-                      >
-                        <path d="M13.5 22v-8h2.7l.4-3h-3.1V9.1c0-.9.3-1.5 1.6-1.5h1.6V4.9c-.3 0-1.3-.1-2.4-.1-2.4 0-4 1.4-4 4.1V11H7.5v3h2.8v8h3.2z" />
-                      </svg>
                       <span>Ilhamify ফেসবুক পেজ</span>
                       <ExternalLink className="w-3 h-3 shrink-0" />
                     </a>

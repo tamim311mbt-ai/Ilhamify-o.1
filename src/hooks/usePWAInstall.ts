@@ -8,93 +8,118 @@ interface BeforeInstallPromptEvent extends Event {
 
 export type BrowserInstallKind = 'ios' | 'firefox' | 'brave' | 'chromium' | 'other';
 
+interface PwaStoreState {
+  deferredPrompt: BeforeInstallPromptEvent | null;
+  isInstalled: boolean;
+  browserKind: BrowserInstallKind;
+}
+
+const listeners = new Set<() => void>();
+let initialized = false;
+
+function detectInitialBrowserKind(): BrowserInstallKind {
+  if (typeof window === 'undefined') return 'other';
+  const ua = window.navigator.userAgent || '';
+  if (/iphone|ipad|ipod/i.test(ua)) return 'ios';
+  if (/firefox|fxios/i.test(ua)) return 'firefox';
+  if (/chrome|crios|edg/i.test(ua)) return 'chromium';
+  return 'other';
+}
+
+let state: PwaStoreState = {
+  deferredPrompt: null,
+  isInstalled: isRunningInInstalledAppOrWebView(),
+  browserKind: detectInitialBrowserKind(),
+};
+
+function emitChange() {
+  listeners.forEach((listener) => listener());
+}
+
+function setState(patch: Partial<PwaStoreState>) {
+  state = { ...state, ...patch };
+  emitChange();
+}
+
+function initPwaListeners() {
+  if (initialized || typeof window === 'undefined') return;
+  initialized = true;
+
+  const ua = window.navigator.userAgent || '';
+  const isIOSDevice = /iphone|ipad|ipod/i.test(ua);
+  const isFirefox = /firefox|fxios/i.test(ua);
+
+  const navWithBrave = window.navigator as Navigator & {
+    brave?: { isBrave?: () => Promise<boolean> };
+  };
+  if (!isIOSDevice && !isFirefox && typeof navWithBrave.brave?.isBrave === 'function') {
+    navWithBrave.brave
+      .isBrave()
+      .then((isBraveBrowser) => {
+        if (isBraveBrowser) {
+          setState({ browserKind: 'brave' });
+        }
+      })
+      .catch(() => {});
+  }
+
+  const standaloneQuery = window.matchMedia('(display-mode: standalone)');
+  standaloneQuery.addEventListener?.('change', () => {
+    if (isRunningInInstalledAppOrWebView()) {
+      setState({ isInstalled: true, deferredPrompt: null });
+    }
+  });
+
+  window.addEventListener('beforeinstallprompt', (e: Event) => {
+    e.preventDefault();
+    setState({ deferredPrompt: e as BeforeInstallPromptEvent });
+  });
+
+  window.addEventListener('appinstalled', () => {
+    setState({ isInstalled: true, deferredPrompt: null });
+  });
+}
+
+if (typeof window !== 'undefined') {
+  initPwaListeners();
+}
+
 export function usePWAInstall() {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isInstalled, setIsInstalled] = useState<boolean>(() => isRunningInInstalledAppOrWebView());
-  const [browserKind, setBrowserKind] = useState<BrowserInstallKind>('other');
+  const [snapshot, setSnapshot] = useState<PwaStoreState>(state);
 
   useEffect(() => {
-    let active = true;
-    setIsInstalled(isRunningInInstalledAppOrWebView());
-
-    const ua = window.navigator.userAgent || '';
-    const isIOSDevice = /iphone|ipad|ipod/i.test(ua);
-    const isFirefox = /firefox|fxios/i.test(ua);
-
-    if (isIOSDevice) {
-      setBrowserKind('ios');
-    } else if (isFirefox) {
-      setBrowserKind('firefox');
-    } else if (/chrome|crios|edg/i.test(ua)) {
-      setBrowserKind('chromium');
-    }
-
-    // Brave ব্রাউজার শনাক্তকরণ (Brave UA-তে Chrome দেখালেও navigator.brave থাকে)
-    const navWithBrave = window.navigator as Navigator & {
-      brave?: { isBrave?: () => Promise<boolean> };
-    };
-    if (!isIOSDevice && !isFirefox && typeof navWithBrave.brave?.isBrave === 'function') {
-      navWithBrave.brave
-        .isBrave()
-        .then((isBraveBrowser) => {
-          if (active && isBraveBrowser) {
-            setBrowserKind('brave');
-          }
-        })
-        .catch(() => {});
-    }
-
-    const standaloneQuery = window.matchMedia('(display-mode: standalone)');
-    const handleDisplayModeChange = () => {
-      if (isRunningInInstalledAppOrWebView()) {
-        setIsInstalled(true);
-      }
-    };
-
-    const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
-    };
-
-    const handleAppInstalled = () => {
-      setIsInstalled(true);
-      setDeferredPrompt(null);
-    };
-
-    standaloneQuery.addEventListener?.('change', handleDisplayModeChange);
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('appinstalled', handleAppInstalled);
-
+    initPwaListeners();
+    setSnapshot(state);
+    const onStoreChange = () => setSnapshot(state);
+    listeners.add(onStoreChange);
     return () => {
-      active = false;
-      standaloneQuery.removeEventListener?.('change', handleDisplayModeChange);
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', handleAppInstalled);
+      listeners.delete(onStoreChange);
     };
   }, []);
 
   const install = async (): Promise<'accepted' | 'dismissed' | 'unavailable'> => {
-    if (!deferredPrompt) return 'unavailable';
+    const promptEvent = state.deferredPrompt;
+    if (!promptEvent) return 'unavailable';
     try {
-      await deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      setDeferredPrompt(null);
+      await promptEvent.prompt();
+      const { outcome } = await promptEvent.userChoice;
+      setState({ deferredPrompt: null });
       if (outcome === 'accepted') {
-        setIsInstalled(true);
+        setState({ isInstalled: true });
         return 'accepted';
       }
       return 'dismissed';
     } catch {
-      setDeferredPrompt(null);
+      setState({ deferredPrompt: null });
       return 'unavailable';
     }
   };
 
   return {
-    isInstallable: Boolean(deferredPrompt),
-    isInstalled,
-    isIOS: browserKind === 'ios',
-    browserKind,
+    isInstallable: Boolean(snapshot.deferredPrompt),
+    isInstalled: snapshot.isInstalled,
+    isIOS: snapshot.browserKind === 'ios',
+    browserKind: snapshot.browserKind,
     install,
   };
 }
