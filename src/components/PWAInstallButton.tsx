@@ -1,4 +1,4 @@
-import { Download, MoreVertical, Share, X } from 'lucide-react';
+import { Chrome, Compass, Download, MoreVertical, Share, Shield, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useState } from 'react';
 import { usePWAInstall } from '../hooks/usePWAInstall';
@@ -8,7 +8,7 @@ interface PWAInstallButtonProps {
 }
 
 export function PWAInstallButton({ compact = false }: PWAInstallButtonProps) {
-  const { isInstallable, isInstalled, isIOS, install } = usePWAInstall();
+  const { isInstallable, isInstalled, isIOS, browserKind, install } = usePWAInstall();
   const [showInstallGuide, setShowInstallGuide] = useState(false);
 
   // অ্যাপ ইতিমধ্যে standalone মোডে বা WebView-তে চললে ইনস্টল বাটন দেখাবেন না
@@ -18,9 +18,9 @@ export function PWAInstallButton({ compact = false }: PWAInstallButtonProps) {
 
   const handleInstallClick = async () => {
     if (isInstallable) {
-      const accepted = await install();
-      if (!accepted) {
-        setShowInstallGuide(false);
+      const result = await install();
+      if (result === 'unavailable') {
+        setShowInstallGuide(true);
       }
       return;
     }
@@ -50,7 +50,7 @@ export function PWAInstallButton({ compact = false }: PWAInstallButtonProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.16 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4"
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/50 p-0 sm:p-4"
             role="dialog"
             aria-modal="true"
             aria-labelledby="pwa-install-guide-title"
@@ -59,13 +59,13 @@ export function PWAInstallButton({ compact = false }: PWAInstallButtonProps) {
             }}
           >
             <motion.div
-              initial={{ opacity: 0, scale: 0.96, y: 8 }}
+              initial={{ opacity: 0, scale: 0.96, y: 12 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.96, y: 8 }}
+              exit={{ opacity: 0, scale: 0.96, y: 12 }}
               transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-              className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl border border-slate-200"
+              className="w-full sm:max-w-md max-h-[90vh] overflow-y-auto rounded-t-3xl sm:rounded-2xl bg-white p-5 sm:p-6 shadow-xl border border-slate-200"
             >
-              <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start justify-between gap-3 pb-3.5 border-b border-slate-100">
                 <div className="flex items-center gap-3">
                   <img
                     src={`${import.meta.env.BASE_URL}apple-touch-icon.png`}
@@ -77,12 +77,12 @@ export function PWAInstallButton({ compact = false }: PWAInstallButtonProps) {
                       id="pwa-install-guide-title"
                       className="text-base font-semibold text-slate-900"
                     >
-                      হোম স্ক্রিনে Ilhamify যুক্ত করুন
+                      হোম স্ক্রিনে Ilhamify ইনস্টল করুন
                     </h3>
                     <p className="text-xs text-slate-500">
                       {isIOS
                         ? 'iPhone ও iPad-এ সহজেই ব্যবহার করুন'
-                        : 'সরাসরি অ্যাপ হিসেবে ইনস্টল করুন'}
+                        : 'স্বয়ংক্রিয় পপআপ না এলে নিচের ধাপগুলো অনুসরণ করুন'}
                     </p>
                   </div>
                 </div>
@@ -116,25 +116,59 @@ export function PWAInstallButton({ compact = false }: PWAInstallButtonProps) {
                   </li>
                 </ol>
               ) : (
-                <ol className="mt-4 space-y-2.5 text-sm text-slate-700">
-                  <li className="flex items-start gap-2">
-                    <span className="font-semibold text-teal-800">১.</span>
-                    <span>
-                      এই ব্রাউজারটি স্বয়ংক্রিয় ইনস্টল পপআপ দেয়নি। ব্রাউজারের উপরে ডানদিকের{' '}
-                      <strong className="inline-flex items-center gap-0.5 text-slate-900">
-                        <MoreVertical className="w-3.5 h-3.5" /> মেনু
-                      </strong>{' '}
-                      আইকনে ট্যাপ করুন বা অ্যাড্রেস বারের ইনস্টল আইকনে ক্লিক করুন।
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="font-semibold text-teal-800">২.</span>
-                    <span>
-                      তালিকা থেকে <strong className="text-slate-900">Install app</strong> বা{' '}
+                <div className="mt-4 space-y-3 text-sm text-slate-700">
+                  {/* Brave নির্দেশনা */}
+                  <div
+                    className={`p-3.5 rounded-xl border space-y-1.5 ${
+                      browserKind === 'brave'
+                        ? 'bg-teal-50/80 border-teal-300'
+                        : 'bg-slate-50 border-slate-200'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 text-xs font-semibold text-slate-900">
+                      <Shield className="w-4 h-4 text-teal-700 shrink-0" />
+                      <span>Brave ব্রাউজারে ইনস্টল করতে:</span>
+                    </div>
+                    <p className="text-xs leading-relaxed text-slate-600">
+                      Brave Shields চালু থাকলে স্বয়ংক্রিয় ইনস্টল প্রম্পট বন্ধ থাকতে পারে। ব্রাউজারের{' '}
+                      <strong className="text-slate-900">Shields</strong> আইকন অথবা উপরে/নিচে থাকা তিন-ডট মেনু (
+                      <strong className="inline-flex items-center text-slate-900">
+                        <MoreVertical className="w-3 h-3" />
+                      </strong>
+                      ) থেকে{' '}
+                      <strong className="text-slate-900">Install app</strong> বা{' '}
                       <strong className="text-slate-900">Add to Home screen</strong> বেছে নিন।
-                    </span>
-                  </li>
-                </ol>
+                    </p>
+                  </div>
+
+                  {/* Firefox নির্দেশনা */}
+                  <div
+                    className={`p-3.5 rounded-xl border space-y-1.5 ${
+                      browserKind === 'firefox'
+                        ? 'bg-teal-50/80 border-teal-300'
+                        : 'bg-slate-50 border-slate-200'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 text-xs font-semibold text-slate-900">
+                      <Compass className="w-4 h-4 text-teal-700 shrink-0" />
+                      <span>Firefox ব্রাউজারে ইনস্টল করতে:</span>
+                    </div>
+                    <p className="text-xs leading-relaxed text-slate-600">
+                      Firefox-এর ব্রাউজার মেনু (<strong className="text-slate-900">⋮</strong>) খুলে{' '}
+                      <strong className="text-slate-900">Install</strong> অথবা{' '}
+                      <strong className="text-slate-900">Add to Home screen</strong> অপশনে ট্যাপ করুন।
+                    </p>
+                  </div>
+
+                  {/* Chrome সুপারিশ */}
+                  <div className="p-3.5 rounded-xl bg-teal-50 border border-teal-200 flex items-start gap-2.5">
+                    <Chrome className="w-4 h-4 text-teal-700 shrink-0 mt-0.5" />
+                    <p className="text-xs leading-relaxed text-teal-900">
+                      <strong className="font-semibold">পরামর্শ:</strong> সবচেয়ে মসৃণ ও এক-ক্লিক অ্যাপ ইনস্টল অভিজ্ঞতার জন্য সাইটটি{' '}
+                      <strong className="font-semibold">Google Chrome</strong> ব্রাউজারে খুলে ব্যবহার করুন।
+                    </p>
+                  </div>
+                </div>
               )}
 
               <button
