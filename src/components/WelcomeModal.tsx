@@ -1,19 +1,19 @@
 import {
   ArrowLeft,
+  Check,
   CheckCircle2,
   Chrome,
-  Compass,
+  Copy,
   Download,
   ExternalLink,
   Globe,
-  MoreVertical,
   Share,
-  Shield,
   ShieldCheck,
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { usePWAInstall } from '../hooks/usePWAInstall';
+import { copyTextToClipboard } from '../utils/appEnvironment';
 
 const GITHUB_REPO_URL = 'https://github.com/tamim311mbt-ai/Ilhamify-o.1';
 const ILHAMIFY_FACEBOOK_PAGE_URL = 'https://www.facebook.com/Ilhamify.com.bd';
@@ -30,7 +30,14 @@ export function WelcomeModal({
   onClose,
 }: WelcomeModalProps) {
   const [view, setView] = useState<'initial' | 'guide'>('initial');
-  const { isInstallable, isInstalled, isIOS, browserKind, install } = usePWAInstall();
+  const [copied, setCopied] = useState(false);
+  const { isInstallable, isInstalled, isIOS, install } = usePWAInstall();
+
+  useEffect(() => {
+    if (!copied) return;
+    const timer = window.setTimeout(() => setCopied(false), 2400);
+    return () => window.clearTimeout(timer);
+  }, [copied]);
 
   if (isInstalled) {
     return null;
@@ -52,10 +59,22 @@ export function WelcomeModal({
     setView('guide');
   };
 
+  const handleCopyLink = async () => {
+    const targetUrl =
+      typeof window !== 'undefined'
+        ? window.location.href
+        : 'https://tamim311mbt-ai.github.io/Ilhamify-o.1/';
+    const ok = await copyTextToClipboard(targetUrl);
+    if (ok) {
+      setCopied(true);
+    }
+  };
+
   return (
     <AnimatePresence
       onExitComplete={() => {
         setView('initial');
+        setCopied(false);
       }}
     >
       {open && (
@@ -163,87 +182,54 @@ export function WelcomeModal({
                       id="welcome-modal-title"
                       className="text-lg font-bold tracking-tight text-slate-900"
                     >
-                      হোম স্ক্রিনে Ilhamify যুক্ত করুন
+                      Google Chrome-এ অ্যাপ ইনস্টল করুন
                     </h2>
+                  </div>
 
-                    <p className="text-xs sm:text-sm leading-relaxed text-slate-600">
-                      {isIOS
-                        ? 'iPhone বা iPad-এ Safari ব্রাউজার থেকে সরাসরি হোম স্ক্রিনে অ্যাপটি যুক্ত করতে নিচের ধাপ দুটি অনুসরণ করুন:'
-                        : 'আপনার বর্তমান ব্রাউজারটি স্বয়ংক্রিয় ইনস্টল প্রম্পট দেখায়নি। অনুগ্রহ করে ব্রাউজারের মেনু থেকে সহজেই অ্যাপটি যুক্ত করুন:'}
+                  <div className="p-3.5 rounded-xl bg-teal-50 border border-teal-200 flex items-start gap-2.5">
+                    <Chrome className="w-5 h-5 text-teal-700 shrink-0 mt-0.5" />
+                    <p className="text-xs sm:text-sm leading-relaxed text-slate-800">
+                      এই ব্রাউজারে সরাসরি অ্যাপ ইনস্টল সাপোর্ট করছে না। ঝামেলা ছাড়া অ্যাপটি ইনস্টল করতে অনুগ্রহ করে{' '}
+                      <strong className="font-semibold text-teal-900">Google Chrome</strong>{' '}
+                      ব্রাউজারে সাইটটি ওপেন করে{' '}
+                      <strong className="font-semibold text-teal-900">
+                        &lsquo;অ্যাপ ইনস্টল করুন&rsquo;
+                      </strong>{' '}
+                      বাটনে চাপ দিন।
                     </p>
                   </div>
 
-                  {isIOS ? (
-                    <ol className="space-y-2.5 text-xs sm:text-sm text-slate-700 bg-slate-50 border border-slate-200 rounded-xl p-3.5">
-                      <li className="flex items-start gap-2">
-                        <span className="font-semibold text-teal-800">১.</span>
-                        <span>
-                          Safari ব্রাউজারের নিচে বা উপরে থাকা{' '}
-                          <strong className="inline-flex items-center gap-1 text-slate-900">
-                            <Share className="w-3.5 h-3.5" /> Share
-                          </strong>{' '}
-                          বাটনে ট্যাপ করুন।
-                        </span>
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <span className="font-semibold text-teal-800">২.</span>
-                        <span>
-                          নিচে স্ক্রল করে <strong className="text-slate-900">Add to Home Screen</strong> নির্বাচন করুন।
-                        </span>
-                      </li>
-                    </ol>
-                  ) : (
-                    <div className="space-y-2.5">
-                      <div
-                        className={`p-3 rounded-xl border space-y-1 ${
-                          browserKind === 'brave'
-                            ? 'bg-teal-50/80 border-teal-300'
-                            : 'bg-slate-50 border-slate-200'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 text-xs font-semibold text-slate-900">
-                          <Shield className="w-4 h-4 text-teal-700 shrink-0" />
-                          <span>Brave ব্রাউজারের জন্য:</span>
-                        </div>
-                        <p className="text-xs leading-relaxed text-slate-600">
-                          Brave-এর <strong className="text-slate-900">Shields</strong> আইকন অথবা তিন-ডট মেনু (
-                          <strong className="inline-flex items-center text-slate-900">
-                            <MoreVertical className="w-3 h-3" />
-                          </strong>
-                          ) থেকে <strong className="text-slate-900">Install app</strong> বা{' '}
-                          <strong className="text-slate-900">Add to Home screen</strong> নির্বাচন করুন।
-                        </p>
-                      </div>
-
-                      <div
-                        className={`p-3 rounded-xl border space-y-1 ${
-                          browserKind === 'firefox'
-                            ? 'bg-teal-50/80 border-teal-300'
-                            : 'bg-slate-50 border-slate-200'
-                        }`}
-                      >
-                        <div className="flex items-center gap-2 text-xs font-semibold text-slate-900">
-                          <Compass className="w-4 h-4 text-teal-700 shrink-0" />
-                          <span>Firefox ব্রাউজারের জন্য:</span>
-                        </div>
-                        <p className="text-xs leading-relaxed text-slate-600">
-                          Firefox-এর মেনু (<strong className="text-slate-900">⋮</strong>) খুলে{' '}
-                          <strong className="text-slate-900">Install</strong> অথবা{' '}
-                          <strong className="text-slate-900">Add to Home screen</strong> বাটনে ট্যাপ করুন।
-                        </p>
-                      </div>
-
-                      <div className="p-3 rounded-xl bg-teal-50 border border-teal-200 flex items-start gap-2.5">
-                        <Chrome className="w-4 h-4 text-teal-700 shrink-0 mt-0.5" />
-                        <p className="text-xs leading-relaxed text-teal-900">
-                          <strong className="font-semibold">সবচেয়ে সহজ উপায়:</strong> এক-ট্যাপে অ্যাপ ইনস্টল করতে সাইটটি{' '}
-                          <strong className="font-semibold">Google Chrome</strong> ব্রাউজারে খুলুন।
-                        </p>
-                      </div>
+                  {isIOS && (
+                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs leading-relaxed text-slate-700">
+                      iPhone/iPad-এ Safari ব্যবহার করলে নিচের{' '}
+                      <strong className="inline-flex items-center gap-0.5 text-slate-900">
+                        <Share className="w-3 h-3" /> Share
+                      </strong>{' '}
+                      মেনু থেকে <strong className="text-slate-900">Add to Home Screen</strong> নির্বাচন করেও যুক্ত করতে পারবেন।
                     </div>
                   )}
 
-                  {/* পেছনে যান ও ব্রাউজারে ব্যবহার করুন */}
+                  {/* লিংক কপি করুন */}
+                  <motion.button
+                    whileTap={{ scale: 0.98 }}
+                    type="button"
+                    onClick={handleCopyLink}
+                    className="w-full min-h-[46px] px-4 py-2.5 text-sm font-semibold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-300 rounded-xl transition-colors flex items-center justify-center gap-2"
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="w-4 h-4 text-emerald-700 shrink-0" />
+                        <span className="text-emerald-800">লিংক কপি হয়েছে! Chrome-এ পেস্ট করুন</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-4 h-4 shrink-0" />
+                        <span>লিংক কপি করুন</span>
+                      </>
+                    )}
+                  </motion.button>
+
+                  {/* পেছনে যান ও ঠিক আছে / ব্রাউজারে ব্যবহার করুন */}
                   <div className="pt-1 flex flex-col sm:flex-row items-stretch gap-2">
                     <motion.button
                       whileTap={{ scale: 0.98 }}
@@ -262,7 +248,7 @@ export function WelcomeModal({
                       className="flex-1 min-h-[44px] px-4 py-2.5 text-xs sm:text-sm font-semibold text-white bg-teal-700 hover:bg-teal-800 rounded-xl transition-colors flex items-center justify-center gap-1.5 whitespace-nowrap"
                     >
                       <Globe className="w-4 h-4 shrink-0" />
-                      <span>ব্রাউজারে ব্যবহার করুন</span>
+                      <span>ঠিক আছে, ব্রাউজারে চালান</span>
                     </motion.button>
                   </div>
 
