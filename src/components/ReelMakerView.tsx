@@ -127,6 +127,7 @@ export function ReelMakerView({
   const isFirstRenderRef = useRef(true);
   const exportCancelRef = useRef<boolean>(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const exportRafRef = useRef<number | null>(null);
   const exportTimerRef = useRef<number | null>(null);
   const exportStreamRef = useRef<MediaStream | null>(null);
   const exportAudioCtxRef = useRef<AudioContext | null>(null);
@@ -182,6 +183,10 @@ export function ReelMakerView({
   }, [audioFileUrl]);
 
   const cleanupExportResources = () => {
+    if (exportRafRef.current !== null) {
+      window.cancelAnimationFrame(exportRafRef.current);
+      exportRafRef.current = null;
+    }
     if (exportTimerRef.current !== null) {
       window.clearTimeout(exportTimerRef.current);
       exportTimerRef.current = null;
@@ -503,19 +508,20 @@ export function ReelMakerView({
     const TARGET_FPS = 30;
     const FRAME_INTERVAL_MS = 1000 / TARGET_FPS;
 
-    let canvasStream = recordCanvas.captureStream(0);
-    let rawVideoTrack = canvasStream.getVideoTracks()[0] as
+    const canvasStream = recordCanvas.captureStream(TARGET_FPS);
+    const rawVideoTrack = canvasStream.getVideoTracks()[0] as
       | (MediaStreamTrack & { requestFrame?: () => void })
       | undefined;
-    const supportsManualFrame = typeof rawVideoTrack?.requestFrame === 'function';
 
-    if (!supportsManualFrame) {
-      canvasStream.getTracks().forEach((t) => t.stop());
-      canvasStream = recordCanvas.captureStream(TARGET_FPS);
-      rawVideoTrack = canvasStream.getVideoTracks()[0] as
-        | (MediaStreamTrack & { requestFrame?: () => void })
-        | undefined;
-    }
+    const pushFrame = () => {
+      if (typeof rawVideoTrack?.requestFrame === 'function') {
+        try {
+          rawVideoTrack.requestFrame();
+        } catch {
+          // captureStream(30) নিজেই ফ্রেম ক্যাপচার করলে উপেক্ষা করুন
+        }
+      }
+    };
 
     const streamTracks: MediaStreamTrack[] = [];
     if (rawVideoTrack) streamTracks.push(rawVideoTrack);
@@ -621,60 +627,46 @@ export function ReelMakerView({
     };
 
     const startTime = performance.now();
-    let frameIndex = 0;
+    let nextFrameAt = startTime + FRAME_INTERVAL_MS;
     let lastReportedPercent = 0;
 
     activeRecorder.start(100);
     if (audioSource) {
       audioSource.start(0, 0, settings.duration + 0.25);
     }
-    if (supportsManualFrame) {
-      rawVideoTrack?.requestFrame?.();
-    }
+    pushFrame();
 
-    const scheduleStep = () => {
+    const renderTick = () => {
       if (exportCancelRef.current) {
+        exportRafRef.current = null;
         if (activeRecorder.state !== 'inactive') {
           activeRecorder.stop();
         }
         return;
       }
 
-      const elapsed = performance.now() - startTime;
-      const p = Math.min(1, elapsed / totalMs);
+      const now = performance.now();
+      const elapsed = now - startTime;
 
-      renderReelFrame({
-        ctx,
-        width,
-        height,
-        caption,
-        attribution,
-        theme,
-        typography,
-        settings,
-        brandKit,
-        logoImage,
-        progress: p,
-      });
-
-      if (supportsManualFrame) {
-        rawVideoTrack?.requestFrame?.();
-      }
-
-      const nextPct = Math.min(99, Math.round(p * 100));
-      if (nextPct !== lastReportedPercent) {
-        lastReportedPercent = nextPct;
-        setExportProgress(nextPct);
-      }
-
-      if (elapsed < totalMs) {
-        frameIndex += 1;
-        const nextTarget = startTime + frameIndex * FRAME_INTERVAL_MS;
-        const delay = Math.max(0, nextTarget - performance.now());
-        exportTimerRef.current = window.setTimeout(scheduleStep, delay);
-      } else {
+      if (elapsed >= totalMs) {
+        exportRafRef.current = null;
+        renderReelFrame({
+          ctx,
+          width,
+          height,
+          caption,
+          attribution,
+          theme,
+          typography,
+          settings,
+          brandKit,
+          logoImage,
+          progress: 1,
+        });
+        pushFrame();
         setExportProgress(100);
-        // শেষ ফ্রেম এবং অডিও স্ট্রিম কনটেইনারে ফ্লাশ হওয়ার জন্য ১৫০ মি.সে. টেইল
+
+        // শেষ ফ্রেম এবং অডিও স্ট্রিম কনটেইনারে ফ্লাশ হওয়ার জন্য ১৮০ মি.সে. টেইল
         exportTimerRef.current = window.setTimeout(() => {
           if (exportCancelRef.current) {
             if (activeRecorder.state !== 'inactive') {
@@ -682,9 +674,7 @@ export function ReelMakerView({
             }
             return;
           }
-          if (supportsManualFrame) {
-            rawVideoTrack?.requestFrame?.();
-          }
+          pushFrame();
           recordedDurationMs = Math.max(
             totalMs,
             Math.min(totalMs + 400, Math.round(performance.now() - startTime))
@@ -692,16 +682,50 @@ export function ReelMakerView({
           if (activeRecorder.state !== 'inactive') {
             activeRecorder.stop();
           }
-        }, 150);
+        }, 180);
+        return;
       }
+
+      if (now >= nextFrameAt - 2) {
+        while (nextFrameAt <= now + 2) {
+          nextFrameAt += FRAME_INTERVAL_MS;
+        }
+
+        const p = Math.min(1, elapsed / totalMs);
+        renderReelFrame({
+          ctx,
+          width,
+          height,
+          caption,
+          attribution,
+          theme,
+          typography,
+          settings,
+          brandKit,
+          logoImage,
+          progress: p,
+        });
+        pushFrame();
+
+        const nextPct = Math.min(99, Math.round(p * 100));
+        if (nextPct !== lastReportedPercent) {
+          lastReportedPercent = nextPct;
+          setExportProgress(nextPct);
+        }
+      }
+
+      exportRafRef.current = window.requestAnimationFrame(renderTick);
     };
 
-    frameIndex = 1;
-    exportTimerRef.current = window.setTimeout(scheduleStep, FRAME_INTERVAL_MS);
+    exportRafRef.current = window.requestAnimationFrame(renderTick);
   };
 
   const handleCancelExport = () => {
     exportCancelRef.current = true;
+    if (exportRafRef.current !== null) {
+      window.cancelAnimationFrame(exportRafRef.current);
+      exportRafRef.current = null;
+    }
     if (exportTimerRef.current !== null) {
       window.clearTimeout(exportTimerRef.current);
       exportTimerRef.current = null;

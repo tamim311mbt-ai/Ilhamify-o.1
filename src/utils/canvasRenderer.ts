@@ -410,19 +410,35 @@ export function renderReelFrame({
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, width, height);
   } else {
-    const grad = ctx.createRadialGradient(
-      width * 0.5,
-      height * 0.38,
-      0,
-      width * 0.5,
-      height * 0.38,
-      width * 0.75
-    );
+    const gx = width * (0.5 + 0.16 * wave);
+    const gy = height * (0.38 + 0.1 * cosWave);
+    const glowRadius = width * (0.72 + 0.08 * Math.sin(clampedP * Math.PI * 2));
+    const grad = ctx.createRadialGradient(gx, gy, 0, gx, gy, glowRadius);
     grad.addColorStop(0, theme.glowColor);
     grad.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, width, height);
   }
+
+  // পুরো সময়কাল জুড়ে হালকা শ্বাস-প্রশ্বাসের মতো অ্যাম্বিয়েন্ট আলো
+  const ambientAlpha = 0.025 + 0.02 * (0.5 + 0.5 * Math.sin(clampedP * Math.PI * 4));
+  const ambientGrad = ctx.createRadialGradient(
+    width * (0.5 - 0.12 * cosWave),
+    height * (0.52 + 0.08 * wave),
+    0,
+    width * 0.5,
+    height * 0.5,
+    width * 0.9
+  );
+  ambientGrad.addColorStop(
+    0,
+    theme.isDark
+      ? `rgba(255, 255, 255, ${ambientAlpha.toFixed(4)})`
+      : `rgba(78, 114, 114, ${ambientAlpha.toFixed(4)})`
+  );
+  ambientGrad.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = ambientGrad;
+  ctx.fillRect(0, 0, width, height);
   ctx.restore();
 
   if (settings.showParticles) {
@@ -467,7 +483,7 @@ export function renderReelFrame({
 
   const textScale =
     settings.motionStyle === 'breathing'
-      ? 1 + 0.018 * Math.sin(clampedP * Math.PI)
+      ? 1 + 0.016 * Math.sin(clampedP * Math.PI * 2)
       : 1;
 
   ctx.save();
@@ -533,4 +549,24 @@ export function renderReelFrame({
   ctx.restore();
 
   drawWatermarks(ctx, width, height, theme, brandKit, logoImage);
+
+  // নিচে মসৃণ প্রগ্রেস বার: ক্যাপশন অ্যানিমেশন শেষ হলেও পুরো দৈর্ঘ্য জুড়ে ফ্রেম পরিবর্তন নিশ্চিত করে
+  const barHeight = Math.max(4, Math.round(6 * scale));
+  const barY = height - barHeight;
+  const fillWidth = Math.max(2 * scale, width * clampedP);
+
+  ctx.save();
+  ctx.fillStyle = theme.isDark ? 'rgba(255, 255, 255, 0.16)' : 'rgba(15, 23, 42, 0.12)';
+  ctx.fillRect(0, barY, width, barHeight);
+
+  ctx.globalAlpha = 0.92;
+  ctx.fillStyle = theme.accentColor;
+  ctx.fillRect(0, barY, fillWidth, barHeight);
+
+  ctx.globalAlpha = 0.75;
+  ctx.fillStyle = theme.textColor;
+  ctx.beginPath();
+  ctx.arc(Math.min(width - barHeight * 0.6, fillWidth), barY + barHeight / 2, barHeight * 0.65, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
 }
