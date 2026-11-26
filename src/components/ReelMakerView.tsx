@@ -29,6 +29,7 @@ import {
 import { formatBanglaSeconds, toBanglaNumber } from '../utils/banglaDigits';
 import { renderReelFrame } from '../utils/canvasRenderer';
 import { fixWebmDuration } from '../utils/fixWebmDuration';
+import { exportReelMp4 } from '../utils/mp4Exporter';
 
 interface ReelMakerViewProps {
   caption: string;
@@ -58,23 +59,25 @@ interface VideoMimeCandidate {
 function getSupportedVideoMimeCandidates(hasAudio: boolean): VideoMimeCandidate[] {
   if (typeof MediaRecorder === 'undefined') return [];
 
+  // Chrome/Android-এ MediaRecorder-এর video/mp4 ফ্র্যাগমেন্টেড MP4 তৈরি করে যা Facebook কেটে দেয়;
+  // তাই WebM (যার Duration ও Segment মেটাডেটা ঠিক করা যায়) আগে রাখুন এবং Safari-তে MP4 ফ্যালব্যাক থাকবে।
   const candidates: VideoMimeCandidate[] = hasAudio
     ? [
-        { mimeType: 'video/mp4;codecs=avc1.42E01E,mp4a.40.2', ext: 'mp4' },
-        { mimeType: 'video/mp4;codecs=avc1,mp4a', ext: 'mp4' },
         { mimeType: 'video/webm;codecs=vp9,opus', ext: 'webm' },
         { mimeType: 'video/webm;codecs=vp8,opus', ext: 'webm' },
         { mimeType: 'video/webm;codecs=vp9', ext: 'webm' },
         { mimeType: 'video/webm;codecs=vp8', ext: 'webm' },
         { mimeType: 'video/webm', ext: 'webm' },
+        { mimeType: 'video/mp4;codecs=avc1.42E01E,mp4a.40.2', ext: 'mp4' },
+        { mimeType: 'video/mp4;codecs=avc1,mp4a', ext: 'mp4' },
         { mimeType: 'video/mp4', ext: 'mp4' },
       ]
     : [
-        { mimeType: 'video/mp4;codecs=avc1.42E01E', ext: 'mp4' },
-        { mimeType: 'video/mp4', ext: 'mp4' },
         { mimeType: 'video/webm;codecs=vp9', ext: 'webm' },
         { mimeType: 'video/webm;codecs=vp8', ext: 'webm' },
         { mimeType: 'video/webm', ext: 'webm' },
+        { mimeType: 'video/mp4;codecs=avc1.42E01E', ext: 'mp4' },
+        { mimeType: 'video/mp4', ext: 'mp4' },
       ];
 
   return candidates.filter((c) => MediaRecorder.isTypeSupported(c.mimeType));
@@ -392,8 +395,13 @@ export function ReelMakerView({
 
   const handleExportVideo = async () => {
     const testCanvas = document.createElement('canvas');
+    const canWebCodecs =
+      typeof VideoEncoder === 'function' && typeof VideoFrame === 'function';
     const initialCandidates = getSupportedVideoMimeCandidates(Boolean(audioFileUrl));
-    if (initialCandidates.length === 0 || typeof testCanvas.captureStream !== 'function') {
+    const canMediaRecorder =
+      initialCandidates.length > 0 && typeof testCanvas.captureStream === 'function';
+
+    if (!canWebCodecs && !canMediaRecorder) {
       setExportState('unsupported');
       setExportStatusMessage(
         'আপনার বর্তমান ব্রাউজারে সরাসরি ভিডিও রেকর্ডিং সমর্থিত নয়। চাইলে ৯:১৬ ছবি হিসেবে ডাউনলোড করতে পারেন।'
@@ -433,12 +441,134 @@ export function ReelMakerView({
 
     const width = settings.resolution === '1080p' ? 1080 : 720;
     const height = settings.resolution === '1080p' ? 1920 : 1280;
+    const videoBitrate = settings.resolution === '1080p' ? 6_000_000 : 3_800_000;
 
+    const triggerReadyDownload = (blob: Blob, ext: 'mp4' | 'webm') => {
+      const url = URL.createObjectURL(blob);
+      setExportedVideoUrl(url);
+      setExportExt(ext);
+      setExportState('ready');
+      setExportProgress(100);
+      setExportStatusMessage(
+        `ভিডিও প্রস্তুত (${settings.resolution === '1080p' ? '১০৮০পি ফুল এইচডি' : '৭২০পি এইচডি'})`
+      );
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ilhamify-reel-${settings.duration}s-${Date.now()}.${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => onDownloadComplete?.(), 500);
+    };
+
+    // অডিও থাকলে একবারই ডিকোড করুন (WebCodecs ও MediaRecorder উভয় পথেই ব্যবহারের জন্য)
+    let decodedAudio: AudioBuffer | null = null;
+    if (audioFileUrl) {
+      try {
+        const AudioCtx =
+          window.AudioContext ||
+          (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+        if (AudioCtx) {
+          const audioCtx = new AudioCtx();
+          exportAudioCtxRef.current = audioCtx;
+          const res = await fetch(audioFileUrl);
+          const arrayBuf = await res.arrayBuffer();
+          decodedAudio = await audioCtx.decodeAudioData(arrayBuf);
+
+          if (exportCancelRef.current) {
+            cleanupExportResources();
+            setExportState('idle');
+            setExportProgress(0);
+            setExportStatusMessage('');
+            return;
+          }
+        }
+      } catch {
+        if (exportAudioCtxRef.current) {
+          exportAudioCtxRef.current.close().catch(() => {});
+          exportAudioCtxRef.current = null;
+        }
+        decodedAudio = null;
+      }
+    }
+
+    // ধাপ ১ (প্রাথমিক): WebCodecs + mp4-muxer দিয়ে নির্ভুল ৩০fps ও Fast-Start MP4 রপ্তানি
+    if (canWebCodecs) {
+      try {
+        let lastMp4Pct = 0;
+        const mp4Blob = await exportReelMp4({
+          width,
+          height,
+          durationSeconds: settings.duration,
+          fps: 30,
+          videoBitrate,
+          audioBuffer: decodedAudio,
+          renderFrame: (frameCtx, p) => {
+            renderReelFrame({
+              ctx: frameCtx,
+              width,
+              height,
+              caption,
+              attribution,
+              theme,
+              typography,
+              settings,
+              brandKit,
+              logoImage,
+              progress: p,
+            });
+          },
+          onProgress: (pct) => {
+            if (pct !== lastMp4Pct) {
+              lastMp4Pct = pct;
+              setExportProgress(pct);
+            }
+          },
+          isCancelled: () => exportCancelRef.current,
+        });
+
+        if (exportCancelRef.current) {
+          cleanupExportResources();
+          setExportState('idle');
+          setExportProgress(0);
+          setExportStatusMessage('');
+          return;
+        }
+
+        if (mp4Blob) {
+          cleanupExportResources();
+          triggerReadyDownload(mp4Blob, 'mp4');
+          return;
+        }
+      } catch {
+        if (exportCancelRef.current) {
+          cleanupExportResources();
+          setExportState('idle');
+          setExportProgress(0);
+          setExportStatusMessage('');
+          return;
+        }
+        // WebCodecs ব্যর্থ হলে নিচের MediaRecorder ফ্যালব্যাক চলবে
+      }
+    }
+
+    if (!canMediaRecorder) {
+      cleanupExportResources();
+      setExportState('unsupported');
+      setExportStatusMessage(
+        'আপনার বর্তমান ব্রাউজারে সরাসরি ভিডিও রেকর্ডিং সমর্থিত নয়। চাইলে ৯:১৬ ছবি হিসেবে ডাউনলোড করতে পারেন।'
+      );
+      return;
+    }
+
+    // ধাপ ২ (ফ্যালব্যাক): MediaRecorder + প্রতি rAF টিক-এ অবিরাম ফ্রেম ড্রয়িং + WebM মেটাডেটা মেরামত
     const recordCanvas = document.createElement('canvas');
     recordCanvas.width = width;
     recordCanvas.height = height;
     const ctx = recordCanvas.getContext('2d');
     if (!ctx) {
+      cleanupExportResources();
       setExportState('error');
       setExportStatusMessage('ভিডিও ক্যানভাস চালু করা যায়নি।');
       return;
@@ -459,46 +589,23 @@ export function ReelMakerView({
       progress: 0,
     });
 
-    // অডিও থাকলে ডিকোড করে MediaStreamAudioDestinationNode তৈরি করুন
     let audioTrack: MediaStreamTrack | null = null;
     let audioSource: AudioBufferSourceNode | null = null;
 
-    if (audioFileUrl) {
+    if (decodedAudio && exportAudioCtxRef.current) {
       try {
-        const AudioCtx =
-          window.AudioContext ||
-          (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-        if (AudioCtx) {
-          const audioCtx = new AudioCtx();
-          exportAudioCtxRef.current = audioCtx;
-          const res = await fetch(audioFileUrl);
-          const arrayBuf = await res.arrayBuffer();
-          const decoded = await audioCtx.decodeAudioData(arrayBuf);
+        const audioCtx = exportAudioCtxRef.current;
+        const dest = audioCtx.createMediaStreamDestination();
+        const source = audioCtx.createBufferSource();
+        source.buffer = decodedAudio;
+        source.loop = decodedAudio.duration > 0 && decodedAudio.duration < settings.duration + 0.3;
+        source.connect(dest);
+        await audioCtx.resume();
 
-          if (exportCancelRef.current) {
-            cleanupExportResources();
-            setExportState('idle');
-            setExportStatusMessage('');
-            return;
-          }
-
-          const dest = audioCtx.createMediaStreamDestination();
-          const source = audioCtx.createBufferSource();
-          source.buffer = decoded;
-          source.loop = decoded.duration > 0 && decoded.duration < settings.duration + 0.3;
-          source.connect(dest);
-          await audioCtx.resume();
-
-          audioTrack = dest.stream.getAudioTracks()[0] ?? null;
-          audioSource = source;
-          exportAudioSourceRef.current = source;
-        }
+        audioTrack = dest.stream.getAudioTracks()[0] ?? null;
+        audioSource = source;
+        exportAudioSourceRef.current = source;
       } catch {
-        // অডিও ডিকোড না হলে ভিডিও-অনলি মোডে নিরাপদে ফ্যালব্যাক করুন
-        if (exportAudioCtxRef.current) {
-          exportAudioCtxRef.current.close().catch(() => {});
-          exportAudioCtxRef.current = null;
-        }
         audioTrack = null;
         audioSource = null;
         exportAudioSourceRef.current = null;
@@ -506,8 +613,6 @@ export function ReelMakerView({
     }
 
     const TARGET_FPS = 30;
-    const FRAME_INTERVAL_MS = 1000 / TARGET_FPS;
-
     const canvasStream = recordCanvas.captureStream(TARGET_FPS);
     const rawVideoTrack = canvasStream.getVideoTracks()[0] as
       | (MediaStreamTrack & { requestFrame?: () => void })
@@ -540,7 +645,7 @@ export function ReelMakerView({
       try {
         const options: MediaRecorderOptions = {
           mimeType: candidate.mimeType,
-          videoBitsPerSecond: settings.resolution === '1080p' ? 6_000_000 : 3_800_000,
+          videoBitsPerSecond: videoBitrate,
           ...(hasAudioTrack ? { audioBitsPerSecond: 128_000 } : {}),
         };
         recorder = new MediaRecorder(combinedStream, options);
@@ -600,21 +705,7 @@ export function ReelMakerView({
         }
       }
 
-      const url = URL.createObjectURL(finalBlob);
-      setExportedVideoUrl(url);
-      setExportState('ready');
-      setExportProgress(100);
-      setExportStatusMessage(
-        `ভিডিও প্রস্তুত (${settings.resolution === '1080p' ? '১০৮০পি ফুল এইচডি' : '৭২০পি এইচডি'})`
-      );
-
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `ilhamify-reel-${settings.duration}s-${Date.now()}.${activeMime.ext}`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(() => onDownloadComplete?.(), 500);
+      triggerReadyDownload(finalBlob, activeMime.ext);
     };
 
     activeRecorder.onerror = () => {
@@ -627,10 +718,9 @@ export function ReelMakerView({
     };
 
     const startTime = performance.now();
-    let nextFrameAt = startTime + FRAME_INTERVAL_MS;
     let lastReportedPercent = 0;
 
-    activeRecorder.start(100);
+    activeRecorder.start(250);
     if (audioSource) {
       audioSource.start(0, 0, settings.duration + 0.25);
     }
@@ -647,26 +737,37 @@ export function ReelMakerView({
 
       const now = performance.now();
       const elapsed = now - startTime;
+      const p = Math.min(1, elapsed / totalMs);
 
-      if (elapsed >= totalMs) {
+      // প্রতিটি rAF টিক-এ অবিরাম ফ্রেম ড্র করে নির্ধারিত সময় শেষ হওয়া পর্যন্ত স্ট্রিম সচল রাখুন
+      renderReelFrame({
+        ctx,
+        width,
+        height,
+        caption,
+        attribution,
+        theme,
+        typography,
+        settings,
+        brandKit,
+        logoImage,
+        progress: p,
+      });
+      pushFrame();
+
+      const nextPct = Math.min(99, Math.round(p * 100));
+      if (nextPct !== lastReportedPercent) {
+        lastReportedPercent = nextPct;
+        setExportProgress(nextPct);
+      }
+
+      if (elapsed < totalMs) {
+        exportRafRef.current = window.requestAnimationFrame(renderTick);
+      } else {
         exportRafRef.current = null;
-        renderReelFrame({
-          ctx,
-          width,
-          height,
-          caption,
-          attribution,
-          theme,
-          typography,
-          settings,
-          brandKit,
-          logoImage,
-          progress: 1,
-        });
-        pushFrame();
         setExportProgress(100);
 
-        // শেষ ফ্রেম এবং অডিও স্ট্রিম কনটেইনারে ফ্লাশ হওয়ার জন্য ১৮০ মি.সে. টেইল
+        // শেষ ফ্রেম এবং অডিও স্ট্রিম কনটেইনারে ফ্লাশ হওয়ার জন্য ২০০ মি.সে. টেইল
         exportTimerRef.current = window.setTimeout(() => {
           if (exportCancelRef.current) {
             if (activeRecorder.state !== 'inactive') {
@@ -682,39 +783,8 @@ export function ReelMakerView({
           if (activeRecorder.state !== 'inactive') {
             activeRecorder.stop();
           }
-        }, 180);
-        return;
+        }, 200);
       }
-
-      if (now >= nextFrameAt - 2) {
-        while (nextFrameAt <= now + 2) {
-          nextFrameAt += FRAME_INTERVAL_MS;
-        }
-
-        const p = Math.min(1, elapsed / totalMs);
-        renderReelFrame({
-          ctx,
-          width,
-          height,
-          caption,
-          attribution,
-          theme,
-          typography,
-          settings,
-          brandKit,
-          logoImage,
-          progress: p,
-        });
-        pushFrame();
-
-        const nextPct = Math.min(99, Math.round(p * 100));
-        if (nextPct !== lastReportedPercent) {
-          lastReportedPercent = nextPct;
-          setExportProgress(nextPct);
-        }
-      }
-
-      exportRafRef.current = window.requestAnimationFrame(renderTick);
     };
 
     exportRafRef.current = window.requestAnimationFrame(renderTick);

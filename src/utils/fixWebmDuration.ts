@@ -1,7 +1,8 @@
 /**
- * Browser MediaRecorder WebM ফাইলগুলোতে প্রায়ই Segment > Info > Duration হেডার অনুপস্থিত থাকে,
- * ফলে Facebook বা প্লেয়ার ভিডিওর আসল দৈর্ঘ্য ভুলভাবে পড়ে।
- * এই ইউটিলিটি প্রথম দিকের EBML হেডার বিশ্লেষণ করে সঠিক Duration (মিলিসেকেন্ডে) যুক্ত করে।
+ * Browser MediaRecorder WebM ফাইলগুলোতে প্রায়ই Segment আকার unknown (-1),
+ * Info > Duration অনুপস্থিত, কিংবা প্রথম Cluster Timecode শূন্যের বদলে অফসেট থাকতে পারে।
+ * ফলে Facebook বা প্লেয়ার ভিডিওর আসল দৈর্ঘ্য ভুলভাবে পড়ে বা কেটে দেয়।
+ * এই ইউটিলিটি EBML হেডার, Segment আকার, Duration ও Cluster Timecode ঠিক করে।
  */
 
 interface VintResult {
@@ -82,6 +83,14 @@ function readUint(bytes: Uint8Array, offset: number, length: number): number {
   return val;
 }
 
+function writeUintInPlace(bytes: Uint8Array, offset: number, length: number, value: number) {
+  let remaining = Math.max(0, Math.round(value));
+  for (let i = offset + length - 1; i >= offset; i -= 1) {
+    bytes[i] = remaining & 0xff;
+    remaining = Math.floor(remaining / 256);
+  }
+}
+
 function writeFloat64BE(value: number): Uint8Array<ArrayBuffer> {
   const buf = new ArrayBuffer(8);
   new DataView(buf).setFloat64(0, value, false);
@@ -93,14 +102,71 @@ const ID_SEGMENT = 0x18538067;
 const ID_INFO = 0x1549a966;
 const ID_TIMECODE_SCALE = 0x2ad7b1;
 const ID_DURATION = 0x4489;
+const ID_CLUSTER = 0x1f43b675;
+const ID_CLUSTER_TIMECODE = 0xe7;
+
+function normalizeClusterTimecodesInPlace(bytes: Uint8Array, segDataStart: number) {
+  let cursor = segDataStart;
+  let firstTimecode: number | null = null;
+
+  while (cursor < bytes.length) {
+    const elId = readElementId(bytes, cursor);
+    if (!elId) break;
+    const sizeOffset = cursor + elId.length;
+    const elSize = readVint(bytes, sizeOffset);
+    if (!elSize) break;
+    const dataStart = sizeOffset + elSize.length;
+
+    if (elId.id === ID_CLUSTER) {
+      let inner = dataStart;
+      const limit = elSize.isUnknown ? bytes.length : Math.min(bytes.length, dataStart + elSize.value);
+      while (inner < limit) {
+        const childId = readElementId(bytes, inner);
+        if (!childId) break;
+        const childSizeOffset = inner + childId.length;
+        const childSize = readVint(bytes, childSizeOffset);
+        if (!childSize || childSize.isUnknown) break;
+        const childDataStart = childSizeOffset + childSize.length;
+        const childEnd = childDataStart + childSize.value;
+        if (childEnd > bytes.length) break;
+
+        if (childId.id === ID_CLUSTER_TIMECODE && childSize.value >= 1 && childSize.value <= 8) {
+          const tc = readUint(bytes, childDataStart, childSize.value);
+          if (firstTimecode === null) {
+            firstTimecode = tc;
+            if (firstTimecode === 0) {
+              // প্রথম ক্লাস্টার আগে থেকেই ০ থেকে শুরু হলে কোনো পরিবর্তনের প্রয়োজন নেই
+              return;
+            }
+          }
+          if (firstTimecode > 0 && tc >= firstTimecode) {
+            writeUintInPlace(bytes, childDataStart, childSize.value, tc - firstTimecode);
+          }
+          break;
+        }
+        inner = childEnd;
+      }
+    }
+
+    if (elSize.isUnknown) {
+      // unknown-size ক্লাস্টার হলে ভেতরে পরবর্তী ক্লাস্টার খোঁজার দরকার নেই
+      if (elId.id === ID_CLUSTER) break;
+      break;
+    }
+    const nextCursor = dataStart + elSize.value;
+    if (nextCursor <= cursor) break;
+    cursor = nextCursor;
+  }
+}
 
 export async function fixWebmDuration(blob: Blob, durationMs: number): Promise<Blob> {
   if (!Number.isFinite(durationMs) || durationMs <= 0) return blob;
 
   try {
-    // EBML ও Segment > Info হেডার সাধারণত প্রথম ৬৪ কিলোবাইটের মধ্যেই থাকে
-    const headSliceSize = Math.min(blob.size, 65536);
-    const headBuffer = await blob.slice(0, headSliceSize).arrayBuffer();
+    // 64MB পর্যন্ত পুরো বাফার পড়লে Segment আকার + Duration + Cluster Timecode সব ঠিক করা যায়
+    const readFull = blob.size <= 64 * 1024 * 1024;
+    const sliceSize = readFull ? blob.size : Math.min(blob.size, 65536);
+    const headBuffer = await blob.slice(0, sliceSize).arrayBuffer();
     const bytes = new Uint8Array(headBuffer);
 
     let pos = 0;
@@ -161,18 +227,27 @@ export async function fixWebmDuration(blob: Blob, durationMs: number): Promise<B
           infoCursor = propDataEnd;
         }
 
+        if (readFull) {
+          normalizeClusterTimecodesInPlace(bytes, segDataStart);
+        }
+
         const scaledDuration = (durationMs * 1_000_000) / timecodeScale;
 
         // আগে থেকেই Duration ফিল্ড থাকলে সরাসরি একই জায়গায় লিখে দিন
         if (existingDurationOffset !== null) {
-          const patchedBuf = headBuffer.slice(0);
-          const view = new DataView(patchedBuf);
+          const view = new DataView(headBuffer);
           if (existingDurationSize === 8) {
             view.setFloat64(existingDurationOffset, scaledDuration, false);
           } else {
             view.setFloat32(existingDurationOffset, scaledDuration, false);
           }
-          return new Blob([patchedBuf, blob.slice(headSliceSize)], { type: blob.type });
+          if (segSize.isUnknown && segSize.length === 8) {
+            const exactSegPayload = blob.size - segDataStart;
+            bytes.set(encodeVint(exactSegPayload, 8), segSizeOffset);
+          }
+          return readFull
+            ? new Blob([headBuffer], { type: blob.type })
+            : new Blob([headBuffer, blob.slice(sliceSize)], { type: blob.type });
         }
 
         // Duration এলিমেন্ট না থাকলে Info-এর শেষে ১১ বাইট যুক্ত করুন
@@ -187,9 +262,19 @@ export async function fixWebmDuration(blob: Blob, durationMs: number): Promise<B
         const infoSizeDelta = newInfoSizeBytes.length - childSize.length;
         const totalDelta = durationElement.length + infoSizeDelta;
 
-        const newSegSizeBytes: Uint8Array<ArrayBuffer> = segSize.isUnknown
-          ? new Uint8Array(headBuffer.slice(segSizeOffset, segSizeOffset + segSize.length))
-          : encodeVint(segSize.value + totalDelta, segSize.length);
+        let newSegSizeBytes: Uint8Array<ArrayBuffer>;
+        if (segSize.isUnknown) {
+          if (segSize.length === 8) {
+            const exactSegPayload = blob.size - segDataStart + totalDelta;
+            newSegSizeBytes = encodeVint(exactSegPayload, 8);
+          } else {
+            newSegSizeBytes = new Uint8Array(
+              headBuffer.slice(segSizeOffset, segSizeOffset + segSize.length)
+            );
+          }
+        } else {
+          newSegSizeBytes = encodeVint(segSize.value + totalDelta, segSize.length);
+        }
 
         const parts: BlobPart[] = [
           headBuffer.slice(0, segSizeOffset),
@@ -199,8 +284,10 @@ export async function fixWebmDuration(blob: Blob, durationMs: number): Promise<B
           headBuffer.slice(childDataStart, childEnd),
           durationElement,
           headBuffer.slice(childEnd),
-          blob.slice(headSliceSize),
         ];
+        if (!readFull) {
+          parts.push(blob.slice(sliceSize));
+        }
 
         return new Blob(parts, { type: blob.type });
       }
