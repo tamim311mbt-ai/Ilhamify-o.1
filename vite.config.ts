@@ -24,6 +24,10 @@ export default defineConfig(() => {
         ],
         workbox: {
           globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+          cleanupOutdatedCaches: true,
+          skipWaiting: true,
+          clientsClaim: true,
+          ignoreURLParametersMatching: [/^utm_/, /^fbclid$/],
           navigateFallbackDenylist: [/google5b2a47092cf8bd1f\.html$/],
           runtimeCaching: [
             {

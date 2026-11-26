@@ -11,6 +11,7 @@ import {
   Pause,
   Play,
   RotateCcw,
+  Share2,
   Sparkles,
   Stamp,
   Trash2,
@@ -112,8 +113,15 @@ export function ReelMakerView({
   >('idle');
   const [exportProgress, setExportProgress] = useState<number>(0);
   const [exportedVideoUrl, setExportedVideoUrl] = useState<string | null>(null);
+  const [exportedVideoBlob, setExportedVideoBlob] = useState<Blob | null>(null);
+  const [exportedFileName, setExportedFileName] = useState<string>('');
   const [exportedExt, setExportExt] = useState<'mp4' | 'webm'>('webm');
   const [exportStatusMessage, setExportStatusMessage] = useState<string>('');
+  const [isSharing, setIsSharing] = useState<boolean>(false);
+  const [shareFeedback, setShareFeedback] = useState<{
+    type: 'success' | 'info' | 'error';
+    message: string;
+  } | null>(null);
 
   const [audioFileUrl, setAudioFileUrl] = useState<string | null>(null);
   const [audioFileName, setAudioFileName] = useState<string>('');
@@ -418,6 +426,9 @@ export function ReelMakerView({
       URL.revokeObjectURL(exportedVideoUrl);
       setExportedVideoUrl(null);
     }
+    setExportedVideoBlob(null);
+    setExportedFileName('');
+    setShareFeedback(null);
 
     cleanupExportResources();
     exportCancelRef.current = false;
@@ -444,8 +455,11 @@ export function ReelMakerView({
     const videoBitrate = settings.resolution === '1080p' ? 6_000_000 : 3_800_000;
 
     const triggerReadyDownload = (blob: Blob, ext: 'mp4' | 'webm') => {
+      const fileName = `ilhamify-reel-${settings.duration}s-${Date.now()}.${ext}`;
       const url = URL.createObjectURL(blob);
       setExportedVideoUrl(url);
+      setExportedVideoBlob(blob);
+      setExportedFileName(fileName);
       setExportExt(ext);
       setExportState('ready');
       setExportProgress(100);
@@ -455,7 +469,7 @@ export function ReelMakerView({
 
       const a = document.createElement('a');
       a.href = url;
-      a.download = `ilhamify-reel-${settings.duration}s-${Date.now()}.${ext}`;
+      a.download = fileName;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -810,6 +824,81 @@ export function ReelMakerView({
     }
   };
 
+  const canShareVideoFile = useMemo(() => {
+    if (
+      !exportedVideoBlob ||
+      typeof navigator === 'undefined' ||
+      typeof navigator.share !== 'function' ||
+      typeof navigator.canShare !== 'function'
+    ) {
+      return false;
+    }
+    try {
+      const cleanMime = exportedExt === 'mp4' ? 'video/mp4' : 'video/webm';
+      const probeFile = new File(
+        [exportedVideoBlob],
+        exportedFileName || `ilhamify-reel.${exportedExt}`,
+        { type: cleanMime }
+      );
+      return navigator.canShare({ files: [probeFile] });
+    } catch {
+      return false;
+    }
+  }, [exportedVideoBlob, exportedExt, exportedFileName]);
+
+  const handleShareVideo = async () => {
+    if (!exportedVideoBlob || isSharing) return;
+    setShareFeedback(null);
+
+    if (
+      typeof navigator === 'undefined' ||
+      typeof navigator.share !== 'function' ||
+      !canShareVideoFile
+    ) {
+      setShareFeedback({
+        type: 'info',
+        message:
+          'আপনার বর্তমান ব্রাউজারে সরাসরি ফাইল শেয়ার সমর্থিত নয়। অনুগ্রহ করে "ফাইল সেভ করুন" থেকে ভিডিওটি সংরক্ষণ করে WhatsApp, Facebook বা Instagram-এ শেয়ার করুন।',
+      });
+      return;
+    }
+
+    const cleanMime = exportedExt === 'mp4' ? 'video/mp4' : 'video/webm';
+    const fileName = exportedFileName || `ilhamify-reel-${settings.duration}s.${exportedExt}`;
+    const videoFile = new File([exportedVideoBlob], fileName, { type: cleanMime });
+
+    setIsSharing(true);
+    try {
+      try {
+        await navigator.share({
+          files: [videoFile],
+          title: 'Ilhamify রিল ভিডিও',
+        });
+      } catch (innerErr) {
+        if (innerErr instanceof Error && innerErr.name === 'AbortError') {
+          return;
+        }
+        // কিছু মোবাইল ব্রাউজার title ছাড়া শুধু files গ্রহণ করে
+        await navigator.share({ files: [videoFile] });
+      }
+      setShareFeedback({
+        type: 'success',
+        message: 'রিল ভিডিওটি সফলভাবে শেয়ার করা হয়েছে।',
+      });
+    } catch (err) {
+      if (err instanceof Error && err.name === 'AbortError') {
+        return;
+      }
+      setShareFeedback({
+        type: 'error',
+        message:
+          'সরাসরি শেয়ার সম্পন্ন করা যায়নি। "ফাইল সেভ করুন" থেকে ভিডিওটি সেভ করে WhatsApp, Facebook বা Instagram-এ আপলোড করুন।',
+      });
+    } finally {
+      setIsSharing(false);
+    }
+  };
+
   const handleDownloadFallbackFrame = () => {
     const offscreen = document.createElement('canvas');
     offscreen.width = 1080;
@@ -954,54 +1043,84 @@ export function ReelMakerView({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -4 }}
                   transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
-                  className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3"
+                  className="space-y-2.5"
                 >
-                  <div className="text-xs text-slate-500">
-                    {exportState === 'ready' ? (
-                      <span className="text-emerald-700 font-medium flex items-center gap-1.5">
-                        <Check className="w-4 h-4 shrink-0" />
-                        {exportStatusMessage}
-                      </span>
-                    ) : exportState === 'unsupported' || exportState === 'error' ? (
-                      <span className="text-amber-700 font-medium">{exportStatusMessage}</span>
-                    ) : (
-                      <span>সরাসরি ব্রাউজার থেকেই ৯:১৬ রিল ভিডিও রেন্ডার ও ডাউনলোড হবে।</span>
-                    )}
-                  </div>
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                    <div className="text-xs text-slate-500">
+                      {exportState === 'ready' ? (
+                        <span className="text-emerald-700 font-medium flex items-center gap-1.5">
+                          <Check className="w-4 h-4 shrink-0" />
+                          {exportStatusMessage}
+                        </span>
+                      ) : exportState === 'unsupported' || exportState === 'error' ? (
+                        <span className="text-amber-700 font-medium">{exportStatusMessage}</span>
+                      ) : (
+                        <span>সরাসরি ব্রাউজার থেকেই ৯:১৬ রিল ভিডিও রেন্ডার ও ডাউনলোড হবে।</span>
+                      )}
+                    </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
-                    {exportState === 'ready' && exportedVideoUrl && (
-                      <a
-                        href={exportedVideoUrl}
-                        download={`ilhamify-reel-${settings.duration}s.${exportedExt}`}
-                        className="min-h-[46px] px-4 py-2.5 text-sm font-semibold text-teal-800 bg-teal-50 border border-teal-200 rounded-xl hover:bg-teal-100 transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
-                      >
-                        <Download className="w-4 h-4" />
-                        ফাইল সেভ করুন
-                      </a>
-                    )}
+                    <div className="flex flex-wrap items-center justify-end gap-2 shrink-0">
+                      {exportState === 'ready' && exportedVideoBlob && (
+                        <motion.button
+                          whileTap={{ scale: 0.97 }}
+                          type="button"
+                          onClick={handleShareVideo}
+                          disabled={isSharing}
+                          className="flex-1 sm:flex-initial min-h-[46px] px-4 py-2.5 text-sm font-semibold text-teal-800 bg-teal-50 border border-teal-300 rounded-xl hover:bg-teal-100 disabled:opacity-60 transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
+                        >
+                          <Share2 className="w-4 h-4" />
+                          {isSharing ? 'শেয়ার হচ্ছে...' : 'শেয়ার করুন'}
+                        </motion.button>
+                      )}
 
-                    {exportState === 'unsupported' && (
-                      <button
+                      {exportState === 'ready' && exportedVideoUrl && (
+                        <a
+                          href={exportedVideoUrl}
+                          download={exportedFileName || `ilhamify-reel-${settings.duration}s.${exportedExt}`}
+                          className="flex-1 sm:flex-initial min-h-[46px] px-4 py-2.5 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
+                        >
+                          <Download className="w-4 h-4" />
+                          ফাইল সেভ করুন
+                        </a>
+                      )}
+
+                      {exportState === 'unsupported' && (
+                        <button
+                          type="button"
+                          onClick={handleDownloadFallbackFrame}
+                          className="min-h-[46px] px-4 py-2.5 text-sm font-semibold text-slate-900 bg-slate-100 border border-slate-200 rounded-xl hover:bg-slate-200 transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
+                        >
+                          <Download className="w-4 h-4" />
+                          ছবি ডাউনলোড করুন
+                        </button>
+                      )}
+
+                      <motion.button
+                        whileTap={{ scale: 0.97 }}
                         type="button"
-                        onClick={handleDownloadFallbackFrame}
-                        className="min-h-[46px] px-4 py-2.5 text-sm font-semibold text-slate-900 bg-slate-100 border border-slate-200 rounded-xl hover:bg-slate-200 transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
+                        onClick={handleExportVideo}
+                        className="w-full sm:w-auto min-h-[46px] px-5 py-2.5 text-sm font-semibold text-white bg-teal-700 rounded-xl hover:bg-teal-800 transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
                       >
-                        <Download className="w-4 h-4" />
-                        ছবি ডাউনলোড করুন
-                      </button>
-                    )}
-
-                    <motion.button
-                      whileTap={{ scale: 0.97 }}
-                      type="button"
-                      onClick={handleExportVideo}
-                      className="min-h-[46px] px-5 py-2.5 text-sm font-semibold text-white bg-teal-700 rounded-xl hover:bg-teal-800 transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
-                    >
-                      <Film className="w-4 h-4" />
-                      ভিডিও ডাউনলোড করুন
-                    </motion.button>
+                        <Film className="w-4 h-4" />
+                        ভিডিও ডাউনলোড করুন
+                      </motion.button>
+                    </div>
                   </div>
+
+                  {shareFeedback && (
+                    <p
+                      role="status"
+                      className={`text-xs leading-relaxed px-3 py-2 rounded-lg border ${
+                        shareFeedback.type === 'success'
+                          ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                          : shareFeedback.type === 'error'
+                            ? 'bg-amber-50 text-amber-800 border-amber-200'
+                            : 'bg-teal-50 text-teal-800 border-teal-200'
+                      }`}
+                    >
+                      {shareFeedback.message}
+                    </p>
+                  )}
                 </motion.div>
               )}
               </AnimatePresence>
