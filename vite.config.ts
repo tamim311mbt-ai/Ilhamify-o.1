@@ -28,7 +28,11 @@ export default defineConfig(() => {
           skipWaiting: true,
           clientsClaim: true,
           ignoreURLParametersMatching: [/^utm_/, /^fbclid$/],
-          navigateFallbackDenylist: [/google5b2a47092cf8bd1f\.html$/],
+          navigateFallbackDenylist: [
+            /google5b2a47092cf8bd1f\.html$/,
+            /sitemap\.xml$/i,
+            /robots\.txt$/i,
+          ],
           runtimeCaching: [
             {
               urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,

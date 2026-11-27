@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://tamim311mbt-ai.github.io/Ilhamify-o.1/sitemap.xml
