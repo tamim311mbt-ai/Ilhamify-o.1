@@ -6,7 +6,6 @@ import {
   Check,
   Clapperboard,
   Download,
-  Palette,
   Stamp,
   Type,
 } from 'lucide-react';
@@ -15,6 +14,7 @@ import { useLoadedImage } from '../hooks/useLoadedImage';
 import { BrandKitState, CardSettings } from '../types/studio';
 import { toBanglaNumber } from '../utils/banglaDigits';
 import { renderQuoteCard } from '../utils/canvasRenderer';
+import { ThemeSelectorGrid } from './ThemeSelectorGrid';
 
 interface CardStudioViewProps {
   caption: string;
@@ -270,49 +270,14 @@ export function CardStudioView({
             </div>
           </section>
 
-          {/* ব্যাকগ্রাউন্ড প্যালেট */}
-          <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
-                <Palette className="w-4 h-4 text-slate-500" />
-                ব্যাকগ্রাউন্ড ও গ্রেডিয়েন্ট
-              </h2>
-              <span className="text-xs text-slate-500">{theme.name}</span>
-            </div>
-            <div className="grid grid-cols-5 gap-2.5">
-              {BACKGROUND_THEMES.map((t) => {
-                const active = settings.themeId === t.id;
-                const bgStyle =
-                  t.kind === 'solid' || t.colors.length === 1
-                    ? t.colors[0]
-                    : `linear-gradient(${t.angle ?? 145}deg, ${t.colors.join(', ')})`;
-
-                return (
-                  <button
-                    key={t.id}
-                    type="button"
-                    title={t.name}
-                    aria-label={t.name}
-                    onClick={() =>
-                      setSettings((s) => ({ ...s, themeId: t.id, customTextColor: null }))
-                    }
-                    className={`h-11 rounded-xl border transition-transform active:scale-95 flex items-center justify-center ${
-                      active
-                        ? 'ring-2 ring-teal-700 ring-offset-2 border-slate-300'
-                        : 'border-slate-200 hover:scale-[1.03]'
-                    }`}
-                    style={{ background: bgStyle }}
-                  >
-                    {active && (
-                      <Check
-                        className={`w-4 h-4 ${t.isDark ? 'text-white' : 'text-slate-900'}`}
-                      />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </section>
+          {/* ব্যাকগ্রাউন্ড ও গ্রেডিয়েন্ট */}
+          <ThemeSelectorGrid
+            selectedThemeId={settings.themeId}
+            activeTheme={theme}
+            onSelectTheme={(themeId) =>
+              setSettings((s) => ({ ...s, themeId, customTextColor: null }))
+            }
+          />
 
           {/* বাংলা টাইপোগ্রাফি */}
           <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4">

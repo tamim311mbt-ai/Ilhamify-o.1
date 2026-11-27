@@ -51,14 +51,22 @@ export interface TypographyPreset {
 export interface BackgroundTheme {
   id: string;
   name: string;
-  kind: 'solid' | 'gradient';
+  kind: 'solid' | 'gradient' | 'radial';
   colors: string[];
+  stops?: number[];
   angle?: number;
+  ambientHighlight?: {
+    color: string;
+    x: number;
+    y: number;
+    radius?: number;
+  };
   textColor: string;
   mutedColor: string;
   accentColor: string;
   glowColor: string;
   isDark: boolean;
+  isPremium?: boolean;
 }
 
 export type WatermarkPosition =

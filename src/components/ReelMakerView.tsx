@@ -7,7 +7,6 @@ import {
   Download,
   Film,
   Music,
-  Palette,
   Pause,
   Play,
   RotateCcw,
@@ -31,6 +30,7 @@ import { formatBanglaSeconds, toBanglaNumber } from '../utils/banglaDigits';
 import { renderReelFrame } from '../utils/canvasRenderer';
 import { fixWebmDuration } from '../utils/fixWebmDuration';
 import { exportReelMp4 } from '../utils/mp4Exporter';
+import { ThemeSelectorGrid } from './ThemeSelectorGrid';
 
 interface ReelMakerViewProps {
   caption: string;
@@ -1413,47 +1413,12 @@ export function ReelMakerView({
             )}
           </section>
 
-          {/* ব্যাকগ্রাউন্ড থিম */}
-          <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
-                <Palette className="w-4 h-4 text-slate-500" />
-                ব্যাকগ্রাউন্ড থিম
-              </h2>
-              <span className="text-xs text-slate-500">{theme.name}</span>
-            </div>
-            <div className="grid grid-cols-5 gap-2.5">
-              {BACKGROUND_THEMES.map((t) => {
-                const active = settings.themeId === t.id;
-                const bgStyle =
-                  t.kind === 'solid' || t.colors.length === 1
-                    ? t.colors[0]
-                    : `linear-gradient(${t.angle ?? 145}deg, ${t.colors.join(', ')})`;
-
-                return (
-                  <button
-                    key={t.id}
-                    type="button"
-                    title={t.name}
-                    aria-label={t.name}
-                    onClick={() => setSettings((s) => ({ ...s, themeId: t.id }))}
-                    className={`h-11 rounded-xl border transition-transform active:scale-95 flex items-center justify-center ${
-                      active
-                        ? 'ring-2 ring-teal-700 ring-offset-2 border-slate-300'
-                        : 'border-slate-200 hover:scale-[1.03]'
-                    }`}
-                    style={{ background: bgStyle }}
-                  >
-                    {active && (
-                      <Check
-                        className={`w-4 h-4 ${t.isDark ? 'text-white' : 'text-slate-900'}`}
-                      />
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </section>
+          {/* ব্যাকগ্রাউন্ড ও গ্রেডিয়েন্ট */}
+          <ThemeSelectorGrid
+            selectedThemeId={settings.themeId}
+            activeTheme={theme}
+            onSelectTheme={(themeId) => setSettings((s) => ({ ...s, themeId }))}
+          />
 
           {/* বাংলা ফন্ট ও আকার */}
           <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4">

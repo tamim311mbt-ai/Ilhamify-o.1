@@ -43,6 +43,21 @@ function drawBackground(
   if (theme.kind === 'solid' || theme.colors.length === 1) {
     ctx.fillStyle = theme.colors[0];
     ctx.fillRect(0, 0, width, height);
+  } else if (theme.kind === 'radial') {
+    const cx = width * (theme.ambientHighlight?.x ?? 0.35);
+    const cy = height * (theme.ambientHighlight?.y ?? 0.3);
+    const outerRadius = Math.hypot(width, height) * 0.88;
+    const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, outerRadius);
+    const count = theme.colors.length;
+    theme.colors.forEach((col, i) => {
+      const stop =
+        theme.stops && theme.stops[i] !== undefined
+          ? theme.stops[i]
+          : i / Math.max(1, count - 1);
+      grad.addColorStop(Math.max(0, Math.min(1, stop)), col);
+    });
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, width, height);
   } else {
     const angleRad = ((theme.angle ?? 145) * Math.PI) / 180;
     const cx = width / 2;
@@ -56,9 +71,24 @@ function drawBackground(
     const grad = ctx.createLinearGradient(x0, y0, x1, y1);
     const count = theme.colors.length;
     theme.colors.forEach((col, i) => {
-      grad.addColorStop(i / Math.max(1, count - 1), col);
+      const stop =
+        theme.stops && theme.stops[i] !== undefined
+          ? theme.stops[i]
+          : i / Math.max(1, count - 1);
+      grad.addColorStop(Math.max(0, Math.min(1, stop)), col);
     });
     ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, width, height);
+  }
+
+  if (theme.ambientHighlight) {
+    const hx = width * theme.ambientHighlight.x;
+    const hy = height * theme.ambientHighlight.y;
+    const hr = Math.max(width, height) * (theme.ambientHighlight.radius ?? 0.72);
+    const highlight = ctx.createRadialGradient(hx, hy, 0, hx, hy, hr);
+    highlight.addColorStop(0, theme.ambientHighlight.color);
+    highlight.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = highlight;
     ctx.fillRect(0, 0, width, height);
   }
 
