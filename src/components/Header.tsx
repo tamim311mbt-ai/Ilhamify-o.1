@@ -29,7 +29,7 @@ export function Header({
   return (
     <>
       {/* ডেস্কটপ টপ বার */}
-      <header className="hidden md:block bg-white border-b border-slate-200">
+      <header className="relative z-20 hidden md:block bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between gap-8">
           {/* ব্র্যান্ড নাম ও লোগো */}
           <button
@@ -88,7 +88,7 @@ export function Header({
       </header>
 
       {/* মোবাইল হেডার */}
-      <header className="md:hidden bg-white border-b border-slate-200 px-4 h-14 flex items-center justify-between gap-3">
+      <header className="relative z-20 md:hidden bg-white border-b border-slate-200 px-4 h-14 flex items-center justify-between gap-3">
         <button
           type="button"
           onClick={() => onSelectTab('captions')}

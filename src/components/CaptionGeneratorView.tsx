@@ -23,6 +23,7 @@ import {
   CaptionSubTopic,
 } from '../types/studio';
 import { toBanglaNumber } from '../utils/banglaDigits';
+import { ScrollReveal } from './ScrollReveal';
 
 interface CaptionGeneratorViewProps {
   activeCaption: string;
@@ -438,23 +439,19 @@ export function CaptionGeneratorView({
                   const starred = isFavorite(item.id);
 
                   return (
-                    <motion.article
+                    <ScrollReveal
                       key={item.id}
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{
-                        duration: 0.18,
-                        delay: Math.min(idx * 0.025, 0.12),
-                        ease: [0.16, 1, 0.3, 1],
-                      }}
-                      className={`border rounded-2xl p-5 transition-all duration-300 ${
-                        isNewlyGenerated
-                          ? 'bg-teal-100/75 border-teal-700 ring-2 ring-teal-700/20'
-                          : isSelected
-                          ? 'bg-white border-teal-700 ring-1 ring-teal-700/20'
-                          : 'bg-white border-slate-200'
-                      }`}
+                      delayMs={idx < 3 ? idx * 45 : (idx % 3) * 55}
                     >
+                      <article
+                        className={`border rounded-2xl p-5 transition-colors duration-300 ${
+                          isNewlyGenerated
+                            ? 'bg-teal-100/75 border-teal-700 ring-2 ring-teal-700/20'
+                            : isSelected
+                            ? 'bg-white border-teal-700 ring-1 ring-teal-700/20'
+                            : 'bg-white border-slate-200'
+                        }`}
+                      >
                       {/* মেটাডেটা লাইন ও প্রিয় বাটন */}
                       <div className="flex items-center justify-between gap-4 text-xs text-slate-500 mb-2">
                         <div className="flex flex-wrap items-center gap-2">
@@ -556,7 +553,8 @@ export function CaptionGeneratorView({
                         </motion.button>
                       </div>
                     </div>
-                  </motion.article>
+                  </article>
+                  </ScrollReveal>
                 );
               })
             )}
@@ -565,7 +563,8 @@ export function CaptionGeneratorView({
 
           {/* ক্যাপশন তালিকার নিচে র‍্যান্ডম জেনারেট কন্ট্রোল */}
           {categoryFilter !== 'saved' && (
-            <div className="bg-white border border-slate-200 rounded-2xl p-3.5 sm:p-4 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-2.5">
+            <ScrollReveal>
+              <div className="bg-white border border-slate-200 rounded-2xl p-3.5 sm:p-4 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-2.5">
               <motion.button
                 whileTap={{ scale: 0.98 }}
                 type="button"
@@ -601,12 +600,14 @@ export function CaptionGeneratorView({
                 </motion.button>
               </div>
             </div>
+            </ScrollReveal>
           )}
         </div>
 
         {/* ডান কলাম: কাস্টম ক্যাপশন এডিটর */}
         <aside className="lg:col-span-5 lg:sticky lg:top-6">
-          <div className="bg-white border border-slate-200 rounded-2xl p-5 md:p-6 space-y-5">
+          <ScrollReveal delayMs={60}>
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 md:p-6 space-y-5">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <h2 className="text-base font-semibold text-slate-900">
@@ -734,6 +735,7 @@ export function CaptionGeneratorView({
               </div>
             </div>
           </div>
+          </ScrollReveal>
         </aside>
       </div>
     </div>

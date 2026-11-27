@@ -3,6 +3,7 @@ import { useRef, useState } from 'react';
 import { BrandKitDrawer } from './components/BrandKitDrawer';
 import { CaptionGeneratorView } from './components/CaptionGeneratorView';
 import { CardStudioView } from './components/CardStudioView';
+import { FloatingCaptionsBackdrop } from './components/FloatingCaptionsBackdrop';
 import { Header } from './components/Header';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { ReelMakerView } from './components/ReelMakerView';
@@ -77,7 +78,8 @@ export default function App() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
+      <div className="relative min-h-screen flex flex-col bg-slate-50 text-slate-900 overflow-x-clip">
+        <FloatingCaptionsBackdrop />
         <Header
           activeTab={activeTab}
           onSelectTab={(tab) => {
@@ -88,7 +90,7 @@ export default function App() {
           brandKit={brandKit}
         />
 
-        <main className="flex-1 pb-4 md:pb-8">
+        <main className="relative z-10 flex-1 pb-4 md:pb-8">
           <AnimatePresence mode="wait" initial={false}>
             {activeTab === 'captions' && (
               <motion.div

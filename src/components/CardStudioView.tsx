@@ -14,6 +14,7 @@ import { useLoadedImage } from '../hooks/useLoadedImage';
 import { BrandKitState, CardSettings } from '../types/studio';
 import { toBanglaNumber } from '../utils/banglaDigits';
 import { renderQuoteCard } from '../utils/canvasRenderer';
+import { ScrollReveal } from './ScrollReveal';
 import { ThemeSelectorGrid } from './ThemeSelectorGrid';
 
 interface CardStudioViewProps {
@@ -156,7 +157,8 @@ export function CardStudioView({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* কার্ড প্রিভিউ স্টেজ */}
         <div className="lg:col-span-7 lg:order-2 lg:sticky lg:top-6 space-y-4">
-          <div className="bg-white border border-slate-200 rounded-2xl p-4 md:p-6">
+          <ScrollReveal delayMs={50}>
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 md:p-6">
             <div className="flex items-center justify-between gap-4 pb-4 border-b border-slate-100">
               <div className="text-xs text-slate-500 flex items-center gap-2">
                 <span className="font-semibold text-slate-900">কার্ড প্রিভিউ</span>
@@ -209,6 +211,7 @@ export function CardStudioView({
               </motion.button>
             </div>
           </div>
+          </ScrollReveal>
         </div>
 
         {/* কন্ট্রোল কলাম */}
@@ -221,66 +224,73 @@ export function CardStudioView({
           </div>
 
           {/* ক্যাপশন লেখা */}
-          <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3.5">
-            <h2 className="text-sm font-semibold text-slate-900">কার্ডের লেখা</h2>
-            <textarea
-              rows={3}
-              value={caption}
-              onChange={(e) => onChangeCaption(e.target.value)}
-              placeholder="এখানে বাংলা ক্যাপশন লিখুন..."
-              className="w-full p-3 text-sm leading-relaxed text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:border-teal-700 resize-y"
-            />
-            <input
-              type="text"
-              value={attribution}
-              onChange={(e) => onChangeAttribution(e.target.value)}
-              placeholder="ঐচ্ছিক ছোট শিরোনাম বা সূত্র"
-              className="w-full h-10 px-3 text-sm text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:border-teal-700"
-            />
-          </section>
+          <ScrollReveal>
+            <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3.5">
+              <h2 className="text-sm font-semibold text-slate-900">কার্ডের লেখা</h2>
+              <textarea
+                rows={3}
+                value={caption}
+                onChange={(e) => onChangeCaption(e.target.value)}
+                placeholder="এখানে বাংলা ক্যাপশন লিখুন..."
+                className="w-full p-3 text-sm leading-relaxed text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:border-teal-700 resize-y"
+              />
+              <input
+                type="text"
+                value={attribution}
+                onChange={(e) => onChangeAttribution(e.target.value)}
+                placeholder="ঐচ্ছিক ছোট শিরোনাম বা সূত্র"
+                className="w-full h-10 px-3 text-sm text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:border-teal-700"
+              />
+            </section>
+          </ScrollReveal>
 
           {/* অনুপাত নির্বাচন */}
-          <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3">
-            <h2 className="text-sm font-semibold text-slate-900">কার্ডের মাপ (অনুপাত)</h2>
-            <div className="grid grid-cols-3 gap-2">
-              {ASPECT_RATIOS.map((ratio) => {
-                const active = settings.aspectRatio === ratio.id;
-                return (
-                  <button
-                    key={ratio.id}
-                    type="button"
-                    onClick={() => setSettings((s) => ({ ...s, aspectRatio: ratio.id }))}
-                    className={`min-h-[52px] px-3 py-2 rounded-xl border text-left transition-colors ${
-                      active
-                        ? 'bg-teal-700 text-white border-teal-700'
-                        : 'bg-white text-slate-800 border-slate-200 hover:border-slate-300'
-                    }`}
-                  >
-                    <div className="text-xs font-semibold whitespace-nowrap">{ratio.label}</div>
-                    <div
-                      className={`text-[11px] tabular-nums mt-0.5 ${
-                        active ? 'text-teal-100' : 'text-slate-500'
+          <ScrollReveal delayMs={50}>
+            <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3">
+              <h2 className="text-sm font-semibold text-slate-900">কার্ডের মাপ (অনুপাত)</h2>
+              <div className="grid grid-cols-3 gap-2">
+                {ASPECT_RATIOS.map((ratio) => {
+                  const active = settings.aspectRatio === ratio.id;
+                  return (
+                    <button
+                      key={ratio.id}
+                      type="button"
+                      onClick={() => setSettings((s) => ({ ...s, aspectRatio: ratio.id }))}
+                      className={`min-h-[52px] px-3 py-2 rounded-xl border text-left transition-colors ${
+                        active
+                          ? 'bg-teal-700 text-white border-teal-700'
+                          : 'bg-white text-slate-800 border-slate-200 hover:border-slate-300'
                       }`}
                     >
-                      {ratio.sublabel}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </section>
+                      <div className="text-xs font-semibold whitespace-nowrap">{ratio.label}</div>
+                      <div
+                        className={`text-[11px] tabular-nums mt-0.5 ${
+                          active ? 'text-teal-100' : 'text-slate-500'
+                        }`}
+                      >
+                        {ratio.sublabel}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          </ScrollReveal>
 
           {/* ব্যাকগ্রাউন্ড ও গ্রেডিয়েন্ট */}
-          <ThemeSelectorGrid
-            selectedThemeId={settings.themeId}
-            activeTheme={theme}
-            onSelectTheme={(themeId) =>
-              setSettings((s) => ({ ...s, themeId, customTextColor: null }))
-            }
-          />
+          <ScrollReveal delayMs={70}>
+            <ThemeSelectorGrid
+              selectedThemeId={settings.themeId}
+              activeTheme={theme}
+              onSelectTheme={(themeId) =>
+                setSettings((s) => ({ ...s, themeId, customTextColor: null }))
+              }
+            />
+          </ScrollReveal>
 
           {/* বাংলা টাইপোগ্রাফি */}
-          <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4">
+          <ScrollReveal delayMs={50}>
+            <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4">
             <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
               <Type className="w-4 h-4 text-slate-500" />
               বাংলা ফন্ট ও বিন্যাস
@@ -383,9 +393,11 @@ export function CardStudioView({
               </button>
             </div>
           </section>
+          </ScrollReveal>
 
           {/* কাস্টম নাম ও লোগো */}
-          <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3">
+          <ScrollReveal delayMs={50}>
+            <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3">
             <div className="flex items-center justify-between gap-4">
               <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                 <Stamp className="w-4 h-4 text-slate-500" />
@@ -430,6 +442,7 @@ export function CardStudioView({
               </button>
             </div>
           </section>
+          </ScrollReveal>
         </div>
       </div>
     </div>

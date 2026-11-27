@@ -1,6 +1,7 @@
 import { Eye } from 'lucide-react';
 import { useVisitorCount } from '../hooks/useVisitorCount';
 import { toBanglaNumber } from '../utils/banglaDigits';
+import { ScrollReveal } from './ScrollReveal';
 
 const CREATOR_NAME = 'Motasim Billah Tamim';
 const CREATOR_FACEBOOK_URL = 'https://www.facebook.com/pixelmbt';
@@ -10,8 +11,9 @@ export function SiteFooter() {
   const { count, status } = useVisitorCount();
 
   return (
-    <footer className="border-t border-slate-200 bg-white pb-20 md:pb-5 pt-4 md:pt-5">
-      <div className="max-w-7xl mx-auto px-4 md:px-6 space-y-3">
+    <footer className="relative z-10 border-t border-slate-200 bg-white pb-20 md:pb-5 pt-4 md:pt-5">
+      <ScrollReveal>
+        <div className="max-w-7xl mx-auto px-4 md:px-6 space-y-3">
         {/* উপরের লাইন: ব্র্যান্ড ও লাইভ ভিজিটর কাউন্টার */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
           <div className="flex flex-wrap items-center gap-2.5 text-xs text-slate-500">
@@ -108,6 +110,7 @@ export function SiteFooter() {
           </div>
         </div>
       </div>
+      </ScrollReveal>
     </footer>
   );
 }

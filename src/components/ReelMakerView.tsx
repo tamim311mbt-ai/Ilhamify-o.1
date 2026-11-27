@@ -30,6 +30,7 @@ import { formatBanglaSeconds, toBanglaNumber } from '../utils/banglaDigits';
 import { renderReelFrame } from '../utils/canvasRenderer';
 import { fixWebmDuration } from '../utils/fixWebmDuration';
 import { exportReelMp4 } from '../utils/mp4Exporter';
+import { ScrollReveal } from './ScrollReveal';
 import { ThemeSelectorGrid } from './ThemeSelectorGrid';
 
 interface ReelMakerViewProps {
@@ -939,7 +940,8 @@ export function ReelMakerView({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* ডান/উপর স্টেজ: ৯:১৬ রিল প্রিভিউ ও ভিডিও ডাউনলোড */}
         <div className="lg:col-span-6 lg:order-2 lg:sticky lg:top-6 space-y-4">
-          <div className="bg-white border border-slate-200 rounded-2xl p-4 md:p-6 space-y-4">
+          <ScrollReveal delayMs={50}>
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 md:p-6 space-y-4">
             <div className="flex items-center justify-between gap-4 pb-3 border-b border-slate-100">
               <div className="text-xs text-slate-500 flex items-center gap-2">
                 <span className="font-semibold text-slate-900">৯:১৬ রিল প্রিভিউ</span>
@@ -1126,6 +1128,7 @@ export function ReelMakerView({
               </AnimatePresence>
             </div>
           </div>
+          </ScrollReveal>
         </div>
 
         {/* বাম কন্ট্রোল কলাম */}
@@ -1138,26 +1141,29 @@ export function ReelMakerView({
           </div>
 
           {/* রিলের লেখা */}
-          <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3.5">
-            <h2 className="text-sm font-semibold text-slate-900">রিলের ক্যাপশন</h2>
-            <textarea
-              rows={3}
-              value={caption}
-              onChange={(e) => onChangeCaption(e.target.value)}
-              placeholder="রিল ভিডিওর জন্য বাংলা ক্যাপশন লিখুন..."
-              className="w-full p-3 text-sm leading-relaxed text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:border-teal-700 resize-y"
-            />
-            <input
-              type="text"
-              value={attribution}
-              onChange={(e) => onChangeAttribution(e.target.value)}
-              placeholder="ঐচ্ছিক ছোট শিরোনাম বা সূত্র"
-              className="w-full h-10 px-3 text-sm text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:border-teal-700"
-            />
-          </section>
+          <ScrollReveal>
+            <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3.5">
+              <h2 className="text-sm font-semibold text-slate-900">রিলের ক্যাপশন</h2>
+              <textarea
+                rows={3}
+                value={caption}
+                onChange={(e) => onChangeCaption(e.target.value)}
+                placeholder="রিল ভিডিওর জন্য বাংলা ক্যাপশন লিখুন..."
+                className="w-full p-3 text-sm leading-relaxed text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:border-teal-700 resize-y"
+              />
+              <input
+                type="text"
+                value={attribution}
+                onChange={(e) => onChangeAttribution(e.target.value)}
+                placeholder="ঐচ্ছিক ছোট শিরোনাম বা সূত্র"
+                className="w-full h-10 px-3 text-sm text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:border-teal-700"
+              />
+            </section>
+          </ScrollReveal>
 
           {/* মোশন ও সময়কাল */}
-          <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4">
+          <ScrollReveal delayMs={50}>
+            <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4">
             <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-slate-500" />
               মোশন ও সময়কাল
@@ -1274,9 +1280,11 @@ export function ReelMakerView({
               </button>
             </div>
           </section>
+          </ScrollReveal>
 
           {/* অডিও আপলোড ও প্রিভিউ */}
-          <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3.5">
+          <ScrollReveal delayMs={50}>
+            <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3.5">
             <div className="flex items-center justify-between gap-2">
               <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                 <Music className="w-4 h-4 text-teal-700" />
@@ -1412,16 +1420,20 @@ export function ReelMakerView({
               </p>
             )}
           </section>
+          </ScrollReveal>
 
           {/* ব্যাকগ্রাউন্ড ও গ্রেডিয়েন্ট */}
-          <ThemeSelectorGrid
-            selectedThemeId={settings.themeId}
-            activeTheme={theme}
-            onSelectTheme={(themeId) => setSettings((s) => ({ ...s, themeId }))}
-          />
+          <ScrollReveal delayMs={50}>
+            <ThemeSelectorGrid
+              selectedThemeId={settings.themeId}
+              activeTheme={theme}
+              onSelectTheme={(themeId) => setSettings((s) => ({ ...s, themeId }))}
+            />
+          </ScrollReveal>
 
           {/* বাংলা ফন্ট ও আকার */}
-          <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4">
+          <ScrollReveal delayMs={50}>
+            <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4">
             <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
               <Type className="w-4 h-4 text-slate-500" />
               বাংলা ফন্ট
@@ -1499,9 +1511,11 @@ export function ReelMakerView({
               </div>
             </div>
           </section>
+          </ScrollReveal>
 
           {/* কাস্টম নাম ও লোগো */}
-          <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3">
+          <ScrollReveal delayMs={50}>
+            <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3">
             <div className="flex items-center justify-between gap-4">
               <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
                 <Stamp className="w-4 h-4 text-slate-500" />
@@ -1545,6 +1559,7 @@ export function ReelMakerView({
               </button>
             </div>
           </section>
+          </ScrollReveal>
         </div>
       </div>
     </div>

@@ -37,6 +37,7 @@
     font-family: var(--font-sans);
     background-color: #FAFBFB;
     color: #1E2B2B;
+    scroll-behavior: smooth;
     -webkit-tap-highlight-color: transparent;
   }
 }
@@ -60,4 +61,31 @@
 /* মোবাইল অ্যাপের সেফ এরিয়া প্যাডিং */
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* স্ক্রল-ট্রিগারড রিভিল অ্যানিমেশন (একবার ট্রিগার, স্মুথ কিউবিক-বেজিয়ার) */
+.scroll-reveal-item {
+  opacity: 0;
+  transform: translate3d(0, 16px, 0);
+  transition:
+    opacity 540ms cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay, 0ms),
+    transform 540ms cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay, 0ms);
+}
+
+.scroll-reveal-item.is-revealed {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .scroll-reveal-item,
+  .scroll-reveal-item.is-revealed {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
 }
