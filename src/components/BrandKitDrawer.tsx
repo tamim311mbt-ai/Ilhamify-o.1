@@ -67,7 +67,7 @@ export function BrandKitDrawer({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-          className="fixed inset-0 z-50 flex items-end md:items-center justify-end bg-slate-950/45 backdrop-blur-xs"
+          className="fixed inset-0 z-50 flex items-end md:items-center justify-end bg-slate-950/45 dark:bg-black/70 backdrop-blur-xs"
           role="dialog"
           aria-modal="true"
           aria-labelledby="brand-kit-title"
@@ -80,20 +80,23 @@ export function BrandKitDrawer({
             animate={{ opacity: 1, x: 0, y: 0 }}
             exit={{ opacity: 0, x: 24, y: 16 }}
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="w-full md:w-[440px] max-h-[90vh] md:h-full md:max-h-none bg-white rounded-t-3xl md:rounded-none border-t md:border-l border-slate-200 flex flex-col overflow-hidden"
+            className="w-full md:w-[440px] max-h-[90vh] md:h-full md:max-h-none bg-white dark:bg-[#142020] rounded-t-3xl md:rounded-none border-t md:border-l border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden"
           >
         {/* মোবাইল ড্র্যাগ হ্যান্ডেল */}
         <div className="md:hidden pt-3 pb-1 flex justify-center">
-          <div className="w-10 h-1.5 bg-slate-200 rounded-full" />
+          <div className="w-10 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full" />
         </div>
 
         {/* ড্রয়ার হেডার */}
-        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between gap-4">
+        <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-4">
           <div>
-            <h2 id="brand-kit-title" className="text-lg font-semibold text-slate-900">
+            <h2
+              id="brand-kit-title"
+              className="text-lg font-semibold text-slate-900 dark:text-slate-100"
+            >
               কাস্টম নাম ও লোগো ওয়াটারমার্ক
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               কার্ড মেকার ও রিল মেকারে স্বয়ংক্রিয়ভাবে যুক্ত হবে
             </p>
           </div>
@@ -101,7 +104,7 @@ export function BrandKitDrawer({
             type="button"
             onClick={onClose}
             aria-label="সেটিংস বন্ধ করুন"
-            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -113,8 +116,12 @@ export function BrandKitDrawer({
           <section className="space-y-4">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <h3 className="text-sm font-semibold text-slate-900">কাস্টম নাম বা হ্যান্ডেল</h3>
-                <p className="text-xs text-slate-500">কার্ড ও রিলে পরিচ্ছন্নভাবে দেখাবে</p>
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                  কাস্টম নাম বা হ্যান্ডেল
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  কার্ড ও রিলে পরিচ্ছন্নভাবে দেখাবে
+                </p>
               </div>
               <button
                 type="button"
@@ -123,7 +130,7 @@ export function BrandKitDrawer({
                 aria-label="কাস্টম নাম চালু বা বন্ধ করুন"
                 onClick={() => onUpdate({ showHandle: !brandKit.showHandle })}
                 className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors ${
-                  brandKit.showHandle ? 'bg-teal-700' : 'bg-slate-300'
+                  brandKit.showHandle ? 'bg-teal-700' : 'bg-slate-300 dark:bg-slate-700'
                 }`}
               >
                 <span
@@ -137,7 +144,7 @@ export function BrandKitDrawer({
             <div>
               <label
                 htmlFor="brand-handle-input"
-                className="block text-xs font-medium text-slate-700 mb-1.5"
+                className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5"
               >
                 প্রদর্শনের নাম
               </label>
@@ -148,12 +155,12 @@ export function BrandKitDrawer({
                 onChange={(e) => onUpdate({ handleText: e.target.value })}
                 placeholder="@Ilhamify অথবা পেজের নাম"
                 maxLength={48}
-                className="w-full h-11 px-3.5 text-sm text-slate-900 bg-white border border-slate-200 rounded-lg focus:outline-none focus:border-teal-700 focus:ring-2 focus:ring-teal-700/15"
+                className="w-full h-11 px-3.5 text-sm text-slate-900 dark:text-slate-100 bg-white dark:bg-[#0E1717] border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none focus:border-teal-700 dark:focus:border-teal-400 focus:ring-2 focus:ring-teal-700/15"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-700 mb-1.5">
+              <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                 অবস্থান
               </label>
               <div className="grid grid-cols-3 gap-2">
@@ -165,7 +172,7 @@ export function BrandKitDrawer({
                     className={`min-h-[40px] px-2.5 py-2 text-xs font-medium rounded-lg border transition-colors whitespace-nowrap ${
                       brandKit.handlePosition === pos.id
                         ? 'bg-teal-700 text-white border-teal-700'
-                        : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
+                        : 'bg-white dark:bg-[#192828] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
                     }`}
                   >
                     {pos.label}
@@ -176,8 +183,8 @@ export function BrandKitDrawer({
 
             <div>
               <div className="flex items-center justify-between text-xs mb-1.5">
-                <span className="font-medium text-slate-700">লেখার স্বচ্ছতা</span>
-                <span className="tabular-nums text-slate-500">
+                <span className="font-medium text-slate-700 dark:text-slate-300">লেখার স্বচ্ছতা</span>
+                <span className="tabular-nums text-slate-500 dark:text-slate-400">
                   {toBanglaNumber(Math.round(brandKit.handleOpacity * 100))}%
                 </span>
               </div>
@@ -188,19 +195,23 @@ export function BrandKitDrawer({
                 step={0.05}
                 value={brandKit.handleOpacity}
                 onChange={(e) => onUpdate({ handleOpacity: parseFloat(e.target.value) })}
-                className="w-full accent-teal-700 cursor-pointer"
+                className="w-full accent-teal-700 dark:accent-teal-400 cursor-pointer"
               />
             </div>
           </section>
 
-          <hr className="border-slate-200" />
+          <hr className="border-slate-200 dark:border-slate-800" />
 
           {/* পিএনজি লোগো ওয়াটারমার্ক */}
           <section className="space-y-4">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <h3 className="text-sm font-semibold text-slate-900">পিএনজি লোগো ওয়াটারমার্ক</h3>
-                <p className="text-xs text-slate-500">স্বচ্ছ ব্যাকগ্রাউন্ডযুক্ত পিএনজি সমর্থিত</p>
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                  পিএনজি লোগো ওয়াটারমার্ক
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  স্বচ্ছ ব্যাকগ্রাউন্ডযুক্ত পিএনজি সমর্থিত
+                </p>
               </div>
               <button
                 type="button"
@@ -209,7 +220,7 @@ export function BrandKitDrawer({
                 aria-label="লোগো চালু বা বন্ধ করুন"
                 onClick={() => onUpdate({ showLogo: !brandKit.showLogo })}
                 className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors ${
-                  brandKit.showLogo ? 'bg-teal-700' : 'bg-slate-300'
+                  brandKit.showLogo ? 'bg-teal-700' : 'bg-slate-300 dark:bg-slate-700'
                 }`}
               >
                 <span
@@ -229,10 +240,10 @@ export function BrandKitDrawer({
             />
 
             {brandKit.logoDataUrl ? (
-              <div className="p-4 border border-slate-200 rounded-xl bg-slate-50 flex items-center justify-between gap-4">
+              <div className="p-4 border border-slate-200 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-[#192828] flex items-center justify-between gap-4">
                 <div className="flex items-center gap-3 min-w-0">
                   <div
-                    className="w-14 h-14 rounded-lg border border-slate-200 flex items-center justify-center p-1.5 shrink-0"
+                    className="w-14 h-14 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center p-1.5 shrink-0"
                     style={{
                       backgroundImage:
                         'linear-gradient(45deg, #e2e8f0 25%, transparent 25%), linear-gradient(-45deg, #e2e8f0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #e2e8f0 75%), linear-gradient(-45deg, transparent 75%, #e2e8f0 75%)',
@@ -248,15 +259,17 @@ export function BrandKitDrawer({
                     />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-slate-900 truncate">লোগো প্রস্তুত</p>
-                    <p className="text-xs text-slate-500">স্বচ্ছ পিএনজি সমর্থিত</p>
+                    <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
+                      লোগো প্রস্তুত
+                    </p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">স্বচ্ছ পিএনজি সমর্থিত</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="px-3 py-2 min-h-[40px] text-xs font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+                    className="px-3 py-2 min-h-[40px] text-xs font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-[#142020] border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-[#1E2E2E] transition-colors"
                   >
                     পরিবর্তন
                   </button>
@@ -264,7 +277,7 @@ export function BrandKitDrawer({
                     type="button"
                     onClick={() => onUpdate({ logoDataUrl: null })}
                     aria-label="লোগো মুছুন"
-                    className="min-w-[40px] min-h-[40px] flex items-center justify-center text-rose-600 bg-white border border-slate-200 rounded-lg hover:bg-rose-50 transition-colors"
+                    className="min-w-[40px] min-h-[40px] flex items-center justify-center text-rose-600 dark:text-rose-400 bg-white dark:bg-[#142020] border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -274,22 +287,24 @@ export function BrandKitDrawer({
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full py-6 px-4 border border-dashed border-slate-300 rounded-xl bg-slate-50/70 hover:bg-slate-100/70 hover:border-teal-600 transition-colors flex flex-col items-center justify-center gap-2 text-center"
+                className="w-full py-6 px-4 border border-dashed border-slate-300 dark:border-slate-700 rounded-xl bg-slate-50/70 dark:bg-[#0E1717] hover:bg-slate-100/70 dark:hover:bg-[#192828] hover:border-teal-600 dark:hover:border-teal-400 transition-colors flex flex-col items-center justify-center gap-2 text-center"
               >
-                <Upload className="w-5 h-5 text-teal-700" />
-                <span className="text-sm font-medium text-slate-900">পিএনজি লোগো আপলোড করুন</span>
-                <span className="text-xs text-slate-500">
+                <Upload className="w-5 h-5 text-teal-700 dark:text-teal-300" />
+                <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
+                  পিএনজি লোগো আপলোড করুন
+                </span>
+                <span className="text-xs text-slate-500 dark:text-slate-400">
                   স্বচ্ছ ব্যাকগ্রাউন্ডযুক্ত পিএনজি ভালো দেখায় · সর্বোচ্চ ৪ মেগাবাইট
                 </span>
               </button>
             )}
 
             {uploadError && (
-              <p className="text-xs text-rose-600 font-medium">{uploadError}</p>
+              <p className="text-xs text-rose-600 dark:text-rose-400 font-medium">{uploadError}</p>
             )}
 
             <div>
-              <label className="block text-xs font-medium text-slate-700 mb-1.5">
+              <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                 লোগোর অবস্থান
               </label>
               <div className="grid grid-cols-3 gap-2">
@@ -301,7 +316,7 @@ export function BrandKitDrawer({
                     className={`min-h-[40px] px-2.5 py-2 text-xs font-medium rounded-lg border transition-colors whitespace-nowrap ${
                       brandKit.logoPosition === pos.id
                         ? 'bg-teal-700 text-white border-teal-700'
-                        : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
+                        : 'bg-white dark:bg-[#192828] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
                     }`}
                   >
                     {pos.label}
@@ -313,8 +328,8 @@ export function BrandKitDrawer({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <div className="flex items-center justify-between text-xs mb-1.5">
-                  <span className="font-medium text-slate-700">লোগোর আকার</span>
-                  <span className="tabular-nums text-slate-500">
+                  <span className="font-medium text-slate-700 dark:text-slate-300">লোগোর আকার</span>
+                  <span className="tabular-nums text-slate-500 dark:text-slate-400">
                     {toBanglaNumber(brandKit.logoSize)} পিক্সেল
                   </span>
                 </div>
@@ -325,14 +340,14 @@ export function BrandKitDrawer({
                   step={4}
                   value={brandKit.logoSize}
                   onChange={(e) => onUpdate({ logoSize: parseInt(e.target.value, 10) })}
-                  className="w-full accent-teal-700 cursor-pointer"
+                  className="w-full accent-teal-700 dark:accent-teal-400 cursor-pointer"
                 />
               </div>
 
               <div>
                 <div className="flex items-center justify-between text-xs mb-1.5">
-                  <span className="font-medium text-slate-700">স্বচ্ছতা</span>
-                  <span className="tabular-nums text-slate-500">
+                  <span className="font-medium text-slate-700 dark:text-slate-300">স্বচ্ছতা</span>
+                  <span className="tabular-nums text-slate-500 dark:text-slate-400">
                     {toBanglaNumber(Math.round(brandKit.logoOpacity * 100))}%
                   </span>
                 </div>
@@ -343,7 +358,7 @@ export function BrandKitDrawer({
                   step={0.05}
                   value={brandKit.logoOpacity}
                   onChange={(e) => onUpdate({ logoOpacity: parseFloat(e.target.value) })}
-                  className="w-full accent-teal-700 cursor-pointer"
+                  className="w-full accent-teal-700 dark:accent-teal-400 cursor-pointer"
                 />
               </div>
             </div>
@@ -351,18 +366,18 @@ export function BrandKitDrawer({
         </div>
 
         {/* ফুটার অ্যাকশন */}
-        <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between gap-3">
+        <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-[#0E1717] flex items-center justify-between gap-3">
           <button
             type="button"
             onClick={onReset}
-            className="px-3.5 py-2 min-h-[44px] text-xs font-medium text-slate-600 hover:text-slate-900 transition-colors"
+            className="px-3.5 py-2 min-h-[44px] text-xs font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors"
           >
             পূর্বের অবস্থায় ফিরুন
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2.5 min-h-[44px] text-sm font-medium text-white bg-teal-700 rounded-lg hover:bg-teal-800 transition-colors"
+            className="px-5 py-2.5 min-h-[44px] text-sm font-medium text-white bg-teal-700 rounded-lg hover:bg-teal-800 dark:hover:bg-teal-500 transition-colors"
           >
             সম্পন্ন
           </button>

@@ -939,29 +939,31 @@ export function ReelMakerView({
     <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* ডান/উপর স্টেজ: ৯:১৬ রিল প্রিভিউ ও ভিডিও ডাউনলোড */}
-        <div className="lg:col-span-6 lg:order-2 lg:sticky lg:top-6 space-y-4">
+        <div className="lg:col-span-6 lg:order-2 lg:sticky lg:top-24 space-y-4">
           <ScrollReveal delayMs={50}>
-            <div className="bg-white border border-slate-200 rounded-2xl p-4 md:p-6 space-y-4">
-            <div className="flex items-center justify-between gap-4 pb-3 border-b border-slate-100">
-              <div className="text-xs text-slate-500 flex items-center gap-2">
-                <span className="font-semibold text-slate-900">৯:১৬ রিল প্রিভিউ</span>
+            <div className="bg-white dark:bg-[#142020] border border-slate-200 dark:border-slate-800 rounded-2xl p-4 md:p-6 space-y-4 transition-colors duration-200">
+            <div className="flex items-center justify-between gap-4 pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2">
+                <span className="font-semibold text-slate-900 dark:text-slate-100">
+                  ৯:১৬ রিল প্রিভিউ
+                </span>
                 <span aria-hidden="true">·</span>
                 <span className="tabular-nums">
                   {toBanglaNumber(settings.duration)} সেকেন্ড ·{' '}
                   {settings.resolution === '1080p' ? '১০৮০পি' : '৭২০পি'}
                 </span>
               </div>
-              <span className="text-xs tabular-nums text-slate-500">
+              <span className="text-xs tabular-nums text-slate-500 dark:text-slate-400">
                 {formatBanglaSeconds(progress * settings.duration)} /{' '}
                 {formatBanglaSeconds(settings.duration)}
               </span>
             </div>
 
-            <div className="py-4 px-4 bg-slate-100/80 rounded-xl flex justify-center overflow-hidden">
+            <div className="py-4 px-4 bg-slate-100/80 dark:bg-[#0A1111] rounded-xl flex justify-center overflow-hidden">
               <div ref={stageScope} className="w-full flex justify-center">
                 <canvas
                   ref={previewCanvasRef}
-                  className="w-full max-w-[280px] sm:max-w-[300px] aspect-[9/16] rounded-2xl shadow-lg border border-slate-300/70"
+                  className="w-full max-w-[280px] sm:max-w-[300px] aspect-[9/16] rounded-2xl shadow-lg border border-slate-300/70 dark:border-slate-800"
                 />
               </div>
             </div>
@@ -971,7 +973,7 @@ export function ReelMakerView({
                 type="button"
                 onClick={() => setIsPlaying((p) => !p)}
                 aria-label={isPlaying ? 'প্রিভিউ থামান' : 'প্রিভিউ চালান'}
-                className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-slate-900 text-white hover:bg-slate-800 transition-colors shrink-0"
+                className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-slate-900 dark:bg-teal-700 text-white hover:bg-slate-800 dark:hover:bg-teal-600 transition-colors shrink-0"
               >
                 {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
               </button>
@@ -980,7 +982,7 @@ export function ReelMakerView({
                 type="button"
                 onClick={handleRestart}
                 aria-label="শুরু থেকে চালান"
-                className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors shrink-0"
+                className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-white dark:bg-[#192828] border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-[#213333] transition-colors shrink-0"
               >
                 <RotateCcw className="w-4 h-4" />
               </button>
@@ -996,12 +998,12 @@ export function ReelMakerView({
                   setIsPlaying(false);
                   setProgress(parseFloat(e.target.value));
                 }}
-                className="flex-1 accent-teal-700 cursor-pointer"
+                className="flex-1 accent-teal-700 dark:accent-teal-400 cursor-pointer"
               />
             </div>
 
             {/* ভিডিও ডাউনলোড ও স্ট্যাটাস */}
-            <div className="pt-3 border-t border-slate-100 space-y-3">
+            <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-3">
               <AnimatePresence mode="wait" initial={false}>
                 {exportState === 'recording' ? (
                   <motion.div
@@ -1010,28 +1012,30 @@ export function ReelMakerView({
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -4 }}
                     transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
-                    className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3"
+                    className="p-4 bg-slate-50 dark:bg-[#0E1717] border border-slate-200 dark:border-slate-700 rounded-xl space-y-3"
                   >
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-medium text-slate-900">{exportStatusMessage}</span>
-                    <span className="tabular-nums font-semibold text-teal-700">
+                    <span className="font-medium text-slate-900 dark:text-slate-100">
+                      {exportStatusMessage}
+                    </span>
+                    <span className="tabular-nums font-semibold text-teal-700 dark:text-teal-300">
                       {toBanglaNumber(exportProgress)}%
                     </span>
                   </div>
-                  <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+                  <div className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-teal-700 transition-all duration-150"
+                      className="h-full bg-teal-700 dark:bg-teal-400 transition-all duration-150"
                       style={{ width: `${exportProgress}%` }}
                     />
                   </div>
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-[11px] text-slate-500">
+                    <span className="text-[11px] text-slate-500 dark:text-slate-400">
                       ভিডিও তৈরি শেষ না হওয়া পর্যন্ত এই ট্যাবটি খোলা রাখুন
                     </span>
                     <button
                       type="button"
                       onClick={handleCancelExport}
-                      className="min-h-[36px] px-3 py-1 text-xs font-medium text-rose-700 bg-white border border-rose-200 rounded-lg hover:bg-rose-50 flex items-center gap-1"
+                      className="min-h-[36px] px-3 py-1 text-xs font-medium text-rose-700 dark:text-rose-300 bg-white dark:bg-[#192828] border border-rose-200 dark:border-rose-800/70 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/50 flex items-center gap-1"
                     >
                       <X className="w-3.5 h-3.5" />
                       বাতিল
@@ -1048,14 +1052,16 @@ export function ReelMakerView({
                   className="space-y-2.5"
                 >
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-                    <div className="text-xs text-slate-500">
+                    <div className="text-xs text-slate-500 dark:text-slate-400">
                       {exportState === 'ready' ? (
-                        <span className="text-emerald-700 font-medium flex items-center gap-1.5">
+                        <span className="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1.5">
                           <Check className="w-4 h-4 shrink-0" />
                           {exportStatusMessage}
                         </span>
                       ) : exportState === 'unsupported' || exportState === 'error' ? (
-                        <span className="text-amber-700 font-medium">{exportStatusMessage}</span>
+                        <span className="text-amber-700 dark:text-amber-300 font-medium">
+                          {exportStatusMessage}
+                        </span>
                       ) : (
                         <span>সরাসরি ব্রাউজার থেকেই ৯:১৬ রিল ভিডিও রেন্ডার ও ডাউনলোড হবে।</span>
                       )}
@@ -1068,7 +1074,7 @@ export function ReelMakerView({
                           type="button"
                           onClick={handleShareVideo}
                           disabled={isSharing}
-                          className="flex-1 sm:flex-initial min-h-[46px] px-4 py-2.5 text-sm font-semibold text-teal-800 bg-teal-50 border border-teal-300 rounded-xl hover:bg-teal-100 disabled:opacity-60 transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
+                          className="flex-1 sm:flex-initial min-h-[46px] px-4 py-2.5 text-sm font-semibold text-teal-800 dark:text-teal-100 bg-teal-50 dark:bg-teal-900/50 border border-teal-300 dark:border-teal-700/70 rounded-xl hover:bg-teal-100 dark:hover:bg-teal-800/60 disabled:opacity-60 transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
                         >
                           <Share2 className="w-4 h-4" />
                           {isSharing ? 'শেয়ার হচ্ছে...' : 'শেয়ার করুন'}
@@ -1079,7 +1085,7 @@ export function ReelMakerView({
                         <a
                           href={exportedVideoUrl}
                           download={exportedFileName || `ilhamify-reel-${settings.duration}s.${exportedExt}`}
-                          className="flex-1 sm:flex-initial min-h-[46px] px-4 py-2.5 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
+                          className="flex-1 sm:flex-initial min-h-[46px] px-4 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 bg-white dark:bg-[#192828] border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-[#213333] transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
                         >
                           <Download className="w-4 h-4" />
                           ফাইল সেভ করুন
@@ -1090,7 +1096,7 @@ export function ReelMakerView({
                         <button
                           type="button"
                           onClick={handleDownloadFallbackFrame}
-                          className="min-h-[46px] px-4 py-2.5 text-sm font-semibold text-slate-900 bg-slate-100 border border-slate-200 rounded-xl hover:bg-slate-200 transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
+                          className="min-h-[46px] px-4 py-2.5 text-sm font-semibold text-slate-900 dark:text-slate-100 bg-slate-100 dark:bg-[#1E2E2E] border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-200 dark:hover:bg-[#273B3B] transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
                         >
                           <Download className="w-4 h-4" />
                           ছবি ডাউনলোড করুন
@@ -1101,7 +1107,7 @@ export function ReelMakerView({
                         whileTap={{ scale: 0.97 }}
                         type="button"
                         onClick={handleExportVideo}
-                        className="w-full sm:w-auto min-h-[46px] px-5 py-2.5 text-sm font-semibold text-white bg-teal-700 rounded-xl hover:bg-teal-800 transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
+                        className="w-full sm:w-auto min-h-[46px] px-5 py-2.5 text-sm font-semibold text-white bg-teal-700 rounded-xl hover:bg-teal-800 dark:hover:bg-teal-500 transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
                       >
                         <Film className="w-4 h-4" />
                         ভিডিও ডাউনলোড করুন
@@ -1114,10 +1120,10 @@ export function ReelMakerView({
                       role="status"
                       className={`text-xs leading-relaxed px-3 py-2 rounded-lg border ${
                         shareFeedback.type === 'success'
-                          ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                          ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/70'
                           : shareFeedback.type === 'error'
-                            ? 'bg-amber-50 text-amber-800 border-amber-200'
-                            : 'bg-teal-50 text-teal-800 border-teal-200'
+                            ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800/70'
+                            : 'bg-teal-50 dark:bg-teal-950/60 text-teal-800 dark:text-teal-200 border-teal-200 dark:border-teal-800/70'
                       }`}
                     >
                       {shareFeedback.message}
@@ -1134,38 +1140,42 @@ export function ReelMakerView({
         {/* বাম কন্ট্রোল কলাম */}
         <div className="lg:col-span-6 lg:order-1 space-y-5">
           <div className="space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">রিল মেকার</h1>
-            <p className="text-sm text-slate-600">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+              রিল মেকার
+            </h1>
+            <p className="text-sm text-slate-600 dark:text-slate-300">
               হালকা মোশন, বাংলা ক্যাপশন এবং কাস্টম নাম ও লোগো দিয়ে ৯:১৬ শর্ট ভিডিও তৈরি করুন।
             </p>
           </div>
 
           {/* রিলের লেখা */}
           <ScrollReveal>
-            <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3.5">
-              <h2 className="text-sm font-semibold text-slate-900">রিলের ক্যাপশন</h2>
+            <section className="bg-white dark:bg-[#142020] border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-3.5 transition-colors duration-200">
+              <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                রিলের ক্যাপশন
+              </h2>
               <textarea
                 rows={3}
                 value={caption}
                 onChange={(e) => onChangeCaption(e.target.value)}
                 placeholder="রিল ভিডিওর জন্য বাংলা ক্যাপশন লিখুন..."
-                className="w-full p-3 text-sm leading-relaxed text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:border-teal-700 resize-y"
+                className="w-full p-3 text-sm leading-relaxed text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 bg-slate-50 dark:bg-[#0E1717] border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:bg-white dark:focus:bg-[#121D1D] focus:border-teal-700 dark:focus:border-teal-400 resize-y"
               />
               <input
                 type="text"
                 value={attribution}
                 onChange={(e) => onChangeAttribution(e.target.value)}
                 placeholder="ঐচ্ছিক ছোট শিরোনাম বা সূত্র"
-                className="w-full h-10 px-3 text-sm text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:border-teal-700"
+                className="w-full h-10 px-3 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 bg-slate-50 dark:bg-[#0E1717] border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:bg-white dark:focus:bg-[#121D1D] focus:border-teal-700 dark:focus:border-teal-400"
               />
             </section>
           </ScrollReveal>
 
           {/* মোশন ও সময়কাল */}
           <ScrollReveal delayMs={50}>
-            <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4">
-            <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-slate-500" />
+            <section className="bg-white dark:bg-[#142020] border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-4 transition-colors duration-200">
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-slate-500 dark:text-slate-400" />
               মোশন ও সময়কাল
             </h2>
 
@@ -1183,13 +1193,13 @@ export function ReelMakerView({
                     className={`min-h-[56px] px-3.5 py-2.5 rounded-xl border text-left transition-colors ${
                       active
                         ? 'bg-teal-700 text-white border-teal-700'
-                        : 'bg-white text-slate-900 border-slate-200 hover:border-slate-300'
+                        : 'bg-white dark:bg-[#192828] text-slate-900 dark:text-slate-100 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
                     }`}
                   >
                     <div className="text-xs font-semibold">{m.label}</div>
                     <div
                       className={`text-[11px] mt-0.5 ${
-                        active ? 'text-teal-100' : 'text-slate-500'
+                        active ? 'text-teal-100' : 'text-slate-500 dark:text-slate-400'
                       }`}
                     >
                       {m.desc}
@@ -1201,7 +1211,7 @@ export function ReelMakerView({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
               <div>
-                <span className="block text-xs font-medium text-slate-700 mb-1.5">
+                <span className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                   ভিডিওর দৈর্ঘ্য
                 </span>
                 <div className="grid grid-cols-3 gap-1.5">
@@ -1215,8 +1225,8 @@ export function ReelMakerView({
                       }}
                       className={`min-h-[40px] rounded-lg border text-xs font-semibold tabular-nums transition-colors ${
                         settings.duration === dur
-                          ? 'bg-slate-900 text-white border-slate-900'
-                          : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                          ? 'bg-slate-900 dark:bg-teal-700 text-white border-slate-900 dark:border-teal-700'
+                          : 'bg-white dark:bg-[#192828] text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-[#213333]'
                       }`}
                     >
                       {toBanglaNumber(dur)} সেকেন্ড
@@ -1226,7 +1236,7 @@ export function ReelMakerView({
               </div>
 
               <div>
-                <span className="block text-xs font-medium text-slate-700 mb-1.5">
+                <span className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                   ভিডিওর মান
                 </span>
                 <div className="grid grid-cols-2 gap-1.5">
@@ -1235,8 +1245,8 @@ export function ReelMakerView({
                     onClick={() => setSettings((s) => ({ ...s, resolution: '720p' }))}
                     className={`min-h-[40px] rounded-lg border text-xs font-semibold tabular-nums transition-colors ${
                       settings.resolution === '720p'
-                        ? 'bg-slate-900 text-white border-slate-900'
-                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                        ? 'bg-slate-900 dark:bg-teal-700 text-white border-slate-900 dark:border-teal-700'
+                        : 'bg-white dark:bg-[#192828] text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-[#213333]'
                     }`}
                   >
                     ৭২০পি এইচডি
@@ -1246,8 +1256,8 @@ export function ReelMakerView({
                     onClick={() => setSettings((s) => ({ ...s, resolution: '1080p' }))}
                     className={`min-h-[40px] rounded-lg border text-xs font-semibold tabular-nums transition-colors ${
                       settings.resolution === '1080p'
-                        ? 'bg-slate-900 text-white border-slate-900'
-                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                        ? 'bg-slate-900 dark:bg-teal-700 text-white border-slate-900 dark:border-teal-700'
+                        : 'bg-white dark:bg-[#192828] text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-[#213333]'
                     }`}
                   >
                     ১০৮০পি ফুল এইচডি
@@ -1257,7 +1267,7 @@ export function ReelMakerView({
             </div>
 
             <div className="flex items-center justify-between pt-1">
-              <span className="text-xs font-medium text-slate-700">
+              <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
                 ভাসমান আলোর কণা দেখান
               </span>
               <button
@@ -1269,7 +1279,7 @@ export function ReelMakerView({
                   setSettings((s) => ({ ...s, showParticles: !s.showParticles }))
                 }
                 className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition-colors ${
-                  settings.showParticles ? 'bg-teal-700' : 'bg-slate-300'
+                  settings.showParticles ? 'bg-teal-700' : 'bg-slate-300 dark:bg-slate-700'
                 }`}
               >
                 <span
@@ -1284,13 +1294,15 @@ export function ReelMakerView({
 
           {/* অডিও আপলোড ও প্রিভিউ */}
           <ScrollReveal delayMs={50}>
-            <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3.5">
+            <section className="bg-white dark:bg-[#142020] border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-3.5 transition-colors duration-200">
             <div className="flex items-center justify-between gap-2">
-              <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
-                <Music className="w-4 h-4 text-teal-700" />
+              <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <Music className="w-4 h-4 text-teal-700 dark:text-teal-300" />
                 রিলের অডিও (ঐচ্ছিক)
               </h2>
-              <span className="text-[11px] text-slate-500">MP3, WAV, M4A, OGG · সর্বোচ্চ ১৫ মেগাবাইট</span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                MP3, WAV, M4A, OGG · সর্বোচ্চ ১৫ মেগাবাইট
+              </span>
             </div>
 
             <input
@@ -1302,7 +1314,7 @@ export function ReelMakerView({
             />
 
             {audioFileUrl ? (
-              <div className="p-3.5 bg-teal-50 border border-teal-200 rounded-xl space-y-3">
+              <div className="p-3.5 bg-teal-50 dark:bg-teal-950/60 border border-teal-200 dark:border-teal-800/70 rounded-xl space-y-3">
                 <audio
                   ref={audioElementRef}
                   src={audioFileUrl}
@@ -1329,17 +1341,17 @@ export function ReelMakerView({
                     type="button"
                     onClick={handleToggleAudioPlay}
                     aria-label={isAudioPlaying ? 'অডিও থামান' : 'অডিও চালান'}
-                    className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-teal-700 text-white hover:bg-teal-800 transition-colors shrink-0"
+                    className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl bg-teal-700 text-white hover:bg-teal-800 dark:hover:bg-teal-500 transition-colors shrink-0"
                   >
                     {isAudioPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
                   </motion.button>
 
                   <div className="min-w-0 flex-1 space-y-1">
                     <div className="flex items-center justify-between gap-2">
-                      <p className="text-xs sm:text-sm font-semibold text-slate-900 truncate">
+                      <p className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">
                         {audioFileName}
                       </p>
-                      <span className="text-[11px] tabular-nums text-slate-500 shrink-0">
+                      <span className="text-[11px] tabular-nums text-slate-500 dark:text-slate-400 shrink-0">
                         {formatFileSizeMb(audioFileSize)}
                       </span>
                     </div>
@@ -1359,24 +1371,24 @@ export function ReelMakerView({
                             audioElementRef.current.currentTime = nextTime;
                           }
                         }}
-                        className="flex-1 min-w-0 accent-teal-700 cursor-pointer"
+                        className="flex-1 min-w-0 accent-teal-700 dark:accent-teal-400 cursor-pointer"
                       />
-                      <span className="text-[11px] tabular-nums text-slate-600 shrink-0">
+                      <span className="text-[11px] tabular-nums text-slate-600 dark:text-slate-300 shrink-0">
                         {formatAudioTime(audioCurrentTime)} / {formatAudioTime(audioDuration)}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-teal-200/70">
-                  <span className="text-[11px] text-slate-600">
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-teal-200/70 dark:border-teal-800/60">
+                  <span className="text-[11px] text-slate-600 dark:text-slate-300">
                     আপলোড করা অডিও কেবল এই ব্রাউজার সেশনে লোকালি প্রিভিউ হবে।
                   </span>
                   <div className="flex items-center gap-2 shrink-0">
                     <button
                       type="button"
                       onClick={() => audioInputRef.current?.click()}
-                      className="min-h-[36px] px-3 py-1.5 text-xs font-medium text-teal-800 bg-white border border-teal-200 rounded-lg hover:bg-teal-100 transition-colors whitespace-nowrap"
+                      className="min-h-[36px] px-3 py-1.5 text-xs font-medium text-teal-800 dark:text-teal-100 bg-white dark:bg-[#192828] border border-teal-200 dark:border-teal-700/70 rounded-lg hover:bg-teal-100 dark:hover:bg-[#213333] transition-colors whitespace-nowrap"
                     >
                       পরিবর্তন করুন
                     </button>
@@ -1384,7 +1396,7 @@ export function ReelMakerView({
                       type="button"
                       onClick={handleRemoveAudio}
                       aria-label="অডিও মুছুন"
-                      className="min-h-[36px] px-3 py-1.5 text-xs font-medium text-rose-700 bg-white border border-rose-200 rounded-lg hover:bg-rose-50 transition-colors flex items-center gap-1 whitespace-nowrap"
+                      className="min-h-[36px] px-3 py-1.5 text-xs font-medium text-rose-700 dark:text-rose-300 bg-white dark:bg-[#192828] border border-rose-200 dark:border-rose-800/70 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/50 transition-colors flex items-center gap-1 whitespace-nowrap"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                       মুছুন
@@ -1398,24 +1410,24 @@ export function ReelMakerView({
                   whileTap={{ scale: 0.99 }}
                   type="button"
                   onClick={() => audioInputRef.current?.click()}
-                  className="w-full py-4 px-4 border border-dashed border-teal-300 rounded-xl bg-teal-50/70 hover:bg-teal-100/70 hover:border-teal-700 transition-colors flex flex-col sm:flex-row items-center justify-center gap-3 text-center sm:text-left"
+                  className="w-full py-4 px-4 border border-dashed border-teal-300 dark:border-teal-700/80 rounded-xl bg-teal-50/70 dark:bg-teal-950/35 hover:bg-teal-100/70 dark:hover:bg-teal-900/45 hover:border-teal-700 dark:hover:border-teal-400 transition-colors flex flex-col sm:flex-row items-center justify-center gap-3 text-center sm:text-left"
                 >
                   <span className="min-h-[40px] px-4 py-2 text-xs sm:text-sm font-semibold text-white bg-teal-700 rounded-lg inline-flex items-center gap-2 shrink-0">
                     <Upload className="w-4 h-4" />
                     ডিভাইস থেকে অডিও যুক্ত করুন
                   </span>
-                  <span className="text-xs text-slate-600">
+                  <span className="text-xs text-slate-600 dark:text-slate-300">
                     MP3, WAV, M4A বা OGG ফাইল নির্বাচন করে রিলের সাথে শুনুন
                   </span>
                 </motion.button>
-                <p className="text-[11px] text-slate-500">
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
                   নোট: আপলোড করা অডিও কেবল আপনার ব্রাউজারেই লোকাল প্রিভিউর জন্য ব্যবহৃত হয় এবং সার্ভারে সংরক্ষণ করা হয় না।
                 </p>
               </div>
             )}
 
             {audioError && (
-              <p role="alert" className="text-xs font-medium text-rose-600">
+              <p role="alert" className="text-xs font-medium text-rose-600 dark:text-rose-400">
                 {audioError}
               </p>
             )}
@@ -1433,9 +1445,9 @@ export function ReelMakerView({
 
           {/* বাংলা ফন্ট ও আকার */}
           <ScrollReveal delayMs={50}>
-            <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4">
-            <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
-              <Type className="w-4 h-4 text-slate-500" />
+            <section className="bg-white dark:bg-[#142020] border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-4 transition-colors duration-200">
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <Type className="w-4 h-4 text-slate-500 dark:text-slate-400" />
               বাংলা ফন্ট
             </h2>
 
@@ -1450,7 +1462,7 @@ export function ReelMakerView({
                     className={`min-h-[42px] px-3 py-2 text-xs font-medium rounded-xl border transition-colors text-left ${
                       active
                         ? 'bg-teal-700 text-white border-teal-700'
-                        : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
+                        : 'bg-white dark:bg-[#192828] text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
                     }`}
                   >
                     {preset.name}
@@ -1462,8 +1474,8 @@ export function ReelMakerView({
             <div className="grid grid-cols-2 gap-4 items-center">
               <div>
                 <div className="flex items-center justify-between text-xs mb-1.5">
-                  <span className="font-medium text-slate-700">ফন্টের আকার</span>
-                  <span className="tabular-nums text-slate-500">
+                  <span className="font-medium text-slate-700 dark:text-slate-300">ফন্টের আকার</span>
+                  <span className="tabular-nums text-slate-500 dark:text-slate-400">
                     {toBanglaNumber(settings.fontSize)}
                   </span>
                 </div>
@@ -1476,20 +1488,22 @@ export function ReelMakerView({
                   onChange={(e) =>
                     setSettings((s) => ({ ...s, fontSize: parseInt(e.target.value, 10) }))
                   }
-                  className="w-full accent-teal-700 cursor-pointer"
+                  className="w-full accent-teal-700 dark:accent-teal-400 cursor-pointer"
                 />
               </div>
 
               <div>
-                <span className="block text-xs font-medium text-slate-700 mb-1.5">সাজানো</span>
+                <span className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  সাজানো
+                </span>
                 <div className="grid grid-cols-2 gap-1.5">
                   <button
                     type="button"
                     onClick={() => setSettings((s) => ({ ...s, textAlign: 'center' }))}
                     className={`min-h-[38px] rounded-lg border flex items-center justify-center gap-1.5 text-xs font-medium transition-colors ${
                       settings.textAlign === 'center'
-                        ? 'bg-slate-900 text-white border-slate-900'
-                        : 'bg-white text-slate-700 border-slate-200'
+                        ? 'bg-slate-900 dark:bg-teal-700 text-white border-slate-900 dark:border-teal-700'
+                        : 'bg-white dark:bg-[#192828] text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700'
                     }`}
                   >
                     <AlignCenter className="w-3.5 h-3.5" />
@@ -1500,8 +1514,8 @@ export function ReelMakerView({
                     onClick={() => setSettings((s) => ({ ...s, textAlign: 'left' }))}
                     className={`min-h-[38px] rounded-lg border flex items-center justify-center gap-1.5 text-xs font-medium transition-colors ${
                       settings.textAlign === 'left'
-                        ? 'bg-slate-900 text-white border-slate-900'
-                        : 'bg-white text-slate-700 border-slate-200'
+                        ? 'bg-slate-900 dark:bg-teal-700 text-white border-slate-900 dark:border-teal-700'
+                        : 'bg-white dark:bg-[#192828] text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700'
                     }`}
                   >
                     <AlignLeft className="w-3.5 h-3.5" />
@@ -1515,16 +1529,16 @@ export function ReelMakerView({
 
           {/* কাস্টম নাম ও লোগো */}
           <ScrollReveal delayMs={50}>
-            <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3">
+            <section className="bg-white dark:bg-[#142020] border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-3 transition-colors duration-200">
             <div className="flex items-center justify-between gap-4">
-              <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
-                <Stamp className="w-4 h-4 text-slate-500" />
+              <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <Stamp className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                 কাস্টম নাম ও লোগো
               </h2>
               <button
                 type="button"
                 onClick={onOpenBrandKit}
-                className="text-xs font-semibold text-teal-700 hover:text-teal-800 transition-colors whitespace-nowrap"
+                className="text-xs font-semibold text-teal-700 dark:text-teal-300 hover:text-teal-800 dark:hover:text-teal-200 transition-colors whitespace-nowrap"
               >
                 পরিবর্তন করুন
               </button>
@@ -1535,8 +1549,8 @@ export function ReelMakerView({
                 onClick={() => onUpdateBrandKit({ showHandle: !brandKit.showHandle })}
                 className={`min-h-[38px] px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${
                   brandKit.showHandle
-                    ? 'bg-teal-50 text-teal-800 border-teal-200'
-                    : 'bg-white text-slate-600 border-slate-200'
+                    ? 'bg-teal-50 dark:bg-teal-900/50 text-teal-800 dark:text-teal-100 border-teal-200 dark:border-teal-700/60'
+                    : 'bg-white dark:bg-[#192828] text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
                 }`}
               >
                 {brandKit.showHandle ? 'নাম: চালু' : 'নাম: বন্ধ'}
@@ -1547,8 +1561,8 @@ export function ReelMakerView({
                 onClick={() => onUpdateBrandKit({ showLogo: !brandKit.showLogo })}
                 className={`min-h-[38px] px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${
                   brandKit.showLogo && brandKit.logoDataUrl
-                    ? 'bg-teal-50 text-teal-800 border-teal-200'
-                    : 'bg-white text-slate-600 border-slate-200'
+                    ? 'bg-teal-50 dark:bg-teal-900/50 text-teal-800 dark:text-teal-100 border-teal-200 dark:border-teal-700/60'
+                    : 'bg-white dark:bg-[#192828] text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
                 }`}
               >
                 {brandKit.logoDataUrl

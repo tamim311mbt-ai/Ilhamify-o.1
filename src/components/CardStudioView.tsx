@@ -156,30 +156,30 @@ export function CardStudioView({
     <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* কার্ড প্রিভিউ স্টেজ */}
-        <div className="lg:col-span-7 lg:order-2 lg:sticky lg:top-6 space-y-4">
+        <div className="lg:col-span-7 lg:order-2 lg:sticky lg:top-24 space-y-4">
           <ScrollReveal delayMs={50}>
-            <div className="bg-white border border-slate-200 rounded-2xl p-4 md:p-6">
-            <div className="flex items-center justify-between gap-4 pb-4 border-b border-slate-100">
-              <div className="text-xs text-slate-500 flex items-center gap-2">
-                <span className="font-semibold text-slate-900">কার্ড প্রিভিউ</span>
+            <div className="bg-white dark:bg-[#142020] border border-slate-200 dark:border-slate-800 rounded-2xl p-4 md:p-6 transition-colors duration-200">
+            <div className="flex items-center justify-between gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
+              <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2">
+                <span className="font-semibold text-slate-900 dark:text-slate-100">কার্ড প্রিভিউ</span>
                 <span aria-hidden="true">·</span>
                 <span className="tabular-nums">{aspectSpec.sublabel} পিক্সেল</span>
               </div>
               <button
                 type="button"
                 onClick={onSendToReel}
-                className="min-h-[38px] px-3 py-1.5 text-xs font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 transition-colors flex items-center gap-1.5 whitespace-nowrap"
+                className="min-h-[38px] px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-[#192828] border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-[#213333] transition-colors flex items-center gap-1.5 whitespace-nowrap"
               >
                 <Clapperboard className="w-3.5 h-3.5" />
                 রিল ভিডিও বানান
               </button>
             </div>
 
-            <div className="py-5 flex items-center justify-center bg-slate-100/80 rounded-xl mt-4 px-4 overflow-hidden">
+            <div className="py-5 flex items-center justify-center bg-slate-100/80 dark:bg-[#0A1111] rounded-xl mt-4 px-4 overflow-hidden">
               <div ref={stageScope} className="flex items-center justify-center max-w-full">
                 <canvas
                   ref={previewCanvasRef}
-                  className="max-w-full w-auto h-auto max-h-[540px] rounded-xl shadow-md border border-slate-200/80"
+                  className="max-w-full w-auto h-auto max-h-[540px] rounded-xl shadow-md border border-slate-200/80 dark:border-slate-800"
                   style={{
                     aspectRatio: `${aspectSpec.width} / ${aspectSpec.height}`,
                   }}
@@ -188,14 +188,14 @@ export function CardStudioView({
             </div>
 
             <div className="mt-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 ঝকঝকে বাংলা টাইপোগ্রাফি ও স্বচ্ছ পিএনজি লোগোসহ হাই-রেজোলিউশন কার্ড ডাউনলোড হবে।
               </p>
               <motion.button
                 whileTap={{ scale: 0.97 }}
                 type="button"
                 onClick={handleDownloadPng}
-                className="min-h-[46px] px-6 py-2.5 text-sm font-semibold text-white bg-teal-700 rounded-xl hover:bg-teal-800 transition-colors flex items-center justify-center gap-2 shrink-0 whitespace-nowrap"
+                className="min-h-[46px] px-6 py-2.5 text-sm font-semibold text-white bg-teal-700 rounded-xl hover:bg-teal-800 dark:hover:bg-teal-500 transition-colors flex items-center justify-center gap-2 shrink-0 whitespace-nowrap"
               >
                 {downloaded ? (
                   <>
@@ -217,37 +217,41 @@ export function CardStudioView({
         {/* কন্ট্রোল কলাম */}
         <div className="lg:col-span-5 lg:order-1 space-y-5">
           <div className="space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">কার্ড মেকার</h1>
-            <p className="text-sm text-slate-600">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+              কার্ড মেকার
+            </h1>
+            <p className="text-sm text-slate-600 dark:text-slate-300">
               কার্ডের অনুপাত, রঙের গ্রেডিয়েন্ট, বাংলা ফন্ট ও আপনার কাস্টম লোগো সাজিয়ে নিন।
             </p>
           </div>
 
           {/* ক্যাপশন লেখা */}
           <ScrollReveal>
-            <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3.5">
-              <h2 className="text-sm font-semibold text-slate-900">কার্ডের লেখা</h2>
+            <section className="bg-white dark:bg-[#142020] border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-3.5 transition-colors duration-200">
+              <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">কার্ডের লেখা</h2>
               <textarea
                 rows={3}
                 value={caption}
                 onChange={(e) => onChangeCaption(e.target.value)}
                 placeholder="এখানে বাংলা ক্যাপশন লিখুন..."
-                className="w-full p-3 text-sm leading-relaxed text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:border-teal-700 resize-y"
+                className="w-full p-3 text-sm leading-relaxed text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 bg-slate-50 dark:bg-[#0E1717] border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:bg-white dark:focus:bg-[#121D1D] focus:border-teal-700 dark:focus:border-teal-400 resize-y"
               />
               <input
                 type="text"
                 value={attribution}
                 onChange={(e) => onChangeAttribution(e.target.value)}
                 placeholder="ঐচ্ছিক ছোট শিরোনাম বা সূত্র"
-                className="w-full h-10 px-3 text-sm text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:border-teal-700"
+                className="w-full h-10 px-3 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 bg-slate-50 dark:bg-[#0E1717] border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:bg-white dark:focus:bg-[#121D1D] focus:border-teal-700 dark:focus:border-teal-400"
               />
             </section>
           </ScrollReveal>
 
           {/* অনুপাত নির্বাচন */}
           <ScrollReveal delayMs={50}>
-            <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3">
-              <h2 className="text-sm font-semibold text-slate-900">কার্ডের মাপ (অনুপাত)</h2>
+            <section className="bg-white dark:bg-[#142020] border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-3 transition-colors duration-200">
+              <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                কার্ডের মাপ (অনুপাত)
+              </h2>
               <div className="grid grid-cols-3 gap-2">
                 {ASPECT_RATIOS.map((ratio) => {
                   const active = settings.aspectRatio === ratio.id;
@@ -259,13 +263,13 @@ export function CardStudioView({
                       className={`min-h-[52px] px-3 py-2 rounded-xl border text-left transition-colors ${
                         active
                           ? 'bg-teal-700 text-white border-teal-700'
-                          : 'bg-white text-slate-800 border-slate-200 hover:border-slate-300'
+                          : 'bg-white dark:bg-[#192828] text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
                       }`}
                     >
                       <div className="text-xs font-semibold whitespace-nowrap">{ratio.label}</div>
                       <div
                         className={`text-[11px] tabular-nums mt-0.5 ${
-                          active ? 'text-teal-100' : 'text-slate-500'
+                          active ? 'text-teal-100' : 'text-slate-500 dark:text-slate-400'
                         }`}
                       >
                         {ratio.sublabel}
@@ -290,9 +294,9 @@ export function CardStudioView({
 
           {/* বাংলা টাইপোগ্রাফি */}
           <ScrollReveal delayMs={50}>
-            <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-4">
-            <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
-              <Type className="w-4 h-4 text-slate-500" />
+            <section className="bg-white dark:bg-[#142020] border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-4 transition-colors duration-200">
+            <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <Type className="w-4 h-4 text-slate-500 dark:text-slate-400" />
               বাংলা ফন্ট ও বিন্যাস
             </h2>
 
@@ -307,7 +311,7 @@ export function CardStudioView({
                     className={`min-h-[42px] px-3 py-2 text-xs font-medium rounded-xl border transition-colors text-left ${
                       active
                         ? 'bg-teal-700 text-white border-teal-700'
-                        : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
+                        : 'bg-white dark:bg-[#192828] text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
                     }`}
                   >
                     {preset.name}
@@ -319,8 +323,8 @@ export function CardStudioView({
             <div className="grid grid-cols-2 gap-4 items-center">
               <div>
                 <div className="flex items-center justify-between text-xs mb-1.5">
-                  <span className="font-medium text-slate-700">ফন্টের আকার</span>
-                  <span className="tabular-nums text-slate-500">
+                  <span className="font-medium text-slate-700 dark:text-slate-300">ফন্টের আকার</span>
+                  <span className="tabular-nums text-slate-500 dark:text-slate-400">
                     {toBanglaNumber(settings.fontSize)}
                   </span>
                 </div>
@@ -333,20 +337,22 @@ export function CardStudioView({
                   onChange={(e) =>
                     setSettings((s) => ({ ...s, fontSize: parseInt(e.target.value, 10) }))
                   }
-                  className="w-full accent-teal-700 cursor-pointer"
+                  className="w-full accent-teal-700 dark:accent-teal-400 cursor-pointer"
                 />
               </div>
 
               <div>
-                <span className="block text-xs font-medium text-slate-700 mb-1.5">সাজানো</span>
+                <span className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                  সাজানো
+                </span>
                 <div className="grid grid-cols-2 gap-1.5">
                   <button
                     type="button"
                     onClick={() => setSettings((s) => ({ ...s, textAlign: 'center' }))}
                     className={`min-h-[38px] rounded-lg border flex items-center justify-center gap-1.5 text-xs font-medium transition-colors ${
                       settings.textAlign === 'center'
-                        ? 'bg-slate-900 text-white border-slate-900'
-                        : 'bg-white text-slate-700 border-slate-200'
+                        ? 'bg-slate-900 dark:bg-teal-700 text-white border-slate-900 dark:border-teal-700'
+                        : 'bg-white dark:bg-[#192828] text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700'
                     }`}
                   >
                     <AlignCenter className="w-3.5 h-3.5" />
@@ -357,8 +363,8 @@ export function CardStudioView({
                     onClick={() => setSettings((s) => ({ ...s, textAlign: 'left' }))}
                     className={`min-h-[38px] rounded-lg border flex items-center justify-center gap-1.5 text-xs font-medium transition-colors ${
                       settings.textAlign === 'left'
-                        ? 'bg-slate-900 text-white border-slate-900'
-                        : 'bg-white text-slate-700 border-slate-200'
+                        ? 'bg-slate-900 dark:bg-teal-700 text-white border-slate-900 dark:border-teal-700'
+                        : 'bg-white dark:bg-[#192828] text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700'
                     }`}
                   >
                     <AlignLeft className="w-3.5 h-3.5" />
@@ -374,8 +380,8 @@ export function CardStudioView({
                 onClick={() => setSettings((s) => ({ ...s, showQuoteMark: !s.showQuoteMark }))}
                 className={`min-h-[38px] px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${
                   settings.showQuoteMark
-                    ? 'bg-teal-50 text-teal-800 border-teal-200'
-                    : 'bg-white text-slate-600 border-slate-200'
+                    ? 'bg-teal-50 dark:bg-teal-900/50 text-teal-800 dark:text-teal-100 border-teal-200 dark:border-teal-700/60'
+                    : 'bg-white dark:bg-[#192828] text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
                 }`}
               >
                 উদ্ধৃতি চিহ্ন
@@ -385,8 +391,8 @@ export function CardStudioView({
                 onClick={() => setSettings((s) => ({ ...s, showDivider: !s.showDivider }))}
                 className={`min-h-[38px] px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${
                   settings.showDivider
-                    ? 'bg-teal-50 text-teal-800 border-teal-200'
-                    : 'bg-white text-slate-600 border-slate-200'
+                    ? 'bg-teal-50 dark:bg-teal-900/50 text-teal-800 dark:text-teal-100 border-teal-200 dark:border-teal-700/60'
+                    : 'bg-white dark:bg-[#192828] text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
                 }`}
               >
                 বিভাজক রেখা
@@ -397,16 +403,16 @@ export function CardStudioView({
 
           {/* কাস্টম নাম ও লোগো */}
           <ScrollReveal delayMs={50}>
-            <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3">
+            <section className="bg-white dark:bg-[#142020] border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-3 transition-colors duration-200">
             <div className="flex items-center justify-between gap-4">
-              <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
-                <Stamp className="w-4 h-4 text-slate-500" />
+              <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <Stamp className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                 কাস্টম নাম ও লোগো
               </h2>
               <button
                 type="button"
                 onClick={onOpenBrandKit}
-                className="text-xs font-semibold text-teal-700 hover:text-teal-800 transition-colors whitespace-nowrap"
+                className="text-xs font-semibold text-teal-700 dark:text-teal-300 hover:text-teal-800 dark:hover:text-teal-200 transition-colors whitespace-nowrap"
               >
                 পরিবর্তন করুন
               </button>
@@ -418,8 +424,8 @@ export function CardStudioView({
                 onClick={() => onUpdateBrandKit({ showHandle: !brandKit.showHandle })}
                 className={`min-h-[38px] px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${
                   brandKit.showHandle
-                    ? 'bg-teal-50 text-teal-800 border-teal-200'
-                    : 'bg-white text-slate-600 border-slate-200'
+                    ? 'bg-teal-50 dark:bg-teal-900/50 text-teal-800 dark:text-teal-100 border-teal-200 dark:border-teal-700/60'
+                    : 'bg-white dark:bg-[#192828] text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
                 }`}
               >
                 {brandKit.showHandle ? 'নাম: চালু' : 'নাম: বন্ধ'}
@@ -430,8 +436,8 @@ export function CardStudioView({
                 onClick={() => onUpdateBrandKit({ showLogo: !brandKit.showLogo })}
                 className={`min-h-[38px] px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${
                   brandKit.showLogo && brandKit.logoDataUrl
-                    ? 'bg-teal-50 text-teal-800 border-teal-200'
-                    : 'bg-white text-slate-600 border-slate-200'
+                    ? 'bg-teal-50 dark:bg-teal-900/50 text-teal-800 dark:text-teal-100 border-teal-200 dark:border-teal-700/60'
+                    : 'bg-white dark:bg-[#192828] text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'
                 }`}
               >
                 {brandKit.logoDataUrl

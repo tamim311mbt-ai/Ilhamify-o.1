@@ -286,12 +286,12 @@ export function FloatingCaptionsBackdrop() {
             }}
             className={`absolute ${slot.positionClass} ${slot.widthClass} ${slot.opacityClass} will-change-transform`}
           >
-            <div className="rounded-xl border border-teal-700/25 bg-teal-100/50 px-3.5 py-2.5">
-              <p className="font-editorial text-[12px] md:text-[13px] leading-relaxed text-teal-950 line-clamp-2">
+            <div className="rounded-xl border border-teal-700/25 dark:border-teal-400/25 bg-teal-100/50 dark:bg-teal-900/45 px-3.5 py-2.5">
+              <p className="font-editorial text-[12px] md:text-[13px] leading-relaxed text-teal-950 dark:text-teal-100 line-clamp-2">
                 {item.text}
               </p>
               {item.attribution && (
-                <span className="block mt-1 text-[10px] font-medium text-teal-800 truncate">
+                <span className="block mt-1 text-[10px] font-medium text-teal-800 dark:text-teal-300 truncate">
                   — {item.attribution}
                 </span>
               )}

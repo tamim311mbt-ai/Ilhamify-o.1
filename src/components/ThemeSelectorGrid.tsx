@@ -33,20 +33,22 @@ export function ThemeSelectorGrid({
   }, [filter]);
 
   return (
-    <section className="bg-white border border-slate-200 rounded-2xl p-5 space-y-3.5">
+    <section className="bg-white dark:bg-[#142020] border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-3.5 transition-colors duration-200">
       <div className="flex items-center justify-between gap-2">
-        <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2 whitespace-nowrap">
-          <Palette className="w-4 h-4 text-teal-700 shrink-0" />
+        <h2 className="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2 whitespace-nowrap">
+          <Palette className="w-4 h-4 text-teal-700 dark:text-teal-300 shrink-0" />
           ব্যাকগ্রাউন্ড ও গ্রেডিয়েন্ট
         </h2>
-        <span className="text-xs font-medium text-slate-600 truncate">{activeTheme.name}</span>
+        <span className="text-xs font-medium text-slate-600 dark:text-slate-300 truncate">
+          {activeTheme.name}
+        </span>
       </div>
 
       {/* দ্রুত থিম ফিল্টার */}
       <div
         role="tablist"
         aria-label="ব্যাকগ্রাউন্ড ধরন"
-        className="grid grid-cols-4 gap-1 p-1 bg-slate-100 rounded-xl"
+        className="grid grid-cols-4 gap-1 p-1 bg-slate-100 dark:bg-[#0E1717] rounded-xl"
       >
         {FILTER_OPTIONS.map((opt) => {
           const isCurrent = filter === opt.id;
@@ -59,8 +61,8 @@ export function ThemeSelectorGrid({
               onClick={() => setFilter(opt.id)}
               className={`min-h-[36px] px-2 py-1.5 text-xs font-medium rounded-lg transition-colors whitespace-nowrap truncate ${
                 isCurrent
-                  ? 'bg-white text-slate-900 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-white dark:bg-[#1E2E2E] text-slate-900 dark:text-slate-100 shadow-xs'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
               }`}
             >
               {opt.label}
@@ -86,8 +88,8 @@ export function ThemeSelectorGrid({
                 onClick={() => onSelectTheme(t.id)}
                 className={`group rounded-xl border overflow-hidden text-left transition-all active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-700 ${
                   active
-                    ? 'ring-2 ring-teal-700 ring-offset-2 border-teal-700'
-                    : 'border-slate-200 hover:border-slate-300'
+                    ? 'ring-2 ring-teal-700 dark:ring-teal-400 ring-offset-2 dark:ring-offset-[#142020] border-teal-700 dark:border-teal-400'
+                    : 'border-slate-200 dark:border-slate-700/80 hover:border-slate-300 dark:hover:border-slate-600'
                 }`}
               >
                 <div
@@ -116,10 +118,12 @@ export function ThemeSelectorGrid({
                     </span>
                   )}
                 </div>
-                <div className="px-2 py-1.5 bg-white border-t border-slate-100">
+                <div className="px-2 py-1.5 bg-white dark:bg-[#192828] border-t border-slate-100 dark:border-slate-800">
                   <div
                     className={`text-[11px] font-medium truncate leading-snug ${
-                      active ? 'text-teal-800 font-semibold' : 'text-slate-700'
+                      active
+                        ? 'text-teal-800 dark:text-teal-200 font-semibold'
+                        : 'text-slate-700 dark:text-slate-300'
                     }`}
                   >
                     {t.name}

@@ -12,6 +12,7 @@ import { WelcomeModal } from './components/WelcomeModal';
 import { CAPTIONS_LIBRARY } from './data/captions';
 import { useBrandKit } from './hooks/useBrandKit';
 import { usePWAInstall } from './hooks/usePWAInstall';
+import { useTheme } from './hooks/useTheme';
 import { StudioTab } from './types/studio';
 import { isRunningInInstalledAppOrWebView } from './utils/appEnvironment';
 
@@ -61,6 +62,7 @@ export default function App() {
   };
 
   const { brandKit, updateBrandKit, resetBrandKit } = useBrandKit();
+  const { isDark, toggleTheme } = useTheme();
 
   const handleSendToCard = (caption: string, attribution: string) => {
     setActiveCaption(caption);
@@ -78,7 +80,7 @@ export default function App() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <div className="relative min-h-screen flex flex-col bg-slate-50 text-slate-900 overflow-x-clip">
+      <div className="relative min-h-screen flex flex-col pt-14 md:pt-16 bg-slate-50 dark:bg-[#0D1515] text-slate-900 dark:text-slate-100 transition-colors duration-200 overflow-x-clip">
         <FloatingCaptionsBackdrop />
         <Header
           activeTab={activeTab}
@@ -88,6 +90,8 @@ export default function App() {
           }}
           onOpenBrandKit={() => setBrandDrawerOpen(true)}
           brandKit={brandKit}
+          isDark={isDark}
+          onToggleTheme={toggleTheme}
         />
 
         <main className="relative z-10 flex-1 pb-4 md:pb-8">

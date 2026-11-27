@@ -91,8 +91,20 @@
       href="https://fonts.googleapis.com/css2?family=Anek+Bangla:wght@400;500;600;700&family=Baloo+Da+2:wght@500;600;700&family=Hind+Siliguri:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Noto+Serif+Bengali:wght@400;500;600;700&family=Tiro+Bangla:ital@0;1&display=swap"
       rel="stylesheet"
     />
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem('ilhamify_theme_v1');
+          var prefersDark =
+            window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var isDark = saved ? saved === 'dark' : prefersDark;
+          document.documentElement.classList.toggle('dark', isDark);
+          document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+        } catch (e) {}
+      })();
+    </script>
   </head>
-  <body class="bg-slate-50 text-slate-900 antialiased selection:bg-teal-700/15 selection:text-teal-900">
+  <body class="bg-slate-50 dark:bg-[#0D1515] text-slate-900 dark:text-slate-100 antialiased selection:bg-teal-700/15 dark:selection:bg-teal-400/25 selection:text-teal-900 dark:selection:text-teal-100">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

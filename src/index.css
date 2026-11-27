@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-teal-50: #F4F8F8;
   --color-teal-100: #EAF1F1;
@@ -39,6 +41,11 @@
     color: #1E2B2B;
     scroll-behavior: smooth;
     -webkit-tap-highlight-color: transparent;
+  }
+
+  html.dark {
+    background-color: #0D1515;
+    color: #EEF4F4;
   }
 }
 

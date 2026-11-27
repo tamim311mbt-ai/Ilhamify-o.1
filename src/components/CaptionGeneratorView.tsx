@@ -267,26 +267,26 @@ export function CaptionGeneratorView({
         {/* বাম কলাম: কন্ট্রোল ও জেনারেট করা ক্যাপশন */}
         <div className="lg:col-span-7 space-y-6">
           <div className="space-y-1">
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
               ক্যাপশন জেনারেটর
             </h1>
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-slate-600 dark:text-slate-300">
               {toBanglaNumber(islamicCount)}টি ইসলামিক ও {toBanglaNumber(motivationalCount)}টি মোটিভেশনাল বাংলা ক্যাপশন থেকে বাছাই করুন, কপি করুন বা নিজের মতো সম্পাদনা করুন।
             </p>
           </div>
 
           {/* মূল ফিল্টার প্যানেল */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-4 md:p-5 space-y-4">
+          <div className="bg-white dark:bg-[#142020] border border-slate-200 dark:border-slate-800 rounded-2xl p-4 md:p-5 space-y-4 transition-colors duration-200">
             {/* ক্যাটাগরি ও সেভ করা ক্যাপশন */}
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="inline-flex flex-wrap sm:flex-nowrap p-1 bg-slate-100 rounded-xl w-full sm:w-auto gap-1 sm:gap-0">
+              <div className="inline-flex flex-wrap sm:flex-nowrap p-1 bg-slate-100 dark:bg-[#0E1717] rounded-xl w-full sm:w-auto gap-1 sm:gap-0">
                 <button
                   type="button"
                   onClick={() => handleCategoryChange('islamic')}
                   className={`flex-1 sm:flex-initial min-h-[42px] px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap ${
                     categoryFilter === 'islamic'
-                      ? 'bg-white text-slate-900 shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900'
+                      ? 'bg-white dark:bg-[#1E2E2E] text-slate-900 dark:text-slate-100 shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
                   }`}
                 >
                   ইসলামিক ({toBanglaNumber(islamicCount)})
@@ -296,8 +296,8 @@ export function CaptionGeneratorView({
                   onClick={() => handleCategoryChange('motivational')}
                   className={`flex-1 sm:flex-initial min-h-[42px] px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap ${
                     categoryFilter === 'motivational'
-                      ? 'bg-white text-slate-900 shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900'
+                      ? 'bg-white dark:bg-[#1E2E2E] text-slate-900 dark:text-slate-100 shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
                   }`}
                 >
                   মোটিভেশনাল ({toBanglaNumber(motivationalCount)})
@@ -307,8 +307,8 @@ export function CaptionGeneratorView({
                   onClick={() => handleCategoryChange('saved')}
                   className={`flex-1 sm:flex-initial min-h-[42px] px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap flex items-center justify-center gap-1.5 ${
                     categoryFilter === 'saved'
-                      ? 'bg-white text-slate-900 shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900'
+                      ? 'bg-white dark:bg-[#1E2E2E] text-slate-900 dark:text-slate-100 shadow-xs'
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
                   }`}
                 >
                   <Star
@@ -319,7 +319,7 @@ export function CaptionGeneratorView({
                     }`}
                   />
                   <span>সেভ করা ক্যাপশন</span>
-                  <span className="tabular-nums text-xs text-slate-500">
+                  <span className="tabular-nums text-xs text-slate-500 dark:text-slate-400">
                     ({toBanglaNumber(totalSavedCount)})
                   </span>
                 </button>
@@ -328,8 +328,8 @@ export function CaptionGeneratorView({
 
             {/* সাব-টপিক ফিল্টার */}
             <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs text-slate-500">
-                <span className="font-medium text-slate-700 flex items-center gap-1.5">
+              <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                <span className="font-medium text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                   <SlidersHorizontal className="w-3.5 h-3.5" />
                   বিষয় নির্বাচন করুন
                 </span>
@@ -348,7 +348,7 @@ export function CaptionGeneratorView({
                       className={`min-h-[38px] px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors whitespace-nowrap ${
                         active
                           ? 'bg-teal-700 text-white border-teal-700'
-                          : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                          : 'bg-white dark:bg-[#192828] text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50 dark:hover:bg-[#203232]'
                       }`}
                     >
                       {topic.label}
@@ -359,7 +359,7 @@ export function CaptionGeneratorView({
             </div>
 
             {/* সার্চ বক্স */}
-            <div className="pt-2 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
               <div className="relative flex-1 min-w-0">
                 <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
@@ -367,12 +367,12 @@ export function CaptionGeneratorView({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="শব্দ বা বিষয় লিখে খুঁজুন..."
-                  className="w-full h-11 pl-9 pr-3 text-sm text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:border-teal-700"
+                  className="w-full h-11 pl-9 pr-3 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 bg-slate-50 dark:bg-[#0E1717] border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:bg-white dark:focus:bg-[#121D1D] focus:border-teal-700 dark:focus:border-teal-400"
                 />
               </div>
 
               {categoryFilter === 'saved' && (
-                <div className="text-xs font-medium text-slate-600 px-1 shrink-0 tabular-nums">
+                <div className="text-xs font-medium text-slate-600 dark:text-slate-300 px-1 shrink-0 tabular-nums">
                   মোট {toBanglaNumber(filteredPool.length)}টি সেভ করা ক্যাপশন
                 </div>
               )}
@@ -380,7 +380,7 @@ export function CaptionGeneratorView({
           </div>
 
           {/* স্ক্রল ও ক্যাপশন তালিকা */}
-          <div ref={captionListTopRef} className="scroll-mt-4" />
+          <div ref={captionListTopRef} className="scroll-mt-20" />
 
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
@@ -393,30 +393,30 @@ export function CaptionGeneratorView({
             >
               {visibleCaptions.length === 0 ? (
                 categoryFilter === 'saved' && totalSavedCount === 0 ? (
-                  <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-3">
-                    <div className="w-10 h-10 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center mx-auto">
+                  <div className="bg-white dark:bg-[#142020] border border-slate-200 dark:border-slate-800 rounded-2xl p-8 text-center space-y-3">
+                    <div className="w-10 h-10 rounded-full bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800/60 flex items-center justify-center mx-auto">
                       <Star className="w-5 h-5 text-amber-500" />
                     </div>
-                    <p className="text-sm font-medium text-slate-900">
+                    <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
                       এখনো কোনো ক্যাপশন সেভ করা হয়নি
                     </p>
-                    <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
                       যেকোনো ইসলামিক বা মোটিভেশনাল ক্যাপশনের তারকা চিহ্নে চাপ দিন অথবা এডিটর থেকে নিজের ক্যাপশন সেভ করুন।
                     </p>
                     <button
                       type="button"
                       onClick={() => handleCategoryChange('islamic')}
-                      className="px-4 py-2 min-h-[40px] text-xs font-medium text-teal-800 bg-teal-50 border border-teal-200 rounded-lg hover:bg-teal-100 transition-colors"
+                      className="px-4 py-2 min-h-[40px] text-xs font-medium text-teal-800 dark:text-teal-100 bg-teal-50 dark:bg-teal-900/50 border border-teal-200 dark:border-teal-700/60 rounded-lg hover:bg-teal-100 dark:hover:bg-teal-800/60 transition-colors"
                     >
                       ক্যাপশন দেখুন
                     </button>
                   </div>
                 ) : (
-                  <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center space-y-3">
-                    <p className="text-sm font-medium text-slate-900">
+                  <div className="bg-white dark:bg-[#142020] border border-slate-200 dark:border-slate-800 rounded-2xl p-8 text-center space-y-3">
+                    <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
                       আপনার খোঁজার সাথে মিলে এমন কোনো ক্যাপশন পাওয়া যায়নি।
                     </p>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                       সার্চ বক্স খালি করে অথবা সবগুলো বিষয় নির্বাচন করে আবার চেষ্টা করুন।
                     </p>
                     <button
@@ -425,7 +425,7 @@ export function CaptionGeneratorView({
                         setSearchQuery('');
                         handleSubTopicChange('all');
                       }}
-                      className="px-4 py-2 min-h-[40px] text-xs font-medium text-teal-800 bg-teal-50 border border-teal-200 rounded-lg hover:bg-teal-100 transition-colors"
+                      className="px-4 py-2 min-h-[40px] text-xs font-medium text-teal-800 dark:text-teal-100 bg-teal-50 dark:bg-teal-900/50 border border-teal-200 dark:border-teal-700/60 rounded-lg hover:bg-teal-100 dark:hover:bg-teal-800/60 transition-colors"
                     >
                       ফিল্টার রিসেট করুন
                     </button>
@@ -446,16 +446,16 @@ export function CaptionGeneratorView({
                       <article
                         className={`border rounded-2xl p-5 transition-colors duration-300 ${
                           isNewlyGenerated
-                            ? 'bg-teal-100/75 border-teal-700 ring-2 ring-teal-700/20'
+                            ? 'bg-teal-100/75 dark:bg-teal-900/45 border-teal-700 dark:border-teal-400 ring-2 ring-teal-700/20 dark:ring-teal-400/20'
                             : isSelected
-                            ? 'bg-white border-teal-700 ring-1 ring-teal-700/20'
-                            : 'bg-white border-slate-200'
+                            ? 'bg-white dark:bg-[#142020] border-teal-700 dark:border-teal-400 ring-1 ring-teal-700/20 dark:ring-teal-400/20'
+                            : 'bg-white dark:bg-[#142020] border-slate-200 dark:border-slate-800'
                         }`}
                       >
                       {/* মেটাডেটা লাইন ও প্রিয় বাটন */}
-                      <div className="flex items-center justify-between gap-4 text-xs text-slate-500 mb-2">
+                      <div className="flex items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400 mb-2">
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="font-medium text-slate-700">
+                          <span className="font-medium text-slate-700 dark:text-slate-200">
                             {item.category === 'islamic' ? 'ইসলামিক' : 'মোটিভেশনাল'}
                           </span>
                           <span aria-hidden="true">·</span>
@@ -469,7 +469,7 @@ export function CaptionGeneratorView({
                         </div>
 
                         <div className="flex items-center gap-2 shrink-0">
-                          <span className="tabular-nums text-slate-400">
+                          <span className="tabular-nums text-slate-400 dark:text-slate-500">
                             {toBanglaNumber(item.text.length)} অক্ষর
                           </span>
                           <motion.button
@@ -481,8 +481,8 @@ export function CaptionGeneratorView({
                             title={starred ? 'সেভ তালিকা থেকে সরান' : 'সেভ করুন'}
                             className={`min-w-[38px] min-h-[38px] -mr-1.5 flex items-center justify-center rounded-lg transition-colors ${
                               starred
-                                ? 'text-amber-500 bg-amber-50 hover:bg-amber-100'
-                                : 'text-slate-400 hover:text-amber-500 hover:bg-slate-50'
+                                ? 'text-amber-500 bg-amber-50 dark:bg-amber-950/60 hover:bg-amber-100 dark:hover:bg-amber-900/60'
+                                : 'text-slate-400 hover:text-amber-500 hover:bg-slate-50 dark:hover:bg-slate-800'
                             }`}
                           >
                             <Star
@@ -492,19 +492,19 @@ export function CaptionGeneratorView({
                         </div>
                       </div>
 
-                      <p className="text-base md:text-[17px] leading-relaxed text-slate-900 font-medium">
+                      <p className="text-base md:text-[17px] leading-relaxed text-slate-900 dark:text-slate-100 font-medium">
                         {item.text}
                       </p>
 
-                    <div className="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
+                    <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2">
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
                           onClick={() => handleCopyText(item.text, item.id)}
                           className={`min-h-[40px] px-3.5 py-2 text-xs font-medium rounded-lg border transition-colors flex items-center gap-1.5 whitespace-nowrap ${
                             isCopied
-                              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                              : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                              ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/70'
+                              : 'bg-white dark:bg-[#192828] text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-[#213333]'
                           }`}
                         >
                           {isCopied ? (
@@ -526,7 +526,7 @@ export function CaptionGeneratorView({
                             onChangeCaption(item.text);
                             onChangeAttribution(item.attribution);
                           }}
-                          className="min-h-[40px] px-3.5 py-2 text-xs font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 transition-colors whitespace-nowrap"
+                          className="min-h-[40px] px-3.5 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-[#192828] border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-[#213333] transition-colors whitespace-nowrap"
                         >
                           সম্পাদনা করুন
                         </button>
@@ -537,7 +537,7 @@ export function CaptionGeneratorView({
                           whileTap={{ scale: 0.96 }}
                           type="button"
                           onClick={() => onSendToCard(item.text, item.attribution)}
-                          className="min-h-[40px] px-3 py-2 text-xs font-medium text-teal-800 bg-teal-50 border border-teal-200 rounded-lg hover:bg-teal-100 transition-colors flex items-center gap-1.5 whitespace-nowrap"
+                          className="min-h-[40px] px-3 py-2 text-xs font-medium text-teal-800 dark:text-teal-100 bg-teal-50 dark:bg-teal-900/50 border border-teal-200 dark:border-teal-700/60 rounded-lg hover:bg-teal-100 dark:hover:bg-teal-800/60 transition-colors flex items-center gap-1.5 whitespace-nowrap"
                         >
                           <ImageIcon className="w-3.5 h-3.5" />
                           কার্ড তৈরি
@@ -546,7 +546,7 @@ export function CaptionGeneratorView({
                           whileTap={{ scale: 0.96 }}
                           type="button"
                           onClick={() => onSendToReel(item.text, item.attribution)}
-                          className="min-h-[40px] px-3 py-2 text-xs font-medium text-slate-900 bg-slate-100 border border-slate-200 rounded-lg hover:bg-slate-200 transition-colors flex items-center gap-1.5 whitespace-nowrap"
+                          className="min-h-[40px] px-3 py-2 text-xs font-medium text-slate-900 dark:text-slate-100 bg-slate-100 dark:bg-[#1E2E2E] border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-200 dark:hover:bg-[#273B3B] transition-colors flex items-center gap-1.5 whitespace-nowrap"
                         >
                           <Clapperboard className="w-3.5 h-3.5" />
                           রিল তৈরি
@@ -564,17 +564,17 @@ export function CaptionGeneratorView({
           {/* ক্যাপশন তালিকার নিচে র‍্যান্ডম জেনারেট কন্ট্রোল */}
           {categoryFilter !== 'saved' && (
             <ScrollReveal>
-              <div className="bg-white border border-slate-200 rounded-2xl p-3.5 sm:p-4 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-2.5">
+              <div className="bg-white dark:bg-[#142020] border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 sm:p-4 flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-2.5">
               <motion.button
                 whileTap={{ scale: 0.98 }}
                 type="button"
                 onClick={() => handleGenerate(1)}
-                className="w-full sm:w-auto min-h-[44px] px-4 py-2 text-xs sm:text-sm font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100 transition-colors flex items-center justify-center whitespace-nowrap"
+                className="w-full sm:w-auto min-h-[44px] px-4 py-2 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-[#192828] border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-100 dark:hover:bg-[#213333] transition-colors flex items-center justify-center whitespace-nowrap"
               >
                 একটি নতুন ক্যাপশন
               </motion.button>
 
-              <div className="w-full sm:w-auto flex items-stretch border border-slate-200 rounded-xl overflow-hidden bg-white">
+              <div className="w-full sm:w-auto flex items-stretch border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden bg-white dark:bg-[#192828]">
                 <select
                   aria-label="কতগুলো ক্যাপশন তৈরি হবে"
                   value={batchSize}
@@ -583,7 +583,7 @@ export function CaptionGeneratorView({
                     setBatchSize(next);
                     handleGenerate(next);
                   }}
-                  className="h-[44px] pl-3 pr-2 text-xs sm:text-sm font-medium text-slate-700 bg-slate-50 border-r border-slate-200 focus:outline-none cursor-pointer tabular-nums shrink-0"
+                  className="h-[44px] pl-3 pr-2 text-xs sm:text-sm font-medium text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-[#0E1717] border-r border-slate-200 dark:border-slate-700 focus:outline-none cursor-pointer tabular-nums shrink-0"
                 >
                   <option value={3}>৩টি</option>
                   <option value={5}>৫টি</option>
@@ -593,7 +593,7 @@ export function CaptionGeneratorView({
                   whileTap={{ scale: 0.98 }}
                   type="button"
                   onClick={() => handleGenerate(batchSize)}
-                  className="flex-1 sm:flex-initial min-h-[44px] px-4 py-2 text-xs sm:text-sm font-semibold text-white bg-teal-700 hover:bg-teal-800 transition-colors flex items-center justify-center gap-1.5 whitespace-nowrap"
+                  className="flex-1 sm:flex-initial min-h-[44px] px-4 py-2 text-xs sm:text-sm font-semibold text-white bg-teal-700 hover:bg-teal-800 dark:hover:bg-teal-500 transition-colors flex items-center justify-center gap-1.5 whitespace-nowrap"
                 >
                   <RefreshCw className="w-3.5 h-3.5 shrink-0" />
                   <span>নতুন {toBanglaNumber(batchSize)}টি দেখুন</span>
@@ -605,19 +605,19 @@ export function CaptionGeneratorView({
         </div>
 
         {/* ডান কলাম: কাস্টম ক্যাপশন এডিটর */}
-        <aside className="lg:col-span-5 lg:sticky lg:top-6">
+        <aside className="lg:col-span-5 lg:sticky lg:top-24">
           <ScrollReveal delayMs={60}>
-            <div className="bg-white border border-slate-200 rounded-2xl p-5 md:p-6 space-y-5">
+            <div className="bg-white dark:bg-[#142020] border border-slate-200 dark:border-slate-800 rounded-2xl p-5 md:p-6 space-y-5 transition-colors duration-200">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <h2 className="text-base font-semibold text-slate-900">
+                <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
                   কাস্টম ক্যাপশন এডিটর
                 </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                   কার্ড বা রিল বানানোর আগে লেখা পরিবর্তন বা নিজের লেখা যোগ করুন
                 </p>
               </div>
-              <span className="text-xs tabular-nums text-slate-500">
+              <span className="text-xs tabular-nums text-slate-500 dark:text-slate-400">
                 {toBanglaNumber(activeCaption.length)} অক্ষর
               </span>
             </div>
@@ -626,7 +626,7 @@ export function CaptionGeneratorView({
               <div>
                 <label
                   htmlFor="custom-caption-textarea"
-                  className="block text-xs font-medium text-slate-700 mb-1.5"
+                  className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5"
                 >
                   মূল ক্যাপশন (বাংলা)
                 </label>
@@ -636,14 +636,14 @@ export function CaptionGeneratorView({
                   value={activeCaption}
                   onChange={(e) => onChangeCaption(e.target.value)}
                   placeholder="এখানে আপনার ইসলামিক বা মোটিভেশনাল বাংলা ক্যাপশন লিখুন..."
-                  className="w-full p-3.5 text-sm leading-relaxed text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:border-teal-700 focus:ring-2 focus:ring-teal-700/15 resize-y"
+                  className="w-full p-3.5 text-sm leading-relaxed text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 bg-slate-50 dark:bg-[#0E1717] border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:bg-white dark:focus:bg-[#121D1D] focus:border-teal-700 dark:focus:border-teal-400 focus:ring-2 focus:ring-teal-700/15 resize-y"
                 />
               </div>
 
               <div>
                 <label
                   htmlFor="custom-attribution-input"
-                  className="block text-xs font-medium text-slate-700 mb-1.5"
+                  className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1.5"
                 >
                   ছোট শিরোনাম বা সূত্র (ঐচ্ছিক)
                 </label>
@@ -653,7 +653,7 @@ export function CaptionGeneratorView({
                   value={activeAttribution}
                   onChange={(e) => onChangeAttribution(e.target.value)}
                   placeholder="যেমন: সবর ও প্রশান্তি অথবা সূরা আশ-শারহ ভাবনা"
-                  className="w-full h-11 px-3.5 text-sm text-slate-900 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:border-teal-700"
+                  className="w-full h-11 px-3.5 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 bg-slate-50 dark:bg-[#0E1717] border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:bg-white dark:focus:bg-[#121D1D] focus:border-teal-700 dark:focus:border-teal-400"
                 />
               </div>
             </div>
@@ -666,8 +666,8 @@ export function CaptionGeneratorView({
                   disabled={!activeCaption.trim()}
                   className={`flex-1 min-h-[44px] px-4 py-2.5 text-sm font-medium rounded-xl border transition-colors flex items-center justify-center gap-2 ${
                     copiedEditor
-                      ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                      : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 disabled:opacity-50'
+                      ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/70'
+                      : 'bg-white dark:bg-[#192828] text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-[#213333] disabled:opacity-50'
                   }`}
                 >
                   {copiedEditor ? (
@@ -690,8 +690,8 @@ export function CaptionGeneratorView({
                   aria-pressed={isEditorFavorited}
                   className={`min-h-[44px] px-3.5 py-2.5 text-sm font-medium rounded-xl border transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50 whitespace-nowrap ${
                     isEditorFavorited
-                      ? 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100'
-                      : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                      ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800/70 hover:bg-amber-100 dark:hover:bg-amber-900/60'
+                      : 'bg-white dark:bg-[#192828] text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-[#213333]'
                   }`}
                 >
                   <Star
@@ -708,7 +708,7 @@ export function CaptionGeneratorView({
                     onChangeCaption('');
                     onChangeAttribution('');
                   }}
-                  className="min-h-[44px] px-3.5 py-2.5 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors"
+                  className="min-h-[44px] px-3.5 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-[#192828] border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-[#213333] transition-colors"
                 >
                   মুছুন
                 </button>
@@ -718,7 +718,7 @@ export function CaptionGeneratorView({
                 <button
                   type="button"
                   onClick={() => onSendToCard(activeCaption, activeAttribution)}
-                  className="min-h-[46px] px-4 py-2.5 text-sm font-semibold text-white bg-teal-700 rounded-xl hover:bg-teal-800 transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
+                  className="min-h-[46px] px-4 py-2.5 text-sm font-semibold text-white bg-teal-700 rounded-xl hover:bg-teal-800 dark:hover:bg-teal-500 transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
                 >
                   <ImageIcon className="w-4 h-4" />
                   কার্ড মেকার
@@ -727,7 +727,7 @@ export function CaptionGeneratorView({
                 <button
                   type="button"
                   onClick={() => onSendToReel(activeCaption, activeAttribution)}
-                  className="min-h-[46px] px-4 py-2.5 text-sm font-semibold text-white bg-slate-900 rounded-xl hover:bg-slate-800 transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
+                  className="min-h-[46px] px-4 py-2.5 text-sm font-semibold text-white bg-slate-900 dark:bg-[#1E2E2E] dark:border dark:border-slate-700 rounded-xl hover:bg-slate-800 dark:hover:bg-[#273B3B] transition-colors flex items-center justify-center gap-2 whitespace-nowrap"
                 >
                   <Clapperboard className="w-4 h-4" />
                   রিল মেকার
