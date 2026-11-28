@@ -12,24 +12,60 @@ interface PwaStoreState {
   deferredPrompt: BeforeInstallPromptEvent | null;
   isInstalled: boolean;
   browserKind: BrowserInstallKind;
+  isChrome: boolean;
 }
+
+interface NavigatorUADataLike {
+  brands?: Array<{ brand: string; version: string }>;
+}
+
+const NON_CHROME_UA_RE =
+  /edg|opr|opera|samsungbrowser|ucbrowser|duckduckgo|yabrowser|miuibrowser|vivaldi|fban|fbav|fb_iab|instagram|line\/|micromessenger|twitter|linkedinapp|snapchat|bytedancewebview/i;
 
 const listeners = new Set<() => void>();
 let initialized = false;
 
-function detectInitialBrowserKind(): BrowserInstallKind {
-  if (typeof window === 'undefined') return 'other';
+function detectInitialBrowserInfo(): {
+  browserKind: BrowserInstallKind;
+  isChrome: boolean;
+} {
+  if (typeof window === 'undefined') {
+    return { browserKind: 'other', isChrome: false };
+  }
   const ua = window.navigator.userAgent || '';
-  if (/iphone|ipad|ipod/i.test(ua)) return 'ios';
-  if (/firefox|fxios/i.test(ua)) return 'firefox';
-  if (/chrome|crios|edg/i.test(ua)) return 'chromium';
-  return 'other';
+  if (/iphone|ipad|ipod/i.test(ua)) {
+    return { browserKind: 'ios', isChrome: false };
+  }
+  if (/firefox|fxios/i.test(ua)) {
+    return { browserKind: 'firefox', isChrome: false };
+  }
+
+  const uaData = (window.navigator as Navigator & { userAgentData?: NavigatorUADataLike })
+    .userAgentData;
+  const brands = uaData?.brands ?? [];
+  if (brands.some((b) => /brave/i.test(b.brand))) {
+    return { browserKind: 'brave', isChrome: false };
+  }
+
+  const hasGoogleChromeBrand = brands.some((b) => /google chrome/i.test(b.brand));
+  const hasChromeUA = /chrome/i.test(ua) && !NON_CHROME_UA_RE.test(ua);
+
+  if (hasGoogleChromeBrand || hasChromeUA) {
+    return { browserKind: 'chromium', isChrome: true };
+  }
+  if (/edg|opr|opera|samsungbrowser|crios/i.test(ua)) {
+    return { browserKind: 'chromium', isChrome: false };
+  }
+  return { browserKind: 'other', isChrome: false };
 }
+
+const initialBrowserInfo = detectInitialBrowserInfo();
 
 let state: PwaStoreState = {
   deferredPrompt: null,
   isInstalled: isRunningInInstalledAppOrWebView(),
-  browserKind: detectInitialBrowserKind(),
+  browserKind: initialBrowserInfo.browserKind,
+  isChrome: initialBrowserInfo.isChrome,
 };
 
 function emitChange() {
@@ -57,7 +93,7 @@ function initPwaListeners() {
       .isBrave()
       .then((isBraveBrowser) => {
         if (isBraveBrowser) {
-          setState({ browserKind: 'brave' });
+          setState({ browserKind: 'brave', isChrome: false });
         }
       })
       .catch(() => {});
@@ -119,6 +155,7 @@ export function usePWAInstall() {
     isInstallable: Boolean(snapshot.deferredPrompt),
     isInstalled: snapshot.isInstalled,
     isIOS: snapshot.browserKind === 'ios',
+    isChrome: snapshot.isChrome,
     browserKind: snapshot.browserKind,
     install,
   };
